@@ -1,0 +1,415 @@
+<script>
+// ══════════════════════════════════════════════════════
+//  のらエモン 完全版 JavaScript
+// ══════════════════════════════════════════════════════
+const TODAY=new Date();
+const MONTH=TODAY.getMonth();
+const DOWS=['日','月','火','水','木','金','土'];
+let climate='normal';
+let region={name:'三浦半島南部',lat:35.14,lon:139.61};
+let wdata=null;
+
+// ── 作物DB（全17種） ──────────────────────────────────
+const DB={
+  tomato:{n:'トマト',e:'🍅',c:'#D85A30',cl:'#FAECE7',season:[3,4,5],days:90,space:'50cm',light:'full',height_cm:150,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'やや弱',wi:'弱',varieties:['ミニトマト','中玉トマト','大玉トマト','アイコ','桃太郎','フルティカ','千果'],tasks:[{d:7,t:'芽かき',n:'第1花房下の脇芽を除去',h:'第1花房の花が咲き始めたら'},{d:14,t:'誘引',n:'支柱に8の字で誘引',h:'草丈30〜40cmになったら'},{d:30,t:'追肥1回目',n:'化成肥料を株元から20cm離して',h:'第1花房が結実しはじめたら'},{d:55,t:'追肥2回目',n:'窒素過多に注意',h:'実が色づきはじめたら'},{d:90,t:'収穫',n:'ヘタ付近が赤くなったら',h:'果実全体が真っ赤に色づいたら'}],end:'連作は3〜4年あけること。ナス科を避けて輪作。',plant:'完熟堆肥2kg/㎡、化成肥料100g/㎡を元肥。'},
+  cucumber:{n:'キュウリ',e:'🥒',c:'#3B6D11',cl:'#EAF3DE',season:[4,5,6],days:60,space:'60cm',light:'full',height_cm:200,ph:'5.5-6.5',tmp:'23-28℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['夏すずみ','シャキット','節成りきゅうり','四葉きゅうり'],tasks:[{d:5,t:'支柱立て',n:'定植後すぐ支柱とネット',h:'定植直後に'},{d:25,t:'追肥',n:'液肥を週1回',h:'一番果がついたら'},{d:50,t:'収穫',n:'20cm前後が適期',h:'実が鉛筆より太くなったら'}],end:'連作は2〜3年あけること。',plant:'株間60cm以上。元肥は少なめ。'},
+  eggplant:{n:'ナス',e:'🍆',c:'#533AB7',cl:'#EEEDFE',season:[4,5],days:120,space:'60cm',light:'full',height_cm:100,ph:'6.0-6.5',tmp:'27-32℃',ht:'畝高15cm',sh:'弱',wi:'中',varieties:['千両2号','長ナス','水ナス','米ナス'],tasks:[{d:10,t:'支柱立て',n:'3本仕立てが基本',h:'苗が根付いたら'},{d:15,t:'芽かき・誘引',n:'一番花下の脇芽を2本残す',h:'一番花が開花したら'},{d:65,t:'収穫',n:'10〜12cmが適期',h:'ガクのトゲが鋭く立っていたら'}],end:'連作は3〜4年。ナス科全体含む。',plant:'深耕（40cm）+完熟堆肥3kg/㎡。'},
+  pepper:{n:'ピーマン',e:'🫑',c:'#639922',cl:'#EAF3DE',season:[4,5],days:100,space:'50cm',light:'full',height_cm:80,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['カリフォルニアワンダー','ニューエース','パプリカ（赤）','パプリカ（黄）'],tasks:[{d:10,t:'支柱立て',n:'2〜3本支柱で倒伏防止',h:'苗が落ち着いたら'},{d:70,t:'収穫',n:'実が5〜6cmに育ったら',h:'緑色の未熟果で収穫'}],end:'連作は3〜4年。ナス科全体含む。',plant:'十分な完熟堆肥と元肥。'},
+  lettuce:{n:'レタス',e:'🥬',c:'#0F6E56',cl:'#E1F5EE',season:[2,3,8,9],days:60,space:'30cm',light:'half',height_cm:30,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['玉レタス','サニーレタス','ロメインレタス','バターヘッド'],tasks:[{d:10,t:'間引き',n:'本葉2〜3枚で1株に',h:'本葉が2〜3枚になったら'},{d:60,t:'収穫',n:'結球したら早めに',h:'頭を押して固く締まっていたら'}],end:'連作障害は少ない。pHの維持が重要。',plant:'株間25〜30cm。浅めに植える。'},
+  carrot:{n:'ニンジン',e:'🥕',c:'#D85A30',cl:'#FAECE7',season:[3,7,8],days:110,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.5',tmp:'15-20℃',ht:'深耕畝',sh:'弱',wi:'強',varieties:['黒田五寸','ベータリッチ','向陽2号'],tasks:[{d:10,t:'間引き1回目',n:'本葉1〜2枚で株間3cm',h:'本葉が1〜2枚になったら'},{d:35,t:'間引き3回目・土寄せ',n:'株間10〜12cmに',h:'本葉7〜8枚になったら'},{d:110,t:'収穫',n:'直径2〜3cmで収穫',h:'根の肩が直径2cm以上になったら'}],end:'連作は1〜2年あけること。',plant:'石を除いた深い軟土が必須（30cm以上）。'},
+  spinach:{n:'ほうれん草',e:'🌿',c:'#1D9E75',cl:'#E1F5EE',season:[2,3,8,9,10],days:50,space:'5cm',light:'half',height_cm:25,ph:'6.5-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',varieties:['アクティブ','サラダほうれん草','日本ほうれん草'],tasks:[{d:14,t:'間引き',n:'本葉2〜3枚で株間5cm',h:'本葉が2〜3枚になったら'},{d:50,t:'収穫',n:'草丈20〜25cmで収穫',h:'草丈が20cm以上になったら'}],end:'酸性土壌が最も嫌い。収穫後すぐ石灰をまく。',plant:'石灰を十分に施用（ph6.5以上）。'},
+  potato:{n:'ジャガイモ',e:'🥔',c:'#888780',cl:'#F1EFE8',season:[2,3],days:100,space:'30cm',light:'full',height_cm:70,ph:'5.5-6.5',tmp:'15-22℃',ht:'畝高20cm',sh:'弱',wi:'中',caution:'⚠️ 芽と緑化した部分は有毒。連作は3〜4年あける。',varieties:['男爵','メークイン','キタアカリ','とうや','アンデス赤','インカのめざめ'],tasks:[{d:21,t:'芽かき',n:'1株あたり2〜3芽に間引く',h:'芽が5〜10cmに伸びたら'},{d:30,t:'追肥・土寄せ1回目',n:'草丈20〜25cmになったら',h:'草丈が20〜25cmになったら'},{d:100,t:'収穫',n:'晴れの日に掘り上げ乾燥',h:'茎葉が完全に枯れたら収穫適期'}],end:'連作は3〜4年あけること。収穫後は深耕と石灰でph調整。',plant:'種芋を切り、切り口を草木灰で処理して1〜2日乾燥させてから植える。'},
+  sweetpotato:{n:'サツマイモ',e:'🍠',c:'#993C1D',cl:'#FAECE7',season:[4,5],days:130,space:'30cm',light:'full',height_cm:40,ph:'5.5-6.5',tmp:'25-30℃',ht:'高畝30cm',sh:'弱',wi:'中',caution:'⚠️ 窒素肥料のやりすぎはつるぼけの原因。元肥は少なめに。',varieties:['紅あずま','鳴門金時','安納芋','シルクスイート','べにはるか'],tasks:[{d:50,t:'つる返し1回目',n:'地面に根を張ったつるをめくり返す',h:'つるが1m以上伸びてきたら'},{d:130,t:'収穫',n:'霜が降りる前に掘り上げる',h:'茎葉が黄化・枯れ始めたら'}],end:'連作は2〜3年あけること。収穫後のつるや残渣はすぐ処分。',plant:'畝高30cm以上が必須。苗は斜め45度に挿す。元肥少なめ。'},
+  corn:{n:'トウモロコシ',e:'🌽',c:'#BA7517',cl:'#FAEEDA',season:[4,5],days:90,space:'30cm',light:'full',height_cm:200,ph:'6.0-6.8',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'強',caution:'⚠️ 必ず2列以上まとめて植えること（風媒花のため）。アワノメイガに注意。',varieties:['ゴールドラッシュ','ピーターコーン','甘々娘','もちとうもろこし'],tasks:[{d:20,t:'追肥・土寄せ',n:'草丈30〜40cmになったら',h:'草丈30〜40cmになったら'},{d:55,t:'受粉期・アワノメイガ防除',n:'絹糸が出たら受粉開始',h:'先端に雄穂が出てきたら'},{d:90,t:'収穫',n:'朝早く収穫しすぐ食べるか冷蔵を',h:'粒を押すと白い汁が出たら食べ頃'}],end:'収穫後はすぐに株を撤収（アワノメイガの越冬防止）。',plant:'2列以上まとめて植えること（風媒花のため）。株間30cm。'},
+  pumpkin:{n:'カボチャ',e:'🎃',c:'#D85A30',cl:'#FAEEDA',season:[4,5],days:100,space:'100cm',light:'full',height_cm:50,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝〜高畝',sh:'弱',wi:'中',caution:'⚠️ つるが広範囲に伸びる（1株で1〜2㎡必要）。',varieties:['栗かぼちゃ','バターナッツ','坊ちゃんかぼちゃ'],tasks:[{d:45,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:90,t:'収穫',n:'果梗がコルク化したら',h:'ヘたが茶色くコルク状になったら'}],end:'連作は3〜4年。ウリ科（キュウリ・スイカ等）も含む。',plant:'株間100cm以上。元肥は少なめ。'},
+  watermelon:{n:'スイカ',e:'🍉',c:'#2D8B4E',cl:'#E2F5EA',season:[4,5],days:100,space:'150cm',light:'full',height_cm:40,ph:'6.0-6.5',tmp:'25-30℃',ht:'高畝',sh:'弱',wi:'弱',caution:'⚠️ 広大なスペースが必要（1株で2〜3㎡）。連作は5〜6年あける。',varieties:['大玉スイカ','小玉スイカ','黒皮スイカ','黄色スイカ'],tasks:[{d:35,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:100,t:'収穫',n:'着果から35〜45日後が目安',h:'叩いてボンボンと低い音がしたら'}],end:'連作は5〜6年あけること（ウリ科の中で最も長い）。',plant:'高畝（排水重要）。株間150cm以上。接ぎ木苗推奨。'},
+  edamame:{n:'枝豆',e:'🫛',c:'#639922',cl:'#EAF3DE',season:[4,5,6],days:75,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝',sh:'弱',wi:'中',varieties:['茶豆','黒豆（枝豆用）','湯あがり娘','だだちゃ豆'],tasks:[{d:25,t:'土寄せ・追肥',n:'倒伏防止に株元に土寄せ',h:'草丈が20〜30cmになったら'},{d:75,t:'収穫',n:'莢を触ると豆の粒がわかるようになったら',h:'収穫後はすぐ茹でる'}],end:'連作は2〜3年あけること。根粒菌で土が豊かになる。',plant:'根粒菌がつくため元肥の窒素は少なめに。'},
+  onion:{n:'タマネギ',e:'🧅',c:'#BA7517',cl:'#FAEEDA',season:[9,10],days:200,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'15-20℃',ht:'平畝〜低畝',sh:'弱',wi:'強',caution:'⚠️ 秋に苗を植え付け、翌年初夏に収穫する長期作物。とう立ちに注意。',varieties:['泉州黄','O・P黄','ネオアース','赤タマネギ'],tasks:[{d:90,t:'追肥2回目',n:'2〜3月ごろの追肥が球の肥大に重要',h:'春になり葉の生長が再開したら'},{d:200,t:'収穫',n:'葉が倒れたら収穫',h:'葉の2/3以上が倒れたら収穫適期'}],end:'連作は3〜4年あけること。ネギ科全体（ネギ・ニラ等）も含む。',plant:'秋（9〜10月）に苗を定植。株間15cm。深く植えすぎると球が太らない。'},
+  broccoli:{n:'ブロッコリー',e:'🥦',c:'#1D9E75',cl:'#E1F5EE',season:[8,9],days:90,space:'50cm',light:'half',height_cm:60,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ アオムシが最大の天敵。定植直後から防虫ネットで覆うのが効果的。',varieties:['緑嶺','ハイツ','グリーンビューティー','スティックブロッコリー'],tasks:[{d:21,t:'追肥1回目',n:'化成肥料を株元から10cm離して',h:'本葉6〜7枚になったら'},{d:90,t:'収穫',n:'花蕾が締まって濃緑色の間に',h:'花蕾が12〜15cmでしっかり締まっているうちに'}],end:'連作は2〜3年。アブラナ科全体含む。',plant:'株間50cm以上。定植直後から防虫ネットを。'},
+  komatsuna:{n:'小松菜',e:'🥬',c:'#3B6D11',cl:'#EAF3DE',season:[3,4,8,9,10,11],days:40,space:'10cm',light:'part',height_cm:25,ph:'6.0-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',caution:'⚠️ アオムシ・コナガに注意。防虫ネット推奨。',varieties:['楽天','黒みすぎ','きよすみ','ミニ小松菜'],tasks:[{d:20,t:'間引き2回目',n:'株間8〜10cmに',h:'本葉3〜4枚になったら'},{d:40,t:'収穫',n:'草丈20〜25cmで株ごと引き抜く',h:'草丈20cm以上になったら'}],end:'連作は2年あけること。アブラナ科全体含む。',plant:'直播き（条まき）が基本。薄く土をかけ不織布で乾燥防止。'},
+  basil:{n:'バジル',e:'🌿',c:'#0F6E56',cl:'#E1F5EE',season:[4,5,6],days:60,space:'20cm',light:'full',height_cm:50,ph:'6.0-7.0',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'中',varieties:['スイートバジル','ジェノベーゼ','レモンバジル'],tasks:[{d:14,t:'摘心',n:'本葉4〜6枚で頂点を摘心',h:'本葉が4〜6枚になったら'},{d:35,t:'花芽摘み',n:'花が咲く前に摘み取る',h:'茎の先端に花穂が見えたら'}],end:'一年草。残渣はコンポストへ。',plant:'霜が終わった後に定植。'},
+};
+
+const SEASON_ALL={0:[],1:['lettuce','spinach'],2:['lettuce','carrot','spinach','potato'],3:['tomato','lettuce','carrot','potato','komatsuna'],4:['tomato','cucumber','eggplant','pepper','corn','sweetpotato','pumpkin','watermelon','edamame'],5:['tomato','cucumber','basil','pepper','corn','sweetpotato','pumpkin','watermelon','edamame'],6:['cucumber','carrot','corn','edamame'],7:['carrot','spinach'],8:['lettuce','carrot','spinach','broccoli','komatsuna'],9:['spinach','lettuce','broccoli','komatsuna','onion'],10:['spinach','komatsuna','onion'],11:['komatsuna']};
+
+const COMP={tomato:{good:['basil','carrot','komatsuna'],bad:['potato','corn']},cucumber:{good:['corn','basil','komatsuna'],bad:['potato','sweetpotato']},eggplant:{good:['basil','komatsuna'],bad:['tomato','potato']},pepper:{good:['basil','lettuce'],bad:['potato']},potato:{good:['corn','broccoli','spinach'],bad:['tomato','eggplant','onion']},corn:{good:['cucumber','sweetpotato'],bad:['tomato']},pumpkin:{good:['corn','basil'],bad:['sweetpotato','cucumber','watermelon']},watermelon:{good:['corn','basil'],bad:['pumpkin','cucumber']},edamame:{good:['carrot','potato'],bad:['onion']},onion:{good:['carrot','lettuce'],bad:['potato','edamame']},broccoli:{good:['potato','spinach','komatsuna'],bad:['pepper']},komatsuna:{good:['tomato','cucumber'],bad:['broccoli']},basil:{good:['tomato','cucumber','eggplant'],bad:[]},lettuce:{good:['onion','pepper'],bad:[]},carrot:{good:['tomato','onion','edamame'],bad:[]},spinach:{good:['broccoli','potato'],bad:[]},};
+
+const LIGHT_REQ={full:'終日日当たり必要',half:'半日以上必要',part:'半日以下でも育つ'};
+const LIGHT_SCORE={full:4,half:3,part:2,shade:1,null:2};
+
+// 育てている作物
+let myCrops=[
+  {id:1,key:'tomato',variety:'ミニトマト（アイコ）',plantDate:new Date(new Date()-38*864e5),status:'active',photos:[],plantWeather:null},
+  {id:2,key:'potato',variety:'男爵',plantDate:new Date(new Date()-82*864e5),status:'active',photos:[],plantWeather:null},
+  {id:3,key:'corn',variety:'ゴールドラッシュ',plantDate:new Date(new Date()-22*864e5),status:'active',photos:[],plantWeather:null},
+  {id:4,key:'spinach',variety:'',plantDate:new Date(new Date()-18*864e5),status:'active',photos:[],plantWeather:null},
+];
+let nid=5,todoChecked={},excluded=[],favorites=['tomato','potato','corn'];
+let photoTarget=null,pvCropId=null,pvIdx=null;
+
+function dn(c){const db=DB[c.key];return db.n+(c.variety?`（${c.variety}）`:'')}
+function dsp(c){return Math.floor((TODAY-c.plantDate)/864e5)}
+function edp(c){return dsp(c)}
+function fd(d){return`${d.getMonth()+1}月${d.getDate()}日`}
+function fdi(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+
+// 天気
+function wico(code){const m={0:'☀️',1:'🌤',2:'🌤',3:'☁️',45:'🌫',51:'🌦',61:'🌧',65:'🌧',71:'🌨',80:'🌦',95:'⛈'};return m[code]||'🌤'}
+function wlab(code){if(code===0)return'快晴';if(code<=2)return'晴れのち曇り';if(code===3)return'曇り';if(code<=49)return'霧';if(code<=69)return'雨';if(code<=79)return'雪';if(code<=84)return'にわか雨';return'雷雨'}
+function isRaining(){if(!wdata)return false;const c=wdata.current;return c.precipitation>0||[51,53,55,61,63,65,80,81,82,95].includes(c.weather_code)}
+
+async function loadWeather(){
+  try{
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Asia%2FTokyo&forecast_days=7`;
+    wdata=await(await fetch(u)).json();
+    renderWbar();renderWdetail();
+  }catch(e){document.getElementById('wbar').innerHTML='';}
+}
+
+async function fetchPlantWx(crop){
+  if(crop.plantWeather)return crop.plantWeather;
+  const ds=fdi(crop.plantDate);
+  try{
+    const u=`https://archive-api.open-meteo.com/v1/archive?latitude=${region.lat}&longitude=${region.lon}&start_date=${ds}&end_date=${ds}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max&timezone=Asia%2FTokyo`;
+    const d=(await(await fetch(u)).json()).daily;
+    if(!d)return null;
+    const w={code:d.weather_code[0],hi:Math.round(d.temperature_2m_max[0]),lo:Math.round(d.temperature_2m_min[0]),rain:d.precipitation_sum[0],wind:Math.round(d.wind_speed_10m_max[0])};
+    crop.plantWeather=w;return w;
+  }catch(e){return null}
+}
+
+function renderWbar(){
+  if(!wdata)return;
+  const c=wdata.current,t=Math.round(c.temperature_2m),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m);
+  const ico=wico(c.weather_code);
+  const rain=isRaining(),hot=t>=32,humid=h>=80;
+  const tip=rain?'🌧 雨天：追肥・農薬散布はお休みを':hot?'🥵 高温：朝夕の作業がおすすめ':humid?'💧 高湿：病害虫チェックを':'🌱 作業日和です！';
+  document.getElementById('wbar').innerHTML=`<div class="wb"><div class="wb-ico">${ico}</div><div style="flex:1"><div style="display:flex;align-items:baseline;gap:6px"><span class="wb-temp">${t}°C</span><span style="font-size:10px;color:var(--tx3)">${wlab(c.weather_code)} · 湿度${h}% · 風${w}m/s</span></div><div style="font-size:11px;color:var(--tx2);margin-top:1px">${tip}</div><div style="font-size:10px;color:var(--tx3);margin-top:1px">📍${region.name} · タップで詳細</div></div></div>`;
+  document.getElementById('wbar').onclick=()=>showTab('weather');
+}
+
+function renderWdetail(){
+  if(!wdata){document.getElementById('wDetail').innerHTML='<div class="loading">🌤 取得中…</div>';return}
+  const c=wdata.current,d=wdata.daily;
+  const t=Math.round(c.temperature_2m),f=Math.round(c.apparent_temperature||t),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m),r=c.precipitation;
+  const ico=wico(c.weather_code),lab=wlab(c.weather_code);
+  const rain=isRaining(),hot=t>=32,humid=h>=80,windy=w>=10;
+  let adv=[];
+  if(rain)adv.push({cls:'warn',ic:'🌧',tt:'雨の日のアドバイス',bd:'追肥・農薬散布はお休みを。支柱の確認や記録整理に充てましょう。'});
+  else if(hot)adv.push({cls:'danger',ic:'🥵',tt:`高温注意（${t}℃）`,bd:'作業は早朝か夕方に。水やりは朝イチで。トマト・ピーマンは落花しやすい時期です。'});
+  else adv.push({cls:'ok',ic:'🌱',tt:'今日は作業日和！',bd:`気温${t}℃、体感${f}℃。追肥・誘引・芽かきなどどんな作業もOKです。`});
+  if(humid&&!rain)adv.push({cls:'warn',ic:'💧',tt:`高湿度（${h}%）：病害虫に注意`,bd:'うどんこ病・疫病が出やすい条件です。風通しを良くしましょう。'});
+  if(windy)adv.push({cls:'warn',ic:'💨',tt:`強風（${w}m/s）`,bd:'支柱の固定確認と、背の高い作物の誘引を増やしましょう。'});
+  const fcst=(d.time||[]).slice(0,7).map((t2,i)=>{const dd=new Date(t2),fw=wico(d.weather_code[i]),hi=Math.round(d.temperature_2m_max[i]),lo=Math.round(d.temperature_2m_min[i]),rn=Math.round(d.precipitation_sum[i]);return`<div style="flex-shrink:0;width:48px;text-align:center;background:${i===0?'var(--gl)':'var(--bg2)'};border-radius:var(--r);padding:6px 3px;${i===0?'border:1px solid #C0DD97':''}"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">${i===0?'今日':DOWS[dd.getDay()]}</div><div style="font-size:18px;margin-bottom:3px">${fw}</div><div style="font-size:12px;font-weight:700">${hi}°</div><div style="font-size:10px;color:var(--tx3)">${lo}°</div><div style="font-size:9px;color:${rn>0?'var(--blue)':'var(--tx3)'};margin-top:2px">${rn>0?rn+'mm':'—'}</div></div>`;}).join('');
+  document.getElementById('wDetail').innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:44px">${ico}</div><div><div style="font-size:28px;font-weight:700">${t}<span style="font-size:14px;color:var(--tx2)">°C</span></div><div style="font-size:11px;color:var(--tx2)">${lab}　体感${f}°C</div><div style="font-size:10px;color:var(--tx3)">📍${region.name}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px"><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💧 湿度</div><div style="font-size:14px;font-weight:700;color:${h>=80?'var(--amber)':'var(--blue)'}">${h}%</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💨 風速</div><div style="font-size:14px;font-weight:700;color:${w>=10?'var(--red)':'var(--green)'}">${w} m/s</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌧 降水量</div><div style="font-size:14px;font-weight:700;color:${r>0?'var(--blue)':'var(--green)'}">${r} mm</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌡 最高/最低</div><div style="font-size:13px;font-weight:700">${Math.round(d.temperature_2m_max[0])}° / ${Math.round(d.temperature_2m_min[0])}°</div></div></div><button class="btn btn-sm btn-bl" onclick="loadWeather()"><i class="ti ti-refresh"></i> 更新</button></div><div class="sec">今日の農作業アドバイス</div>${adv.map(a=>`<div class="banner ${a.cls}"><div class="banner-ico">${a.ic}</div><div><div class="banner-title">${a.tt}</div><div class="banner-body">${a.bd}</div></div></div>`).join('')}<div class="sec">週間予報</div><div class="card" style="padding:10px 12px"><div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:3px">${fcst}</div></div><div style="font-size:10px;color:var(--tx3);text-align:center;margin:4px 0 8px">データ提供: Open-Meteo（無料・オープンデータ）</div>`;
+}
+
+// Todo
+const OMSG=[t=>`そろそろ${t}はどうですか？`,t=>`${t}、いかがでしょう？`,t=>`${t}の頃合いかもしれません`,t=>`${t}のタイミングかな、と思います`];
+function gm(task,idx){return OMSG[idx%OMSG.length](task)}
+function warnHtml(task){if(!isRaining())return'';if(['追肥','施肥'].some(k=>task.includes(k)))return'<div class="ti-warn">🌧 雨天のため明日以降がおすすめ</div>';if(['農薬','防除'].some(k=>task.includes(k)))return'<div class="ti-warn">🌧 雨天時は農薬散布を避けましょう</div>';return''}
+
+function weekTasks(){let ts=[],oi=0;myCrops.filter(c=>c.status==='active').forEach(crop=>{const db=DB[crop.key];if(!db)return;const eDays=edp(crop);db.tasks.filter(t=>{const d=t.d-eDays;return d>=0&&d<=7}).forEach(t=>ts.push({...t,cid:crop.id,cname:dn(crop),emoji:db.e,daysUntil:t.d-eDays}));db.tasks.filter(t=>{const d=t.d-eDays;return d<0&&d>=-3}).forEach(t=>ts.push({...t,cid:crop.id,cname:dn(crop),emoji:db.e,daysUntil:t.d-eDays,overdue:true,oi:oi++}));});return ts.sort((a,b)=>a.daysUntil-b.daysUntil)}
+function futureTasks(){let ts=[];myCrops.filter(c=>c.status==='active').forEach(crop=>{const db=DB[crop.key];if(!db)return;const eDays=edp(crop);db.tasks.filter(t=>{const d=t.d-eDays;return d>7&&d<=30}).forEach(t=>ts.push({...t,cid:crop.id,cname:dn(crop),emoji:db.e,daysUntil:t.d-eDays}));});return ts.sort((a,b)=>a.daysUntil-b.daysUntil)}
+
+function tiHtml(t,small=false){
+  const key=`${t.cid}-${t.d}`;const done=!!todoChecked[key];
+  const urgent=!done&&(t.overdue||t.daysUntil<=2);
+  let st=t.overdue?gm(t.t,t.oi||0):t.daysUntil===0?'今日がちょうど目安です':t.daysUntil<=2?`あと${t.daysUntil}日、もうすぐです`:`あと${t.daysUntil}日`;
+  return`<div class="ti"><div class="ti-circle ${done?'done':''}" onclick="chk('${key}')">${done?'<i class="ti ti-check"></i>':''}</div><div class="ti-body"><div class="ti-task">${t.emoji} ${t.t}</div><div class="ti-crop ${urgent?'ti-gentle':''}">${t.cname} · ${st}</div>${!small?`<div style="font-size:10px;color:var(--tx3);margin-top:1px">${t.n}</div>`:''}${!small&&t.h?`<div class="ti-hint">🌿 ${t.h}</div>`:''}${!small?warnHtml(t.t):''}</div></div>`;
+}
+function chk(k){todoChecked[k]=!todoChecked[k];renderHome();renderTodo()}
+
+function buildGantt(container,cropList,totalDays=120,todayOff=30){
+  const months=[];for(let i=0;i<5;i++){const d=new Date(TODAY.getFullYear(),TODAY.getMonth()+i-1,1);months.push(d.getMonth()+1+'月');}
+  const tp=todayOff/totalDays*100;
+  let html=`<div class="g-hdr"><div class="g-hdr-l"></div><div class="g-hdr-m">${months.map(m=>`<div class="g-month">${m}</div>`).join('')}</div></div>`;
+  cropList.forEach(crop=>{const db=DB[crop.key];if(!db)return;const days=dsp(crop),eDays=edp(crop);const s=Math.max(0,(todayOff-days)/totalDays*100),e=Math.min(100,(todayOff-days+db.days)/totalDays*100),w=e-s;const lbl=crop.variety||db.n;const dots=db.tasks.filter(t=>t.d>eDays).slice(0,4).map(t=>{const p=(todayOff-days+t.d)/totalDays*100;return p>=0&&p<=100?`<div class="g-dot" style="left:${p.toFixed(1)}%;border:1.5px solid ${db.c}"></div>`:'';}).join('');html+=`<div class="g-row"><div class="g-lbl" title="${dn(crop)}" onclick="showDetail(${crop.id})">${db.e} ${lbl}</div><div class="g-track"><div class="g-bar" style="left:${s.toFixed(1)}%;width:${Math.max(2,w).toFixed(1)}%;background:${db.c}">${w>22?lbl:''}</div><div class="g-today" style="left:${tp.toFixed(1)}%"></div>${dots}</div></div>`;});
+  container.innerHTML=html;
+}
+
+function renderHome(){
+  renderWbar();
+  const week=weekTasks();
+  document.getElementById('todoList').innerHTML=week.slice(0,3).map(t=>tiHtml(t,true)).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px 0">今週の作業はありません 🎉</div>';
+  buildGantt(document.getElementById('homeGantt'),myCrops.filter(c=>c.status==='active'));
+  let alertHtml='';
+  myCrops.filter(c=>c.status==='active').forEach(crop=>{const db=DB[crop.key];if(!db)return;const eDays=edp(crop);db.tasks.forEach(task=>{const du=task.d-eDays;if(du<-3&&du>=-6)alertHtml+=`<div class="banner warn"><div class="banner-ico">⚠️</div><div><div class="banner-title">要注意！${dn(crop)} - ${task.t}</div><div class="banner-body">目安時期を${Math.abs(du)}日過ぎています。${task.h}</div></div></div>`;});});
+  document.getElementById('alerts').innerHTML=alertHtml;
+  const archived=myCrops.filter(c=>c.status==='archived');
+  document.getElementById('archiveSec').innerHTML=archived.length?`<div class="sec">📦 アーカイブ</div><div class="card">${archived.map(crop=>{const db=DB[crop.key];if(!db)return'';const d=Math.floor((crop.endDate-crop.plantDate)/864e5);return`<div class="arch-item"><div class="ci-ico" style="background:var(--bg2)">${db.e}</div><div class="ci-info"><div class="ci-name" style="color:var(--tx2)">${db.n} <span class="badge-end">終了</span></div>${crop.variety?`<div class="ci-variety">🏷 ${crop.variety}</div>`:''}<div class="ci-date">${fd(crop.plantDate)}〜${fd(crop.endDate)} · ${d}日間</div></div></div>`;}).join('')}</div>`:'';
+}
+function renderTodo(){const week=weekTasks(),future=futureTasks();document.getElementById('todoFull').innerHTML=week.map(t=>tiHtml(t,false)).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">今週の作業はありません 🎉</div>';document.getElementById('todoFuture').innerHTML=future.map(t=>tiHtml(t,false)).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">来週以降の予定はまだありません</div>';}
+function renderSuggest(){
+  const suggest=SEASON_ALL[MONTH]||[];
+  document.getElementById('suggestList').innerHTML=suggest.map(k=>{const db=DB[k];if(excluded.includes(k))return'';const fav=favorites.includes(k);return`<div class="ci"><div class="ci-ico" style="background:${db.cl}">${db.e}</div><div class="ci-info"><div class="ci-name">${db.n} ${fav?'⭐':''}</div><div class="ci-date">収穫まで約${db.days}日 · 株間${db.space}</div><div class="ci-next">ph ${db.ph} · ${db.tmp}</div>${db.caution?`<div style="font-size:10px;color:var(--amber);margin-top:1px">${db.caution.substring(0,36)}…</div>`:''}</div><button class="btn btn-sm btn-p" onclick="startAdd('${k}')">植付</button></div>`;}).filter(Boolean).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">この時期に植え付けできる作物がありません</div>';
+  const allK=Object.keys(DB);
+  document.getElementById('excludeChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${excluded.includes(k)?'exc':''}" onclick="togExc('${k}')">${db.e} ${db.n}</span>`;}).join('');
+  document.getElementById('favoriteChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${favorites.includes(k)?'sel':''}" onclick="togFav('${k}')">${db.e} ${db.n}</span>`;}).join('');
+}
+function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);renderSuggest()}
+function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);renderSuggest()}
+function renderCatalog(){document.getElementById('catalogGrid').innerHTML=Object.entries(DB).map(([k,v])=>`<div class="cat-card" onclick="showCropInfo('${k}')"><div style="font-size:24px;margin-bottom:4px">${v.e}</div><div style="font-size:12px;font-weight:700;margin-bottom:2px">${v.n}</div><div style="font-size:10px;color:var(--tx3)">${(v.season||[]).map(m=>m+1+'月').join('・')}<br>約${v.days}日 · ${v.space}</div></div>`).join('');}
+function showFullGantt(){const all=[...myCrops.filter(c=>c.status==='active'),...myCrops.filter(c=>c.status==='archived')];buildGantt(document.getElementById('fullGanttInner'),all,150,35);document.getElementById('ganttModal').style.display='block';}
+
+// 作物詳細
+async function showDetail(id){
+  const crop=myCrops.find(c=>c.id===id);const db=DB[crop.key];if(!db)return;
+  const arch=crop.status==='archived';
+  const days=arch?Math.floor((crop.endDate-crop.plantDate)/864e5):dsp(crop);
+  const eDays=arch?days:edp(crop);const pct=Math.min(100,Math.round(eDays/db.days*100));
+  const photos=crop.photos||[];
+  const photoHtml=`<div class="photo-grid">${photos.map((p,i)=>`<div class="photo-thumb" onclick="openPV(${id},${i})"><img src="${p.dataUrl}" alt=""><div class="photo-date">${p.date}</div></div>`).join('')}${!arch?`<div class="photo-add" onclick="trigPhoto(${id})"><i class="ti ti-camera"></i>追加</div>`:''}</div>`;
+  const tlHtml=db.tasks.map(t=>{const d=arch?-999:t.d-eDays;const cls=d<0?'d':d<=7?'a':'u';return`<div class="tl-item"><div class="tl-dot ${cls}"></div><div class="tl-day">${arch?`植付${t.d}日目`:d<0?`${-d}日前`:`${d===0?'今日':d+'日後'}（植付${t.d}日目）`}</div><div class="tl-task">${t.t}</div><div class="tl-note">${t.n}</div>${t.h?`<div class="tl-hint">🌿 ${t.h}</div>`:''}</div>`;}).join('');
+  const comp=COMP[crop.key];let compHtml='';
+  if(comp){if(comp.good?.length){compHtml+=`<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:5px">✅ 一緒に植えると良い</div>`;comp.good.forEach(g=>{const db2=DB[g];if(!db2)return;compHtml+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:20px">${db2.e}</span><div style="font-size:12px;font-weight:700">${db2.n}</div></div>`;});}if(comp.bad?.length){compHtml+=`<div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:5px;margin-top:8px">❌ 離して植えるべき</div>`;comp.bad.forEach(b=>{const db2=DB[b];if(!db2)return;compHtml+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:20px">${db2.e}</span><div style="font-size:12px;font-weight:700">${db2.n}</div></div>`;});}}
+  const btnHtml=arch?`<button class="btn btn-bl" style="margin-top:4px"><i class="ti ti-message-circle"></i> のらエモンに相談</button>`:`<div style="display:flex;gap:8px"><button class="btn" style="flex:1"><i class="ti ti-message-circle"></i> のらエモンに相談</button><button class="btn btn-d" style="flex:1" onclick="showEnd(${id})"><i class="ti ti-archive"></i> 終了する</button></div>`;
+  openPanel(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="font-size:34px">${db.e}</div><div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">${db.n}${arch?' <span class="badge-end">終了</span>':''}</div>${crop.variety?`<div style="font-size:12px;color:var(--gm);margin-top:1px">🏷 ${crop.variety}</div>`:''}<div style="font-size:11px;color:var(--tx2);margin-top:1px">${fd(crop.plantDate)}〜 · ${days}日${arch?'間':'目'}</div></div></div>${db.caution?`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`:''}<div class="stat-row"><div class="stat-box"><div class="stat-val">${days}</div><div class="stat-lbl">経過日数</div></div><div class="stat-box"><div class="stat-val">${Math.max(0,pct)}%</div><div class="stat-lbl">進度</div></div><div class="stat-box"><div class="stat-val">${photos.length}</div><div class="stat-lbl">写真</div></div></div><div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:14px"><div style="height:100%;width:${Math.max(0,pct)}%;background:${arch?'#B4B2A9':db.c};border-radius:3px"></div></div><div class="sec" style="margin-top:0">📅 植え付け日の天気</div><div id="pwBox"><div style="font-size:11px;color:var(--tx3);padding:4px">取得中…</div></div><div class="sec">📷 写真記録</div>${photoHtml}<div class="sec">作業タイムライン</div><div class="tl">${tlHtml}</div>${compHtml?`<div class="sec">🤝 コンパニオンプランツ</div><div class="card" style="margin-bottom:10px">${compHtml}</div>`:''}<div class="sec">栽培データ</div><div class="ir"><span class="ik">株間</span><span class="iv">${db.space}</span></div><div class="ir"><span class="ik">pH</span><span class="iv">${db.ph}</span></div><div class="ir"><span class="ik">生育適温</span><span class="iv">${db.tmp}</span></div><div class="ir"><span class="ik">畝の高さ</span><span class="iv">${db.ht}</span></div><div class="ir"><span class="ik">耐陰性</span><span class="iv">${db.sh}</span></div>${arch?`<div class="sec">のらエモンからひとこと</div><div style="font-size:12px;line-height:1.7;background:var(--al);border-radius:var(--r);padding:11px;color:#633806;margin-bottom:14px">お疲れさまでした！${db.end}</div>`:''}<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">${btnHtml}</div>`);
+  const pw=await fetchPlantWx(crop);const box=document.getElementById('pwBox');if(!box)return;
+  if(pw){const wi=wico(pw.code),wl=wlab(pw.code);box.innerHTML=`<div class="pw-box"><div class="pw-ico">${wi}</div><div style="flex:1"><div style="font-weight:700;font-size:12px">${fd(crop.plantDate)}の天気 <span style="font-size:10px;font-weight:400;color:var(--blue)">実績データ</span></div><div style="font-size:12px;margin-top:2px">${wl}　最高<strong>${pw.hi}°C</strong> / 最低${pw.lo}°C</div><div style="font-size:11px;margin-top:2px">💧 雨量${pw.rain}mm　💨 最大風速${pw.wind}m/s</div></div></div>`;}
+  else box.innerHTML='<div style="font-size:11px;color:var(--tx3);padding:3px 0">天気データを取得できませんでした</div>';
+}
+
+function showCropInfo(key){
+  const db=DB[key];
+  openPanel(`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="font-size:38px">${db.e}</div><div><div style="font-size:16px;font-weight:700">${db.n}</div><div style="font-size:11px;color:var(--tx2)">植付: ${(db.season||[]).map(m=>m+1+'月').join('・')}</div></div></div>${db.caution?`<div class="caution-box" style="margin-bottom:12px">${db.caution}</div>`:''}<div class="sec" style="margin-top:0">栽培データ</div><div class="ir"><span class="ik">収穫まで</span><span class="iv">約${db.days}日</span></div><div class="ir"><span class="ik">株間</span><span class="iv">${db.space}</span></div><div class="ir"><span class="ik">pH</span><span class="iv">${db.ph}</span></div><div class="ir"><span class="ik">生育適温</span><span class="iv">${db.tmp}</span></div><div class="ir"><span class="ik">畝の高さ</span><span class="iv">${db.ht}</span></div><div class="ir"><span class="ik">耐陰性</span><span class="iv">${db.sh}</span></div><div class="sec">植付け時の注意</div><div style="font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:14px">${db.plant}</div><div class="sec">作業タイムライン</div><div class="tl">${db.tasks.map(t=>`<div class="tl-item"><div class="tl-dot u"></div><div class="tl-day">植付${t.d}日目の目安</div><div class="tl-task">${t.t}</div><div class="tl-note">${t.n}</div>${t.h?`<div class="tl-hint">🌿 ${t.h}</div>`:''}</div>`).join('')}</div><div class="sec">終了後の注意</div><div style="font-size:12px;color:#633806;background:var(--al);border-radius:var(--r);padding:10px 11px;margin-bottom:14px;line-height:1.6">${db.end}</div><button class="btn btn-p btn-bl" onclick="startAdd('${key}');closePanel()"><i class="ti ti-plus"></i> この作物を植え付ける</button>`);
+}
+
+function showEnd(id){
+  const crop=myCrops.find(c=>c.id===id);const db=DB[crop.key];
+  openPanel(`<div style="font-size:16px;font-weight:700;margin-bottom:2px">${db.e} ${db.n}を終了する</div>${crop.variety?`<div style="font-size:12px;color:var(--gm);margin-bottom:8px">🏷 ${crop.variety}</div>`:''}<div style="font-size:12px;color:var(--tx2);margin-bottom:14px">植付から${dsp(crop)}日目。終了理由を選んでください。</div><div class="end-opt" onclick="endCrop(${id},'harvest')"><div style="font-size:22px">🌾</div><div><div style="font-size:13px;font-weight:700">収穫完了・シーズン終了</div></div></div><div class="end-opt" onclick="endCrop(${id},'season')"><div style="font-size:22px">🍂</div><div><div style="font-size:13px;font-weight:700">季節・気温の変化で終了</div></div></div><div class="end-opt" onclick="endCrop(${id},'disease')"><div style="font-size:22px">😔</div><div><div style="font-size:13px;font-weight:700">病気・害虫で撤収</div></div></div><div class="end-opt" onclick="endCrop(${id},'other')"><div style="font-size:22px">📦</div><div><div style="font-size:13px;font-weight:700">その他の理由</div></div></div><button class="btn btn-bl" style="margin-top:6px" onclick="showDetail(${id})">キャンセル</button>`);
+}
+function endCrop(id,reason){
+  const crop=myCrops.find(c=>c.id===id);const db=DB[crop.key];
+  crop.status='archived';crop.endDate=new Date();
+  const em={harvest:'🌾',season:'🍂',disease:'😔',other:'📦'};
+  closePanel();
+  setTimeout(()=>openPanel(`<div style="font-size:36px;text-align:center;margin-bottom:8px">${em[reason]}</div><div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:14px">${db.n}をアーカイブしました</div><div class="sec">のらエモンからひとこと</div><div style="font-size:12px;line-height:1.7;background:var(--al);border-radius:var(--r);padding:11px;color:#633806;margin-bottom:14px">お疲れさまでした！${db.end}</div><button class="btn btn-p btn-bl" onclick="closePanel();renderHome()">ホームに戻る</button>`),80);
+  renderHome();
+}
+
+// 追加フォーム
+function vChips(key){const db=DB[key];if(!db?.varieties?.length)return'';return`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:5px">${db.varieties.map(v=>`<span class="chip" style="font-size:10px;padding:3px 8px" onclick="setV('${v.replace(/'/g,"\\'")}')">${v}</span>`).join('')}</div>`;}
+function setV(v){const el=document.getElementById('nv');if(el)el.value=v}
+function onKChange(){const k=document.getElementById('nk')?.value;const vc=document.getElementById('vc');if(vc)vc.innerHTML=vChips(k);const db=DB[k];const cb=document.getElementById('cb');if(cb)cb.innerHTML=db?.caution?`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`:''}
+function showAddCrop(key='tomato'){
+  const allK=Object.keys(DB);
+  openPanel(`<div style="font-size:16px;font-weight:700;margin-bottom:14px">作物を追加</div><div class="fgrp"><label class="flbl">野菜を選ぶ</label><select class="finp" id="nk" onchange="onKChange()">${allK.map(k=>`<option value="${k}" ${k===key?'selected':''}>${DB[k].e} ${DB[k].n}</option>`).join('')}</select></div><div id="cb"></div><div class="fgrp"><label class="flbl">品種・メモ <span style="font-size:10px;color:var(--tx3)">（任意）</span></label><input type="text" class="finp" id="nv" placeholder="例：男爵、べにはるかなど" maxlength="30"><div class="finp-hint">タップで入力できます</div><div id="vc" style="margin-top:4px">${vChips(key)}</div></div><div class="fgrp"><label class="flbl">植え付け日</label><input type="date" class="finp" id="nd" value="${fdi(TODAY)}"></div><div style="display:flex;gap:8px;margin-top:14px"><button class="btn" style="flex:1" onclick="closePanel()">キャンセル</button><button class="btn btn-p" style="flex:1" onclick="addCrop()"><i class="ti ti-plus"></i> 追加</button></div>`);
+  const db=DB[key];const cb=document.getElementById('cb');if(cb&&db?.caution)cb.innerHTML=`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`;
+}
+function startAdd(k){closePanel();setTimeout(()=>showAddCrop(k),80)}
+function addCrop(){
+  const k=document.getElementById('nk').value;const v=(document.getElementById('nv').value||'').trim();const dv=document.getElementById('nd').value;const[y,m,d]=dv.split('-').map(Number);
+  myCrops.push({id:nid++,key:k,variety:v,plantDate:new Date(y,m-1,d),status:'active',photos:[],plantWeather:null});
+  closePanel();showTab('home');
+}
+
+// 写真
+function trigPhoto(cid){photoTarget=cid;document.getElementById('photoInput').click()}
+function onPhotoSelected(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const crop=myCrops.find(c=>c.id===photoTarget);if(!crop.photos)crop.photos=[];const d=new Date();crop.photos.push({dataUrl:ev.target.result,date:`${d.getMonth()+1}/${d.getDate()}`});showDetail(photoTarget);};reader.readAsDataURL(file);e.target.value=''}
+function openPV(cid,idx){const crop=myCrops.find(c=>c.id===cid);const p=crop.photos[idx];pvCropId=cid;pvIdx=idx;document.getElementById('pvImg').src=p.dataUrl;document.getElementById('pvMeta').textContent=`${dn(crop)} · ${p.date}`;document.getElementById('pv').style.display='flex'}
+function closePV(){document.getElementById('pv').style.display='none'}
+function delPV(){const crop=myCrops.find(c=>c.id===pvCropId);crop.photos.splice(pvIdx,1);closePV();showDetail(pvCropId)}
+
+// ══════════════════════════════════════════════════════
+//  畑マップ
+// ══════════════════════════════════════════════════════
+let COLS=10,ROWS=8;
+const cpx=()=>Math.floor((document.getElementById('mapWrap')?.clientWidth||330)/COLS);
+let mapGrid=[],mapUndo=[],mapTool='field',selCropKey='tomato',bedOrient='ns',sunDir='S',sunPaint='full',selObs='house',mapDragging=false;
+const OBSTACLES={house:{label:'家・建物',e:'🏠',color:'#607080',shadow:3},wall:{label:'塀・フェンス',e:'🧱',color:'#8A8070',shadow:1},tree:{label:'大きな木',e:'🌳',color:'#3B6D2A',shadow:2},fence:{label:'低フェンス',e:'🚧',color:'#A08050',shadow:1}};
+
+function initMapGrid(){mapGrid=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({type:null,crop:null,sun:null,obs:null,_shadow:false})))}
+initMapGrid();
+
+function cellFill(cell){if(cell.obs)return OBSTACLES[cell.obs]?.color||'#607080';if(cell.type==='field')return'#C8E09A';if(cell.type==='bed_ns')return'#9B7340';if(cell.type==='bed_ew')return'#B8874A';if(cell.type==='path')return'#EDE8DC';return'#F0EDE6'}
+function cellStroke(cell){if(cell.obs)return'#3A4550';if(cell.type==='field')return'#7EAD42';if(cell.type==='bed_ns'||cell.type==='bed_ew')return'#5A3E0A';if(cell.type==='path')return'#C8C0A8';return'#D8D4CC'}
+const SUN_OV={full:'rgba(255,210,40,.38)',half:'rgba(255,210,40,.16)',part:'rgba(160,160,220,.16)',shade:'rgba(80,80,150,.22)'};
+const SUN_E={full:'☀️',half:'🌤',part:'⛅',shade:'🌥'};
+
+function drawMap(){
+  const wrap=document.getElementById('mapWrap');if(!wrap)return;
+  const cv=document.getElementById('mapCanvas');const px=cpx();
+  cv.width=px*COLS;cv.height=px*ROWS;wrap.style.height=(px*ROWS+2)+'px';
+  const ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
+  for(let r=0;r<ROWS;r++){for(let c=0;c<COLS;c++){
+    const cell=mapGrid[r][c],x=c*px,y=r*px;
+    ctx.fillStyle=cellFill(cell);ctx.fillRect(x,y,px,px);
+    if(cell.sun&&!cell.obs){ctx.fillStyle=SUN_OV[cell.sun]||'transparent';ctx.fillRect(x,y,px,px)}
+    if(cell._shadow&&!cell.obs&&!cell.crop){ctx.fillStyle='rgba(80,80,120,.10)';ctx.fillRect(x,y,px,px)}
+    ctx.strokeStyle=cellStroke(cell);ctx.lineWidth=.6;ctx.strokeRect(x+.3,y+.3,px-.6,px-.6);
+    if(cell.type==='bed_ns'&&!cell.obs){ctx.strokeStyle='rgba(90,62,10,.2)';ctx.lineWidth=.8;for(let lx=x+Math.floor(px*.25);lx<x+px;lx+=Math.floor(px*.5)){ctx.beginPath();ctx.moveTo(lx,y);ctx.lineTo(lx,y+px);ctx.stroke()}}
+    else if(cell.type==='bed_ew'&&!cell.obs){ctx.strokeStyle='rgba(90,62,10,.2)';ctx.lineWidth=.8;for(let ly=y+Math.floor(px*.25);ly<y+px;ly+=Math.floor(px*.5)){ctx.beginPath();ctx.moveTo(x,ly);ctx.lineTo(x+px,ly);ctx.stroke()}}
+    if(cell.obs){ctx.font=`${Math.floor(px*.52)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(OBSTACLES[cell.obs]?.e||'🏠',x+px/2,y+px/2+1)}
+    if(cell.crop&&!cell.obs){ctx.font=`${Math.floor(px*.5)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(DB[cell.crop]?.e||'🌱',x+px/2,y+px/2+1)}
+    if(cell.sun&&!cell.crop&&!cell.obs&&px>=28){ctx.font=`${Math.floor(px*.27)}px serif`;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(SUN_E[cell.sun],x+px-1,y+px-1)}
+  }}
+  drawMapCompass(ctx,cv.width-26,26,17);
+}
+function drawMapCompass(ctx,cx,cy,r){
+  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();ctx.strokeStyle='#ccc';ctx.lineWidth=.7;ctx.stroke();
+  const dirs={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},labels={N:'北',S:'南',E:'東',W:'西'};
+  for(const[d,[dx,dy]]of Object.entries(dirs)){ctx.fillStyle=d===sunDir?'#BA7517':'#999';ctx.font=`${d===sunDir?'bold ':''}8px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(labels[d],cx+dx*(r-5),cy+dy*(r-5))}
+  const sv={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0],NE:[.7,-.7],NW:[-.7,-.7],SE:[.7,.7],SW:[-.7,.7]};
+  const[ax,ay]=sv[sunDir]||[0,1];ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+ax*(r-7),cy+ay*(r-7));ctx.strokeStyle='#BA7517';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+}
+
+function mapCellFrom(e,cv){const rect=cv.getBoundingClientRect();const px=cpx();const sx=cv.width/rect.width,sy=cv.height/rect.height;const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;const col=Math.floor((cx-rect.left)*sx/px),row=Math.floor((cy-rect.top)*sy/px);if(col<0||col>=COLS||row<0||row>=ROWS)return null;return{row,col}}
+function applyMapTool(r,c){const cell=mapGrid[r][c];if(mapTool==='field'){cell.type='field';cell.obs=null}else if(mapTool==='bed'){cell.type=`bed_${bedOrient}`;cell.obs=null}else if(mapTool==='path'){cell.type='path';cell.obs=null;cell.crop=null}else if(mapTool==='crop'){if(cell.type&&!cell.obs)cell.crop=selCropKey}else if(mapTool==='obstacle'){cell.obs=selObs;cell.crop=null}else if(mapTool==='sunpaint'){if(cell.type&&!cell.obs)cell.sun=sunPaint}else if(mapTool==='erase'){cell.type=null;cell.crop=null;cell.sun=null;cell.obs=null;cell._shadow=false}}
+function saveMapUndo(){mapUndo.push(JSON.stringify(mapGrid));if(mapUndo.length>40)mapUndo.shift()}
+function undoMap(){if(!mapUndo.length)return;mapGrid=JSON.parse(mapUndo.pop());drawMap()}
+
+const mc=document.getElementById('mapCanvas');
+mc.addEventListener('mousedown',e=>{saveMapUndo();mapDragging=true;const p=mapCellFrom(e,mc);if(p){applyMapTool(p.row,p.col);drawMap()}});
+mc.addEventListener('mousemove',e=>{if(!mapDragging)return;const p=mapCellFrom(e,mc);if(p){applyMapTool(p.row,p.col);drawMap()}});
+mc.addEventListener('mouseup',()=>mapDragging=false);mc.addEventListener('mouseleave',()=>mapDragging=false);
+mc.addEventListener('touchstart',e=>{e.preventDefault();saveMapUndo();mapDragging=true;const p=mapCellFrom(e,mc);if(p){applyMapTool(p.row,p.col);drawMap()}},{passive:false});
+mc.addEventListener('touchmove',e=>{e.preventDefault();if(!mapDragging)return;const p=mapCellFrom(e,mc);if(p){applyMapTool(p.row,p.col);drawMap()}},{passive:false});
+mc.addEventListener('touchend',()=>mapDragging=false);
+
+function setTool(t){mapTool=t;['field','bed','path','crop','obstacle','sunpaint','erase'].forEach(id=>document.getElementById('tool-'+id)?.classList.toggle('active',id===t));renderMapSubOpts()}
+function renderMapSubOpts(){
+  const el=document.getElementById('mapSubOpts');if(!el)return;
+  if(mapTool==='bed')el.innerHTML=`<div class="card"><div style="font-size:11px;font-weight:700;margin-bottom:7px">畝の向き</div><div style="display:flex;gap:4px"><div class="orient-btn ${bedOrient==='ns'?'active':''}" onclick="setBedOrient('ns')">↕ 南北畝</div><div class="orient-btn ${bedOrient==='ew'?'active':''}" onclick="setBedOrient('ew')">↔ 東西畝</div></div></div>`;
+  else if(mapTool==='crop')el.innerHTML=`<div class="card"><div style="font-size:11px;font-weight:700;margin-bottom:7px">配置する作物</div><div class="crop-palette">${Object.entries(DB).map(([k,v])=>`<div class="cp-btn ${k===selCropKey?'active':''}" onclick="selMapCrop('${k}')"><div class="cp-btn-ico">${v.e}</div><div>${v.n.length>4?v.n.slice(0,4)+'…':v.n}</div></div>`).join('')}</div></div>`;
+  else if(mapTool==='obstacle')el.innerHTML=`<div class="card"><div style="font-size:11px;font-weight:700;margin-bottom:7px">障害物の種類</div><div class="obs-palette">${Object.entries(OBSTACLES).map(([k,v])=>`<div class="obs-btn ${k===selObs?'active':''}" onclick="selObstacle('${k}')"><div style="font-size:20px">${v.e}</div><div>${v.label}</div><div style="font-size:9px;color:var(--tx3)">影${v.shadow}マス</div></div>`).join('')}</div><div style="font-size:10px;color:var(--tx2);margin-top:6px">配置すると「日当たり解析」で影の影響が計算されます</div></div>`;
+  else if(mapTool==='sunpaint')el.innerHTML=`<div class="card"><div style="font-size:11px;font-weight:700;margin-bottom:7px">日当たりを塗る</div><div style="display:flex;gap:5px;flex-wrap:wrap">${[['full','☀️終日'],['half','🌤半日'],['part','⛅半日以下'],['shade','🌥日陰']].map(([k,l])=>`<div class="tool-btn ${sunPaint===k?'active':''}" onclick="setSunPaint2('${k}')" style="min-width:0;padding:5px 7px">${l}</div>`).join('')}</div></div>`;
+  else el.innerHTML='';
+}
+function setBedOrient(o){bedOrient=o;renderMapSubOpts()}
+function selMapCrop(k){selCropKey=k;renderMapSubOpts()}
+function selObstacle(k){selObs=k;renderMapSubOpts()}
+function setSunPaint2(m){sunPaint=m;renderMapSubOpts()}
+function setSunDir(d){
+  sunDir=d;document.querySelectorAll('[id^="sd-"]').forEach(el=>el.classList.remove('active'));document.getElementById('sd-'+d)?.classList.add('active');
+  const labels={N:'北向き（日当たり少）',S:'南向き（良好）',E:'東向き（午前に日当たり）',W:'西向き（午後に日当たり）',NE:'北東向き',NW:'北西向き',SE:'南東向き（比較的良）',SW:'南西向き（比較的良）'};
+  document.getElementById('sunDirLabel').textContent=labels[d]||d;drawMap();
+}
+function resizeGrid(){COLS=parseInt(document.getElementById('colsRange').value);ROWS=parseInt(document.getElementById('rowsRange').value);document.getElementById('colsLbl').textContent=COLS;document.getElementById('rowsLbl').textContent=ROWS;initMapGrid();populateSampleMap();drawMap()}
+function clearMap(){if(!confirm('マップをリセットしますか？'))return;initMapGrid();mapUndo=[];drawMap()}
+function getShadowVec(dir){const m={S:[-1,0],N:[1,0],E:[0,-1],W:[0,1],SE:[-1,-1],SW:[-1,1],NE:[1,-1],NW:[1,1]};return m[dir]||[-1,0]}
+
+function analyzeMap(){
+  saveMapUndo();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){mapGrid[r][c]._shadow=false;mapGrid[r][c]._shadowBy=null}
+  const[dr,dc]=getShadowVec(sunDir);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(!mapGrid[r][c].obs)continue;const obs=OBSTACLES[mapGrid[r][c].obs];if(!obs)continue;for(let s=1;s<=obs.shadow;s++){const nr=r+dr*s,nc=c+dc*s;if(nr<0||nr>=ROWS||nc<0||nc>=COLS)break;if(mapGrid[nr][nc].obs)break;mapGrid[nr][nc]._shadow=true;mapGrid[nr][nc]._shadowBy=mapGrid[r][c].obs;if(!mapGrid[nr][nc].sun||mapGrid[nr][nc].sun==='full')mapGrid[nr][nc].sun=s<=1?'part':'shade'}}
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const crop=mapGrid[r][c].crop;if(!crop||!DB[crop])continue;const h=DB[crop].height_cm;if(h<100)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].type&&!mapGrid[nr][nc].obs){mapGrid[nr][nc]._shadow=true;mapGrid[nr][nc]._shadowBy='crop:'+crop;if(!mapGrid[nr][nc].sun)mapGrid[nr][nc].sun='part'}}
+  drawMap();showCheckResults();showTab('mapcheck');
+}
+
+function showCheckResults(){
+  const issues=[],goods=[],tallWarns=[],adjBad=[],adjGood=[];
+  const placed={};
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop||!DB[cell.crop])continue;const k=cell.crop;if(!placed[k])placed[k]={key:k,cells:[],shadowCells:[]};placed[k].cells.push({r,c,sun:cell.sun,shadow:cell._shadow,shadowBy:cell._shadowBy});if(cell._shadow)placed[k].shadowCells.push({r,c,shadowBy:cell._shadowBy})}
+  Object.values(placed).forEach(p=>{const db=DB[p.key];const req=db.light;const reqScore=LIGHT_SCORE[req]||4;const avgScore=p.cells.reduce((a,cell)=>a+(LIGHT_SCORE[cell.sun||'full']||2),0)/p.cells.length;const ok=avgScore>=reqScore;const shadowCauses=[...new Set(p.shadowCells.map(s=>s.shadowBy).filter(Boolean))].map(sb=>sb.startsWith('crop:')?`${DB[sb.split(':')[1]]?.e||''}${DB[sb.split(':')[1]]?.n||''}による影`:`${OBSTACLES[sb]?.e||''}${OBSTACLES[sb]?.label||sb}による影`);const obj={icon:ok?'✅':'❌',name:`${db.e} ${db.n}`,cells:p.cells.length,req:LIGHT_REQ[req]||req,shadowCauses,ok,detail:shadowCauses.length?`【原因】${shadowCauses.join('、')}が日光を遮っています。`:''};if(ok)goods.push(obj);else issues.push(obj)});
+  const[dr,dc]=getShadowVec(sunDir);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop)continue;const h=DB[cell.crop]?.height_cm||0;if(h<100)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].crop)tallWarns.push({tall:cell.crop,shaded:mapGrid[nr][nc].crop,tallDb:DB[cell.crop],shadedDb:DB[mapGrid[nr][nc].crop]})}
+  const seen=new Set();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop)continue;[[0,1],[1,0]].forEach(([dr2,dc2])=>{const nr=r+dr2,nc=c+dc2;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].crop&&mapGrid[nr][nc].crop!==cell.crop){const pair=[cell.crop,mapGrid[nr][nc].crop].sort().join('|');if(seen.has(pair))return;seen.add(pair);const[a,b]=pair.split('|');const ca=COMP[a]||{};if(ca.bad?.includes(b))adjBad.push({a,b,da:DB[a],db:DB[b]});else if(ca.good?.includes(b))adjGood.push({a,b,da:DB[a],db:DB[b]});}})}
+  let html='';
+  if(!Object.keys(placed).length&&!tallWarns.length)html='<div class="banner info"><div class="banner-ico">ℹ️</div><div><div class="banner-body">作物が配置されていません。マップタブで作物を配置してから解析してください。</div></div></div>';
+  issues.forEach(p=>{html+=`<div class="banner danger"><div class="banner-ico">${p.icon}</div><div><div class="banner-title">${p.name}（${p.cells}マス）</div><div class="banner-body">必要な日当たり: ${p.req}<br>${p.detail||'配置エリアの日当たりが不足しています'}</div></div></div>`});
+  tallWarns.forEach(w=>{html+=`<div class="banner warn"><div class="banner-ico">⚠️</div><div><div class="banner-title">${w.tallDb.e}${w.tallDb.n}が${w.shadedDb.e}${w.shadedDb.n}の日当たりを妨げる可能性</div><div class="banner-body">${w.tallDb.n}（最大${w.tallDb.height_cm}cm）が太陽方向（${sunDir}）に対して${w.shadedDb.n}の北側に位置しています。配置を入れ替えるか、背の低い作物を北側に持ってくることを検討してください。</div></div></div>`});
+  adjBad.forEach(p=>{html+=`<div class="banner warn"><div class="banner-ico">🔴</div><div><div class="banner-title">${p.da.e}${p.da.n} × ${p.db.e}${p.db.n} が隣接</div><div class="banner-body">この組み合わせは相性が良くありません。病害の共通リスクや生育の競合が起きる可能性があります。離して植えることをおすすめします。</div></div></div>`});
+  goods.forEach(p=>{html+=`<div class="banner ok"><div class="banner-ico">${p.icon}</div><div><div class="banner-title">${p.name}（${p.cells}マス）</div><div class="banner-body">日当たりは問題ありません。必要: ${p.req}</div></div></div>`});
+  adjGood.forEach(p=>{html+=`<div class="banner ok"><div class="banner-ico">💚</div><div><div class="banner-title">${p.da.e}${p.da.n} × ${p.db.e}${p.db.n} が隣接</div><div class="banner-body">コンパニオンプランツとして相性の良い組み合わせです！</div></div></div>`});
+  if(!html)html='<div class="banner ok"><div class="banner-ico">✅</div><div class="banner-body">特に問題は見つかりませんでした。</div></div>';
+  document.getElementById('checkResults').innerHTML=html;
+}
+
+function populateSampleMap(){
+  for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)mapGrid[r][c].type='field';
+  mapGrid[0][2].obs='house';mapGrid[0][3].obs='house';mapGrid[0][4].obs='house';
+  for(let r=1;r<5;r++)mapGrid[r][0].obs='wall';
+  if(mapGrid[2]&&mapGrid[2][COLS-1])mapGrid[2][COLS-1].obs='tree';
+  for(let r=1;r<ROWS-1;r++){mapGrid[r][5]={type:'path',crop:null,sun:null,obs:null,_shadow:false};for(let c=1;c<5;c++)mapGrid[r][c].type='bed_ns';for(let c=6;c<COLS-1;c++)mapGrid[r][c].type='bed_ew'}
+  [[2,1,'corn'],[2,2,'corn'],[3,1,'tomato'],[3,2,'tomato'],[4,1,'basil'],[5,1,'spinach'],[5,2,'spinach'],[2,6,'potato'],[3,6,'edamame'],[4,7,'lettuce']].forEach(([r,c,k])=>{if(mapGrid[r]&&mapGrid[r][c]&&mapGrid[r][c].type)mapGrid[r][c].crop=k});
+  for(let r=1;r<ROWS-1;r++){for(let c=1;c<5;c++)mapGrid[r][c].sun='full';for(let c=6;c<COLS-1;c++)mapGrid[r][c].sun='full'}
+  for(let c=1;c<COLS-1;c++)if(mapGrid[1]?.[c]?.type)mapGrid[1][c].sun='half';
+}
+
+// ══════════════════════════════════════════════════════
+//  農薬・肥料ライブラリ
+// ══════════════════════════════════════════════════════
+const AGRO_CATS={insecticide:{label:'殺虫剤',emoji:'🐛',bg:'#FCEBEB',tagClass:'tag-kill'},fungicide:{label:'殺菌剤',emoji:'🍄',bg:'var(--pl)',tagClass:'tag-anti'},fertilizer:{label:'肥料・土壌改良',emoji:'🌿',bg:'var(--gl)',tagClass:'tag-fert'},multi:{label:'殺虫殺菌剤',emoji:'🔀',bg:'var(--al)',tagClass:'tag-multi'}};
+
+const PRESET_AGRO=[
+  {id:'sumithion',name:'スミチオン乳剤',brand:'住友化学',cat:'insecticide',ingredient:'MEP（フェニトロチオン）50%',effect:'アブラムシ・カメムシ・ハダニ・コナジラミ・ヨトウムシなど広範囲の害虫に効果。速効性があり、持続性は比較的短い。',crops:['トマト','キュウリ','ナス','ピーマン','レタス','キャベツ','ブロッコリー','枝豆','ジャガイモ'],dilution:'1000〜1500倍希釈。7〜14日間隔で散布。',preHarvest:'収穫14〜21日前まで（作物により異なる）',caution:'ミツバチ・マルハナバチへの影響が強い。花の開花期の散布は避ける。蚕に毒性が高い。魚毒性あり。',timing:'早朝や夕方の散布が効果的。',stock:500,unit:'ml',stockMax:1000,own:false},
+  {id:'topsin',name:'トップジンM水和剤',brand:'日本曹達',cat:'fungicide',ingredient:'チオファネートメチル70%',effect:'灰色かび病・うどんこ病・炭疽病・菌核病・黒星病など多くの糸状菌病害に効果。浸透移行性があり、予防・治療の両方に使える。',crops:['トマト','キュウリ','ナス','イチゴ','カボチャ','スイカ'],dilution:'1000〜1500倍希釈。7〜10日間隔で予防的に散布。',preHarvest:'収穫7〜14日前まで',caution:'同一薬剤の連続使用は薬剤耐性菌の発生につながる。MBC系殺菌剤との交互使用を推奨。',timing:'発病前からの予防散布が効果的。雨が続く時期は特に注意。',stock:0,unit:'g',stockMax:500,own:false},
+  {id:'benlate',name:'ベンレート水和剤',brand:'住友化学',cat:'fungicide',ingredient:'ベノミル50%',effect:'うどんこ病・灰色かび病・菌核病・黒斑病・炭疽病など広範囲の糸状菌病害に効果。予防・治療両用。',crops:['トマト','キュウリ','ナス','ピーマン','イチゴ','スイカ','カボチャ'],dilution:'2000〜3000倍希釈。7〜10日間隔で散布。',preHarvest:'収穫7〜14日前まで',caution:'ベノミル系薬剤耐性菌が発生しやすい。他系統の薬剤と交互使用すること。',timing:'病気の出やすい時期（梅雨・秋雨前線）の前から予防的に使用。',stock:200,unit:'g',stockMax:500,own:false},
+  {id:'kosaido',name:'コサイド3000',brand:'日本曹達',cat:'fungicide',ingredient:'塩基性塩化銅35%（銅換算20.5%）',effect:'疫病・灰色かび病・軟腐病・かいよう病など細菌性・糸状菌性の両方の病害に効果。有機農業でも使用可能な銅剤。',crops:['トマト','ジャガイモ','キュウリ','スイカ','カボチャ','ナス','レタス'],dilution:'1000〜2000倍希釈。予防的に7〜10日間隔で散布。',preHarvest:'収穫前日まで（作物により異なる）',caution:'高温乾燥時や幼苗期は薬害が出ることがある。銅の過剰蓄積に注意。',timing:'疫病多発期（梅雨・9〜10月）の予防散布が特に重要。',stock:300,unit:'ml',stockMax:500,own:false},
+  {id:'orthocide',name:'オルトラン粒剤',brand:'住友化学',cat:'insecticide',ingredient:'アセフェート5%',effect:'アブラムシ・コナジラミ・ハモグリバエ・アオムシ・ヨトウムシなどに効果。土壌撒布タイプ。浸透移行性で葉まで成分が届く。',crops:['トマト','キュウリ','ナス','ピーマン','キャベツ','ブロッコリー','レタス'],dilution:'定植時に株元に1株あたり1〜3g撒布。',preHarvest:'収穫14〜21日前まで',caution:'散布時は手袋・マスクを着用。ミツバチへの毒性あり（開花期は避ける）。',timing:'定植時に土壌混和しておくと初期害虫を予防できる。',stock:400,unit:'g',stockMax:1000,own:false},
+  {id:'magamp',name:'マグアンプK',brand:'ハイポネックス',cat:'fertilizer',ingredient:'N:P:K:Mg = 6:40:6:15（緩効性肥料）',effect:'リン酸・カリウム・マグネシウムをバランスよく含む緩効性肥料。6〜12ヶ月かけてゆっくり溶け出す。根の発育促進・花芽分化促進・果実の品質向上に効果的。',crops:['トマト','キュウリ','ナス','ピーマン','イチゴ','レタス','ほとんどの野菜'],dilution:'定植時に土壌に混和（1L当たり小粒3〜5g目安）。元肥として使用。',preHarvest:'肥料のため収穫前日数制限なし',caution:'窒素成分が少ないため、生育期には窒素系の追肥を別途行う。',timing:'定植時の土壌改良が最も効果的。',stock:800,unit:'g',stockMax:1000,own:false},
+  {id:'hyponex',name:'ハイポネックス原液',brand:'ハイポネックス',cat:'fertilizer',ingredient:'N:P:K = 6:10:5（液体速効性肥料）',effect:'窒素・リン酸・カリウムのバランスが良い万能液体肥料。追肥として使いやすく、速効性がある。',crops:['トマト','キュウリ','ナス','ピーマン','レタス','ほうれん草','ほとんどの野菜'],dilution:'500〜1000倍希釈で週1〜2回水やり代わりに施用。',preHarvest:'肥料のため収穫前日数制限なし',caution:'高濃度での施用は根焼けの原因になる。必ず規定通りに希釈して使用。',timing:'生育旺盛な春〜夏に週1〜2回施用。',stock:600,unit:'ml',stockMax:800,own:false},
+  {id:'daconil',name:'ダコニール1000',brand:'SDSバイオテック',cat:'fungicide',ingredient:'クロロタロニル（TPN）40%',effect:'疫病・炭疽病・斑点病・灰色かび病・うどんこ病など非常に広範囲の糸状菌病害に効果。予防効果が高い万能殺菌剤。',crops:['トマト','キュウリ','ナス','ピーマン','ジャガイモ','スイカ','カボチャ','ほうれん草'],dilution:'1000倍希釈。7〜10日間隔で予防散布。',preHarvest:'収穫7〜21日前（作物により異なる）',caution:'魚毒性が高い（水田・水路への流出厳禁）。皮膚・眼への刺激性あり。保護具必着。',timing:'梅雨前後・秋雨前線の時期に特に予防的散布を。',stock:0,unit:'ml',stockMax:500,own:false},
+  {id:'neobon',name:'ネオボン殺虫殺菌スプレー',brand:'住友化学園芸',cat:'multi',ingredient:'クロチアニジン（殺虫）・フルジオキソニル（殺菌）配合',effect:'アブラムシ・コナジラミ（殺虫）＋灰色かび病・うどんこ病（殺菌）に同時対応。スプレータイプで希釈不要。',crops:['トマト','キュウリ','ナス','ピーマン','バジル','ほうれん草','レタス'],dilution:'そのまま使用（スプレータイプ）。7〜10日間隔。',preHarvest:'収穫3〜7日前まで',caution:'ミツバチへの影響あり。開花期を避けて散布。',timing:'害虫・病気の発生初期から使用。葉裏も忘れずに。',stock:1,unit:'本',stockMax:3,own:false},
+  {id:'lime',name:'苦土石灰',brand:'各社共通',cat:'fertilizer',ingredient:'炭酸カルシウム・酸化マグネシウム（Ca・Mg）',effect:'土壌のpHを矯正（酸性→中性）し、カルシウムとマグネシウムを補給する。根の発育促進、病気に強い土壌づくりに必須。',crops:['ほうれん草','キャベツ','ブロッコリー','タマネギ','ほとんどの野菜'],dilution:'植付け2週間前に1㎡あたり100〜200g撒布して土壌混和。',preHarvest:'肥料のため制限なし',caution:'化成肥料と同時施用すると窒素が逃げる（アンモニアガス発生）ため、施用後2週間は化成肥料を混ぜないこと。',timing:'作物の植付け2週間以上前に土壌混和。ほうれん草は特に重要（ph6.5以上必要）。',stock:5000,unit:'g',stockMax:10000,own:false},
+];
+
+let userAgro=[],agroCat='all';
+function allAgro(){return[...PRESET_AGRO,...userAgro]}
+function stockColor(s,m){if(m===0||s===0)return'#E24B4A';const p=s/m;if(p>0.5)return'var(--green)';if(p>0.2)return'var(--amber)';return'#E24B4A'}
+function stockLabel(s,u,m){if(s===0&&u!=='本')return'在庫なし';if(m===0)return`${s}${u}`;return`残${s}${u}（${Math.round(s/m*100)}%）`}
+
+function setAgroCat(cat,el){agroCat=cat;document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderAgro()}
+function renderAgro(){
+  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  let list=allAgro();if(agroCat==='own')list=userAgro;else if(agroCat!=='all')list=list.filter(a=>a.cat===agroCat);
+  if(q)list=list.filter(a=>a.name.toLowerCase().includes(q)||a.ingredient.toLowerCase().includes(q)||(a.crops||[]).some(c=>c.toLowerCase().includes(q)));
+  const el=document.getElementById('agroList');
+  if(!list.length){el.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:16px;text-align:center">該当する農薬・肥料がありません</div>';return}
+  el.innerHTML=list.map(a=>{
+    const cat=AGRO_CATS[a.cat]||AGRO_CATS.fertilizer;const sp=a.stockMax>0?Math.round(a.stock/a.stockMax*100):100;const empty=a.stock===0&&a.unit!=='本';
+    return`<div class="agro-card" onclick="showAgroDetail('${a.id||a.name}')"><div class="agro-ico" style="background:${cat.bg}">${cat.emoji}</div><div style="flex:1;min-width:0"><div class="agro-name">${a.name}${a.own?' <span class="tag tag-own">自分</span>':''}</div><div class="agro-brand">${a.brand||'自己登録'}</div><div class="agro-tags"><span class="tag ${cat.tagClass}">${cat.label}</span>${empty?'<span class="tag tag-kill">在庫なし</span>':sp<=20&&sp>0&&a.stockMax>0?'<span class="tag tag-multi">残量少</span>':''}</div>${a.stockMax>0?`<div class="agro-stock">${stockLabel(a.stock,a.unit,a.stockMax)}</div><div class="stock-bar"><div class="stock-bar-fill" style="width:${sp}%;background:${stockColor(a.stock,a.stockMax)}"></div></div>`:a.unit?`<div class="agro-stock">${a.stock}${a.unit}</div>`:''}</div><i class="ti ti-chevron-right" style="color:var(--tx3);flex-shrink:0"></i></div>`;
+  }).join('');
+}
+
+function showAgroDetail(id){
+  const a=allAgro().find(x=>(x.id||x.name)===id);if(!a)return;
+  const cat=AGRO_CATS[a.cat]||AGRO_CATS.fertilizer;const sp=a.stockMax>0?Math.round(a.stock/a.stockMax*100):null;
+  const isBee=a.caution?.includes('ミツバチ'),isFish=a.caution?.includes('魚毒'),isStrong=a.caution?.includes('重要')||a.caution?.includes('絶対');
+  openPanel(`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="width:48px;height:48px;border-radius:12px;background:${cat.bg};display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${cat.emoji}</div><div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:700;margin-bottom:2px">${a.name}</div><div style="font-size:12px;color:var(--tx3)">${a.brand||'自己登録'}</div><span class="tag ${cat.tagClass}" style="margin-top:4px;display:inline-flex">${cat.label}</span></div></div>${a.stockMax>0?`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;font-weight:700">在庫状況</span><span style="font-size:12px;font-weight:700;color:${stockColor(a.stock,a.stockMax)}">${stockLabel(a.stock,a.unit,a.stockMax)}</span></div><div class="stock-bar"><div class="stock-bar-fill" style="width:${sp}%;background:${stockColor(a.stock,a.stockMax)}"></div></div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${a.effect}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<button class="btn btn-d btn-bl" style="margin-top:12px" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>`:''}`);
+}
+function adjStock(id,dir){const a=allAgro().find(x=>(x.id||x.name)===id);if(!a)return;const step=Math.ceil((a.stockMax||100)*0.05)||1;a.stock=Math.max(0,Math.min(a.stockMax||9999,a.stock+dir*step));showAgroDetail(id);renderAgro()}
+function delAgro(id){if(!confirm('この農薬を削除しますか？'))return;userAgro=userAgro.filter(a=>(a.id||a.name)!==id);closePanel();renderAgro()}
+function registerAgro(){
+  const name=document.getElementById('f-name').value.trim();if(!name){alert('製品名を入力してください');return}
+  const cropsRaw=document.getElementById('f-crops').value;const crops=cropsRaw?cropsRaw.split(/[,、，]/).map(s=>s.trim()).filter(Boolean):[];
+  const stock=parseFloat(document.getElementById('f-stock').value)||0,unit=document.getElementById('f-unit').value.trim();
+  userAgro.push({id:'user_'+Date.now(),name,brand:'自己登録',cat:document.getElementById('f-cat').value,ingredient:document.getElementById('f-ingredient').value.trim(),effect:document.getElementById('f-effect').value.trim(),crops,dilution:document.getElementById('f-dilution').value.trim(),preHarvest:document.getElementById('f-preharvest').value.trim(),caution:document.getElementById('f-caution').value.trim(),stock,unit,stockMax:stock*2||0,timing:'',registered:new Date().toISOString().slice(0,10),own:true});
+  ['f-name','f-ingredient','f-effect','f-crops','f-dilution','f-preharvest','f-caution','f-stock','f-unit'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  showTab('agrochem');setTimeout(()=>{const el=document.querySelector('[data-cat="own"]');if(el)setAgroCat('own',el)},100);
+}
+
+// ══ タブ切り替え ══
+function showTab(tab){
+  const tabs=['home','todo','weather','menu','map','mapcheck','agrochem','agro-register','suggest','catalog'];
+  tabs.forEach(t=>document.getElementById('scr-'+t)?.classList.toggle('on',t===tab));
+  ['home','todo','weather','menu'].forEach(t=>document.getElementById('nav-'+t)?.classList.toggle('on',t===tab));
+  const titles={home:'家庭菜園お助けAI「のらエモン」',todo:'📋 今週のTo-Do',weather:'🌤 天気詳細',menu:'メニュー',map:'🗺 畑マップエディタ',mapcheck:'🔍 解析結果',agrochem:'🧪 農薬・肥料ライブラリ','agro-register':'📝 農薬・肥料を登録',suggest:'🌟 植え付け提案',catalog:'📋 作物一覧'};
+  const subs={home:`${region.name} · 中間地`,todo:'',weather:'週間予報と作業アドバイス',menu:'',map:'障害物・日当たり・作物配置を管理',mapcheck:'日当たり・相性チェック',agrochem:'手持ちの農薬・肥料を管理',suggest:'今の時期におすすめ',catalog:'全17種の栽培情報'};
+  document.getElementById('hdrTitle').textContent=titles[tab]||'のらエモン';
+  document.getElementById('hdrSub').textContent=subs[tab]||'';
+  const hdrBtn=document.getElementById('hdrBtn');
+  if(tab==='map')hdrBtn.innerHTML='<button class="btn btn-sm btn-p" onclick="analyzeMap()"><i class="ti ti-search"></i> 解析</button>';
+  else if(tab==='mapcheck')hdrBtn.innerHTML='<button class="btn btn-sm" onclick="showTab(\'map\')"><i class="ti ti-arrow-left"></i> マップへ</button>';
+  else if(tab==='agro-register')hdrBtn.innerHTML='<button class="btn btn-sm" onclick="showTab(\'agrochem\')"><i class="ti ti-arrow-left"></i> 一覧へ</button>';
+  else if(tab==='home'||tab==='todo')hdrBtn.innerHTML='<button class="btn btn-sm btn-p" onclick="showAddCrop()"><i class="ti ti-plus"></i> 追加</button>';
+  else hdrBtn.innerHTML='';
+  if(tab==='home')renderHome();else if(tab==='todo')renderTodo();else if(tab==='weather')renderWdetail();else if(tab==='map')setTimeout(()=>drawMap(),50);else if(tab==='suggest')renderSuggest();else if(tab==='catalog')renderCatalog();else if(tab==='agrochem')renderAgro();
+}
+
+// パネル
+function openPanel(c){document.getElementById('panelContent').innerHTML=c;document.getElementById('panel').classList.add('on');document.getElementById('overlay').classList.add('on')}
+function closePanel(){document.getElementById('panel').classList.remove('on');document.getElementById('overlay').classList.remove('on')}
+
+// 初期化
+populateSampleMap();
+loadWeather();
+renderHome();
+setTimeout(()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()},200);
+window.addEventListener('resize',()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()});
+</script>
+</body>
+</html>
