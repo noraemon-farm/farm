@@ -1,3 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>のらエモン｜家庭菜園お助けAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --green:#3A6B10;--gl:#EBF4DC;--gm:#5E9920;--gd:#264808;
+  --amber:#B87316;--al:#FBF0DC;--am:#EE9D24;
+  --teal:#0E6C54;--tl:#E2F5EE;
+  --red:#992B1A;--rl:#FBEBE7;
+  --blue:#184FA3;--bl:#E7F1FC;
+  --purple:#58399B;--pl:#EEEAFD;
+  --bg:#FAFAF7;--bg2:#F1F0EB;--bg3:#E8E7E0;
+  --tx:#1C1C18;--tx2:#5A5A52;--tx3:#9A9A90;
+  --bd:#E0DFD8;--bd2:#C8C7BE;
+  --r:8px;--rl2:14px;
+  --shadow:0 2px 12px rgba(40,40,20,.09);
+  --shadow-lg:0 8px 32px rgba(40,40,20,.14);
+  --font:'M PLUS Rounded 1c',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:15px}
+body{font-family:var(--font);color:var(--tx);background:var(--bg3);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+.app{display:flex;flex-direction:column;min-height:100vh}
+/* ヘッダー */
+.hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 15px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.hdr-l{display:flex;align-items:center;gap:9px}
+.hdr-mascot{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#C8E89A,#90C840);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 2px 6px rgba(90,150,20,.3)}
+.hdr-title{font-size:13px;font-weight:700;color:var(--gd);line-height:1.2}
+.hdr-sub{font-size:10px;color:var(--tx3);margin-top:1px}
+/* ナビ */
+.nav{display:flex;background:var(--bg);border-top:1px solid var(--bd);position:sticky;bottom:0;z-index:100;box-shadow:0 -2px 10px rgba(40,40,20,.07)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 6px;font-size:9px;color:var(--tx3);border:none;background:none;cursor:pointer;transition:color .15s;font-family:var(--font)}
+.nav-btn i{font-size:20px;transition:transform .2s}
+.nav-btn.on{color:var(--green)}
+.nav-btn.on i{transform:translateY(-1px)}
+/* コンテンツ */
+.content{flex:1;overflow-y:auto;padding-bottom:62px}
+.scr{display:none;padding:12px}
+.scr.on{display:block}
+.sec{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.6px;text-transform:uppercase;margin:14px 0 7px}
+/* カード */
+.card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:13px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+/* ボタン */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border:1px solid var(--bd2);border-radius:var(--r);font-size:12px;font-weight:500;background:var(--bg);color:var(--tx);cursor:pointer;transition:all .15s;font-family:var(--font)}
+.btn:hover{background:var(--bg2)}
+.btn-p{background:var(--gm);color:#fff;border-color:var(--gm)}
+.btn-p:hover{background:var(--green)}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-bl{width:100%;justify-content:center}
+.btn-d{color:var(--red);border-color:#E24B4A}
+/* フォーム */
+.fgrp{margin-bottom:12px}
+.flbl{font-size:12px;color:var(--tx2);margin-bottom:4px;display:block}
+.finp{width:100%;padding:9px 11px;border:1px solid var(--bd2);border-radius:var(--r);font-size:13px;background:var(--bg);color:var(--tx);font-family:var(--font)}
+.finp:focus{outline:none;border-color:var(--gm);box-shadow:0 0 0 3px rgba(90,150,20,.12)}
+select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+.finp-hint{font-size:10px;color:var(--tx3);margin-top:3px}
+/* 情報行 */
+.ir{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px;gap:8px}
+.ir:last-child{border-bottom:none}
+.ik{color:var(--tx2);flex-shrink:0}
+.iv{font-weight:500;text-align:right;flex:1}
+/* バナー */
+.banner{border-radius:var(--r);padding:9px 11px;margin-bottom:8px;display:flex;align-items:flex-start;gap:8px}
+.banner.ok{background:var(--gl);border:1px solid #C0DD97}
+.banner.warn{background:var(--al);border:1px solid #FAC775}
+.banner.danger{background:var(--rl);border:1px solid #F5C4B3}
+.banner.info{background:var(--bl);border:1px solid #B5D4F4}
+.banner-ico{font-size:18px;flex-shrink:0;margin-top:1px}
+.banner-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.banner-body{font-size:11px;color:var(--tx2);line-height:1.5}
+/* パネル */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:199;display:none}
+.overlay.on{display:block}
+.panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px;position:fixed;bottom:62px;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:200;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.panel.on{transform:translateY(0)}
+.panel-handle{width:38px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 14px}
+/* 作物 */
+.ci{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.ci:last-child{border-bottom:none}
+.ci-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:13px;font-weight:700}
+.ci-variety{font-size:10px;color:var(--tx3)}
+.ci-date{font-size:11px;color:var(--tx2)}
+.ci-next{font-size:11px;color:var(--teal);margin-top:1px}
+/* ガント */
+.gantt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.gantt-inner{min-width:500px}
+.g-hdr{display:flex;height:20px;margin-bottom:2px}
+.g-hdr-l{width:80px;flex-shrink:0}
+.g-hdr-m{flex:1;display:flex}
+.g-month{flex:1;font-size:10px;color:var(--tx3);text-align:center}
+.g-row{display:flex;align-items:center;height:28px;border-bottom:1px solid var(--bd)}
+.g-row:last-child{border-bottom:none}
+.g-lbl{width:80px;flex-shrink:0;font-size:10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:4px;cursor:pointer}
+.g-lbl:hover{color:var(--green)}
+.g-track{flex:1;position:relative;height:14px;background:var(--bg2);border-radius:3px}
+.g-bar{position:absolute;height:100%;border-radius:3px;display:flex;align-items:center;padding:0 4px;font-size:8px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden}
+.g-today{position:absolute;top:-5px;bottom:-5px;width:2px;background:#E24B4A;border-radius:1px;z-index:2}
+.g-dot{position:absolute;top:50%;transform:translate(-50%,-50%);width:5px;height:5px;border-radius:50%;background:#fff;z-index:3}
+/* タイムライン */
+.tl{position:relative;padding-left:20px}
+.tl::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1.5px;background:var(--bd2)}
+.tl-item{position:relative;margin-bottom:13px}
+.tl-dot{position:absolute;left:-17px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--bg2);border:2px solid var(--bd2)}
+.tl-dot.a{background:var(--gm);border-color:var(--gm)}
+.tl-dot.d{background:#B4B2A9;border-color:#B4B2A9}
+.tl-dot.u{background:var(--am);border-color:var(--am)}
+.tl-day{font-size:10px;color:var(--tx3);margin-bottom:1px}
+.tl-task{font-size:13px;font-weight:700}
+.tl-note{font-size:11px;color:var(--tx2);margin-top:1px}
+.tl-hint{font-size:10px;color:var(--teal);margin-top:2px;background:var(--tl);border-radius:5px;padding:2px 7px;display:inline-block}
+/* Todo */
+.ti{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.ti:last-child{border-bottom:none}
+.ti-circle{width:19px;height:19px;border-radius:50%;border:2px solid var(--bd2);flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ti-circle.done{background:var(--gm);border-color:var(--gm);color:#fff}
+.ti-circle.done i{font-size:11px}
+.ti-body{flex:1;min-width:0}
+.ti-task{font-size:12px;font-weight:700}
+.ti-crop{font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti-gentle{color:var(--amber)}
+.ti-hint{font-size:10px;color:var(--teal);margin-top:3px;background:var(--tl);border-radius:5px;padding:3px 7px;display:inline-block;line-height:1.4}
+.ti-warn{font-size:10px;color:var(--blue);margin-top:3px;background:var(--bl);border-radius:5px;padding:3px 7px;display:inline-block}
+/* 天気バー */
+.wb{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s;box-shadow:var(--shadow)}
+.wb:hover{background:var(--bg2)}
+.wb-ico{font-size:28px}
+.wb-temp{font-size:20px;font-weight:700}
+/* メニューエントリ */
+.menu-entry{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:8px;transition:all .15s;box-shadow:var(--shadow)}
+.menu-entry:hover{background:var(--bg2);border-color:var(--bd2)}
+.menu-entry-ico{font-size:30px;flex-shrink:0}
+.menu-entry-title{font-size:13px;font-weight:700}
+.menu-entry-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+/* 検索 */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 11px;margin-bottom:10px}
+.search-bar i{color:var(--tx3);font-size:16px}
+.search-bar input{border:none;background:transparent;flex:1;font-size:13px;color:var(--tx);outline:none;font-family:var(--font)}
+/* カテゴリータブ */
+.cat-tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:3px}
+.cat-tab{flex-shrink:0;padding:5px 12px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);font-size:11px;cursor:pointer;color:var(--tx2);transition:all .15s;white-space:nowrap;font-family:var(--font)}
+.cat-tab.on{background:var(--gl);border-color:var(--gm);color:var(--gd);font-weight:700}
+/* 農薬カード */
+.agro-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:12px 13px;margin-bottom:8px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;transition:all .15s;box-shadow:var(--shadow)}
+.agro-card:hover{border-color:var(--bd2);background:var(--bg2)}
+.agro-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.agro-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.agro-brand{font-size:10px;color:var(--tx3);margin-bottom:4px}
+.agro-tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{display:inline-flex;align-items:center;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.tag-kill{background:#FCEBEB;color:#501313}
+.tag-anti{background:var(--pl);color:#3A2080}
+.tag-fert{background:var(--gl);color:var(--gd)}
+.tag-multi{background:var(--al);color:#633806}
+.tag-own{background:var(--bl);color:#042C53}
+/* 在庫バー */
+.stock-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:4px}
+.stock-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.agro-stock{font-size:11px;color:var(--tx2)}
+/* 作物チップ */
+.crop-chip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:12px;border:1px solid var(--bd);background:var(--bg2);font-size:11px;margin:2px}
+/* 注意ボックス */
+.caution-box{background:var(--rl);border:1px solid #F5C4B3;border-radius:var(--r);padding:10px 12px;font-size:11px;color:#501313;line-height:1.6}
+/* 統計 */
+.stat-row{display:flex;gap:8px;margin-bottom:10px}
+.stat-box{flex:1;background:var(--bg2);border-radius:var(--r);padding:9px;text-align:center}
+.stat-val{font-size:18px;font-weight:700;color:var(--green)}
+.stat-lbl{font-size:10px;color:var(--tx3);margin-top:1px}
+/* バッジ */
+.badge-end{display:inline-flex;font-size:9px;padding:2px 6px;border-radius:9px;background:var(--bg2);color:var(--tx3);border:1px solid var(--bd)}
+/* 植え付け天気 */
+.pw-box{display:flex;align-items:center;gap:10px;background:var(--bl);border-radius:var(--r);padding:9px 12px;font-size:12px;color:#042C53;margin-top:6px}
+.pw-ico{font-size:22px}
+/* 写真 */
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.photo-thumb{aspect-ratio:1;border-radius:6px;overflow:hidden;position:relative;cursor:pointer;background:var(--bg2);border:1px solid var(--bd)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-date{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.45);color:#fff;font-size:9px;padding:2px 4px;text-align:center}
+.photo-add{aspect-ratio:1;border-radius:6px;border:1px dashed var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--tx3);font-size:10px;background:var(--bg)}
+.photo-add i{font-size:20px}
+/* フォトビューワー */
+.pv{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.pv img{max-width:100%;max-height:60vh;border-radius:8px;object-fit:contain}
+.pv-meta{color:#fff;font-size:13px;margin-top:12px}
+.pv-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pv-del{margin-top:12px;padding:6px 16px;border-radius:20px;background:rgba(220,60,60,.7);border:none;color:#fff;font-size:12px;cursor:pointer}
+/* マップ */
+.toolbar{display:flex;gap:5px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:9px;margin-bottom:8px;box-shadow:var(--shadow)}
+.tool-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 8px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);cursor:pointer;font-size:9px;color:var(--tx2);transition:all .15s;min-width:44px;text-align:center;font-family:var(--font)}
+.tool-btn:hover{background:var(--bg2)}
+.tool-btn.active{background:var(--gl);border-color:var(--gm);color:var(--gd);font-weight:700}
+.tool-btn i{font-size:17px}
+.map-wrap{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);overflow:hidden;margin-bottom:8px;position:relative;box-shadow:var(--shadow)}
+canvas{display:block;touch-action:none}
+.orient-btn{flex:1;padding:5px 4px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);cursor:pointer;font-size:10px;text-align:center;transition:all .15s;font-family:var(--font)}
+.orient-btn.active{background:var(--gl);border-color:var(--gm);color:var(--gd);font-weight:700}
+.sun-dir-btn{position:absolute;width:24px;height:24px;border-radius:50%;border:1px solid var(--bd2);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:all .15s;transform:translate(-50%,-50%);z-index:2;font-weight:500;font-family:var(--font)}
+.sun-dir-btn.active{background:var(--al);border-color:var(--amber);color:#633806;font-weight:700}
+.obs-palette{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.obs-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);cursor:pointer;font-size:9px;color:var(--tx2);transition:all .15s;text-align:center;font-family:var(--font)}
+.obs-btn.active{border-color:var(--amber);background:var(--al);color:#633806}
+.obs-btn i{font-size:17px}
+.crop-palette{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.cp-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg);cursor:pointer;font-size:9px;color:var(--tx2);transition:all .15s;font-family:var(--font)}
+.cp-btn.active{border-color:var(--gm);background:var(--gl);color:var(--gd)}
+.cp-btn-ico{font-size:18px}
+.legend{display:flex;flex-wrap:wrap;gap:5px}
+.legend-item{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--tx2)}
+.legend-dot{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+/* ガントモーダル */
+#ganttModal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow:auto;padding:14px}
+/* チップ */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:5px 11px;border-radius:18px;border:1px solid var(--bd);background:var(--bg);font-size:11px;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:var(--font);margin:2px}
+.chip.sel{background:var(--gl);border-color:var(--gm);color:var(--gd);font-weight:700}
+.chip.exc{background:#FCEBEB;border-color:#A32D2D;color:#501313;text-decoration:line-through}
+/* カタログ */
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl2);padding:11px;cursor:pointer;transition:border-color .15s;box-shadow:var(--shadow)}
+.cat-card:hover{border-color:var(--bd2)}
+/* 終了オプション */
+.end-opt{display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;margin-bottom:7px;transition:background .15s}
+.end-opt:hover{background:var(--bg2)}
+/* アーカイブ */
+.arch-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);opacity:.72}
+.arch-item:last-child{border-bottom:none}
+/* loading */
+.loading{color:var(--tx3);font-size:13px;padding:20px;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-l">
+      <div class="hdr-mascot">🌱</div>
+      <div>
+        <div class="hdr-title" id="hdrTitle">家庭菜園お助けAI「のらエモン」</div>
+        <div class="hdr-sub" id="hdrSub">三浦半島南部・中間地</div>
+      </div>
+    </div>
+    <div id="hdrBtn"><button class="btn btn-sm btn-p" onclick="showAddCrop()"><i class="ti ti-plus"></i> 追加</button></div>
+  </header>
+  <main class="content">
+    <!-- ホーム -->
+    <div class="scr on" id="scr-home">
+      <div id="wbar"></div><div id="alerts"></div>
+      <div class="sec">今週のやること</div>
+      <div class="card"><div id="todoList"></div>
+        <button class="btn btn-sm" style="margin-top:8px" onclick="showTab('todo')">すべて表示 <i class="ti ti-arrow-right"></i></button>
+      </div>
+      <div class="sec">育てている作物</div>
+      <div class="card" style="padding:10px 13px">
+        <div class="gantt-wrap"><div class="gantt-inner" id="homeGantt"></div></div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:5px">名前タップで詳細を表示</div>
+      </div>
+      <div id="archiveSec"></div>
+    </div>
+    <!-- Todo -->
+    <div class="scr" id="scr-todo">
+      <div class="sec">今週のTo-Do</div>
+      <div class="card"><div id="todoFull"></div></div>
+      <div class="sec">来週以降（30日以内）</div>
+      <div class="card"><div id="todoFuture"></div></div>
+    </div>
+    <!-- 天気 -->
+    <div class="scr" id="scr-weather">
+      <div id="wDetail"><div class="loading">🌤 天気情報を取得中…</div></div>
+    </div>
+    <!-- メニュー -->
+    <div class="scr" id="scr-menu">
+      <div class="sec">メニュー</div>
+      <div class="menu-entry" onclick="showTab('map')"><div class="menu-entry-ico">🗺</div><div style="flex:1"><div class="menu-entry-title">畑マップエディタ</div><div class="menu-entry-sub">畑の形・畝・作物配置・日当たり・障害物を管理</div></div><i class="ti ti-chevron-right" style="color:var(--tx3)"></i></div>
+      <div class="menu-entry" onclick="showTab('agrochem')"><div class="menu-entry-ico">🧪</div><div style="flex:1"><div class="menu-entry-title">農薬・肥料ライブラリ</div><div class="menu-entry-sub">手持ちの資材を管理・効能・濃度・注意事項を確認</div></div><i class="ti ti-chevron-right" style="color:var(--tx3)"></i></div>
+      <div class="menu-entry" onclick="showTab('suggest')"><div class="menu-entry-ico">🌟</div><div style="flex:1"><div class="menu-entry-title">植え付け提案</div><div class="menu-entry-sub">今の時期におすすめの野菜</div></div><i class="ti ti-chevron-right" style="color:var(--tx3)"></i></div>
+      <div class="menu-entry" onclick="showTab('catalog')"><div class="menu-entry-ico">🌱</div><div style="flex:1"><div class="menu-entry-title">作物一覧</div><div class="menu-entry-sub">全17種の栽培情報・コンパニオンプランツ</div></div><i class="ti ti-chevron-right" style="color:var(--tx3)"></i></div>
+      <div class="menu-entry" onclick="showFullGantt()"><div class="menu-entry-ico">📊</div><div style="flex:1"><div class="menu-entry-title">全作物ガントチャート</div><div class="menu-entry-sub">育てている作物の作業スケジュール一覧</div></div><i class="ti ti-chevron-right" style="color:var(--tx3)"></i></div>
+    </div>
+    <!-- 畑マップ -->
+    <div class="scr" id="scr-map">
+      <div class="toolbar">
+        <div class="tool-btn active" id="tool-field"    onclick="setTool('field')">    <i class="ti ti-border-all"></i>畑</div>
+        <div class="tool-btn"        id="tool-bed"      onclick="setTool('bed')">      <i class="ti ti-layout-rows"></i>畝</div>
+        <div class="tool-btn"        id="tool-path"     onclick="setTool('path')">     <i class="ti ti-route"></i>通路</div>
+        <div class="tool-btn"        id="tool-crop"     onclick="setTool('crop')">     <i class="ti ti-plant"></i>作物</div>
+        <div class="tool-btn"        id="tool-obstacle" onclick="setTool('obstacle')"> <i class="ti ti-building"></i>障害物</div>
+        <div class="tool-btn"        id="tool-sunpaint" onclick="setTool('sunpaint')"> <i class="ti ti-sun"></i>日当たり</div>
+        <div class="tool-btn"        id="tool-erase"    onclick="setTool('erase')">    <i class="ti ti-eraser"></i>消す</div>
+        <div class="tool-btn"        onclick="undoMap()"><i class="ti ti-arrow-back-up"></i>戻す</div>
+      </div>
+      <div class="card" style="padding:10px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+          <div><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">横 <span id="colsLbl">10</span>マス</div><input type="range" min="4" max="20" value="10" id="colsRange" oninput="resizeGrid()" style="width:100%;accent-color:var(--gm)"></div>
+          <div><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">縦 <span id="rowsLbl">8</span>マス</div><input type="range" min="4" max="16" value="8" id="rowsRange" oninput="resizeGrid()" style="width:100%;accent-color:var(--gm)"></div>
+        </div>
+        <div style="font-size:10px;color:var(--tx3)">1マス ≈ 50cm × 50cm</div>
+      </div>
+      <div class="map-wrap" id="mapWrap"><canvas id="mapCanvas"></canvas></div>
+      <div id="mapSubOpts"></div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;margin-bottom:7px">☀️ 太陽の方向（南面）</div>
+        <div style="position:relative;width:110px;height:110px;margin:0 auto 8px">
+          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--bd2);background:radial-gradient(circle,var(--bg2) 55%,#FAEEDA88 100%)"></div>
+          <div id="sd-N"  class="sun-dir-btn" style="top:8%;left:50%"   onclick="setSunDir('N')">北</div>
+          <div id="sd-S"  class="sun-dir-btn active" style="top:92%;left:50%"  onclick="setSunDir('S')">南</div>
+          <div id="sd-E"  class="sun-dir-btn" style="top:50%;left:92%"  onclick="setSunDir('E')">東</div>
+          <div id="sd-W"  class="sun-dir-btn" style="top:50%;left:8%"   onclick="setSunDir('W')">西</div>
+          <div id="sd-NE" class="sun-dir-btn" style="top:20%;left:80%"  onclick="setSunDir('NE')">NE</div>
+          <div id="sd-NW" class="sun-dir-btn" style="top:20%;left:20%"  onclick="setSunDir('NW')">NW</div>
+          <div id="sd-SE" class="sun-dir-btn" style="top:80%;left:80%"  onclick="setSunDir('SE')">SE</div>
+          <div id="sd-SW" class="sun-dir-btn" style="top:80%;left:20%"  onclick="setSunDir('SW')">SW</div>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px">☀️</div>
+        </div>
+        <div style="font-size:10px;color:var(--tx2);text-align:center" id="sunDirLabel">南向き（良好）</div>
+      </div>
+      <div class="card">
+        <div style="font-size:11px;font-weight:700;margin-bottom:7px">凡例</div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#C8E09A;border:1px solid #7EAD42"></div>畑</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#9B7340;border:1px solid #5A3E0A"></div>南北畝</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#B8874A;border:1px solid #5A3E0A"></div>東西畝</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EDE8DC;border:1px solid #C8C0A8"></div>通路</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#607080;border:1px solid #3A4550"></div>障害物</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,210,40,.4)"></div>終日☀️</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,210,40,.18)"></div>半日🌤</div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(140,140,200,.2)"></div>日陰🌥</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" style="flex:1" onclick="clearMap()"><i class="ti ti-trash"></i> リセット</button>
+        <button class="btn btn-p" style="flex:1" onclick="analyzeMap()"><i class="ti ti-search"></i> 日当たり解析</button>
+      </div>
+    </div>
+    <!-- マップ解析結果 -->
+    <div class="scr" id="scr-mapcheck">
+      <button class="btn btn-sm" style="margin-bottom:10px" onclick="showTab('map')"><i class="ti ti-arrow-left"></i> マップに戻る</button>
+      <div class="sec">🔍 日当たり・相性チェック結果</div>
+      <div id="checkResults"></div>
+    </div>
+    <!-- 農薬ライブラリ -->
+    <div class="scr" id="scr-agrochem">
+      <div class="search-bar"><i class="ti ti-search"></i><input type="text" placeholder="農薬名・成分名で検索…" id="searchInput" oninput="renderAgro()"></div>
+      <div class="cat-tabs">
+        <div class="cat-tab on"  data-cat="all"         onclick="setAgroCat('all',this)">すべて</div>
+        <div class="cat-tab"     data-cat="insecticide" onclick="setAgroCat('insecticide',this)">🐛 殺虫剤</div>
+        <div class="cat-tab"     data-cat="fungicide"   onclick="setAgroCat('fungicide',this)">🍄 殺菌剤</div>
+        <div class="cat-tab"     data-cat="fertilizer"  onclick="setAgroCat('fertilizer',this)">🌿 肥料</div>
+        <div class="cat-tab"     data-cat="multi"       onclick="setAgroCat('multi',this)">🔀 殺虫殺菌</div>
+        <div class="cat-tab"     data-cat="own"         onclick="setAgroCat('own',this)">⭐ 自分の登録</div>
+      </div>
+      <div id="agroList"></div>
+      <button class="btn btn-p btn-bl" style="margin-top:4px" onclick="showTab('agro-register')"><i class="ti ti-plus"></i> 農薬・肥料を登録する</button>
+    </div>
+    <!-- 農薬登録 -->
+    <div class="scr" id="scr-agro-register">
+      <button class="btn btn-sm" style="margin-bottom:10px" onclick="showTab('agrochem')"><i class="ti ti-arrow-left"></i> 一覧に戻る</button>
+      <div class="sec">新しい農薬・肥料を登録</div>
+      <div class="card">
+        <div class="fgrp"><label class="flbl">製品名 <span style="color:var(--red)">*</span></label><input class="finp" id="f-name" placeholder="例：スミチオン乳剤"></div>
+        <div class="fgrp"><label class="flbl">カテゴリー</label>
+          <select class="finp" id="f-cat">
+            <option value="insecticide">🐛 殺虫剤</option>
+            <option value="fungicide">🍄 殺菌剤</option>
+            <option value="multi">🔀 殺虫殺菌剤</option>
+            <option value="fertilizer">🌿 肥料・土壌改良材</option>
+          </select>
+        </div>
+        <div class="fgrp"><label class="flbl">有効成分</label><input class="finp" id="f-ingredient" placeholder="例：MEP（フェニトロチオン）50%"></div>
+        <div class="fgrp"><label class="flbl">効能・用途</label><textarea class="finp" id="f-effect" rows="2" placeholder="例：アブラムシ・カメムシなど広範囲の害虫に効果"></textarea></div>
+        <div class="fgrp"><label class="flbl">使用できる主な作物</label><input class="finp" id="f-crops" placeholder="例：トマト、キュウリ、ナス（カンマ区切り）"><div class="finp-hint">空欄の場合は「幅広い野菜に適用」と表示されます</div></div>
+        <div class="fgrp"><label class="flbl">希釈濃度・使用方法</label><input class="finp" id="f-dilution" placeholder="例：1000〜1500倍希釈 / 7〜10日間隔で散布"></div>
+        <div class="fgrp"><label class="flbl">収穫前日数</label><input class="finp" id="f-preharvest" placeholder="例：14日前まで / 前日まで"></div>
+        <div class="fgrp"><label class="flbl">注意事項</label><textarea class="finp" id="f-caution" rows="2" placeholder="例：ミツバチへの影響あり。蚕に対して毒性が高い。"></textarea></div>
+        <div class="fgrp"><label class="flbl">在庫量（任意）</label>
+          <div style="display:flex;gap:8px">
+            <input class="finp" id="f-stock" placeholder="例：500" style="flex:1" type="number" min="0">
+            <input class="finp" id="f-unit"  placeholder="例：ml"  style="width:70px">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" style="flex:1" onclick="showTab('agrochem')">キャンセル</button>
+          <button class="btn btn-p" style="flex:1" onclick="registerAgro()"><i class="ti ti-check"></i> 登録する</button>
+        </div>
+      </div>
+    </div>
+    <!-- 植え付け提案 -->
+    <div class="scr" id="scr-suggest">
+      <div class="sec">🌟 今植え付けできる野菜</div>
+      <div class="card" id="suggestList"></div>
+      <div class="sec">除外する作物</div>
+      <div class="card" style="padding:10px 14px"><div id="excludeChips"></div></div>
+      <div class="sec">優先して育てたい作物</div>
+      <div class="card" style="padding:10px 14px"><div id="favoriteChips"></div></div>
+    </div>
+    <!-- 作物一覧 -->
+    <div class="scr" id="scr-catalog">
+      <div class="sec">📋 作物一覧（全17種）</div>
+      <div class="cat-grid" id="catalogGrid"></div>
+    </div>
+  </main>
+  <nav class="nav">
+    <button class="nav-btn on" id="nav-home"    onclick="showTab('home')">   <i class="ti ti-home"></i>ホーム</button>
+    <button class="nav-btn"    id="nav-todo"    onclick="showTab('todo')">   <i class="ti ti-checkbox"></i>To-Do</button>
+    <button class="nav-btn"    id="nav-weather" onclick="showTab('weather')"><i class="ti ti-cloud"></i>天気</button>
+    <button class="nav-btn"    id="nav-menu"    onclick="showTab('menu')">   <i class="ti ti-menu-2"></i>メニュー</button>
+  </nav>
+</div>
+<!-- ガントモーダル -->
+<div id="ganttModal">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="font-size:15px;font-weight:700">📊 全作物の作業スケジュール</div>
+    <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i> 閉じる</button>
+  </div>
+  <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">赤線=今日　●=次の作業予定</div>
+  <div class="gantt-wrap"><div id="fullGanttInner" style="min-width:560px"></div></div>
+</div>
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel"><div class="panel-handle"></div><div id="panelContent"></div></div>
+<div class="pv" id="pv" style="display:none">
+  <button class="pv-close" onclick="closePV()"><i class="ti ti-x"></i></button>
+  <img id="pvImg" src="" alt=""><div class="pv-meta" id="pvMeta"></div>
+  <button class="pv-del" onclick="delPV()">この写真を削除</button>
+</div>
+<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="onPhotoSelected(event)">
 <script>
 // ══════════════════════════════════════════════════════
 //  のらエモン 完全版 JavaScript
