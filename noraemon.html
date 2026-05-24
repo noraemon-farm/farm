@@ -306,20 +306,49 @@ canvas{display:block;touch-action:none}
       <div class="map-wrap" id="mapWrap"><canvas id="mapCanvas"></canvas></div>
       <div id="mapSubOpts"></div>
       <div class="card">
-        <div style="font-size:11px;font-weight:700;margin-bottom:7px">☀️ 太陽の方向（南面）</div>
-        <div style="position:relative;width:110px;height:110px;margin:0 auto 8px">
-          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--bd2);background:radial-gradient(circle,var(--bg2) 55%,#FAEEDA88 100%)"></div>
-          <div id="sd-N"  class="sun-dir-btn" style="top:8%;left:50%"   onclick="setSunDir('N')">北</div>
-          <div id="sd-S"  class="sun-dir-btn active" style="top:92%;left:50%"  onclick="setSunDir('S')">南</div>
-          <div id="sd-E"  class="sun-dir-btn" style="top:50%;left:92%"  onclick="setSunDir('E')">東</div>
-          <div id="sd-W"  class="sun-dir-btn" style="top:50%;left:8%"   onclick="setSunDir('W')">西</div>
-          <div id="sd-NE" class="sun-dir-btn" style="top:20%;left:80%"  onclick="setSunDir('NE')">NE</div>
-          <div id="sd-NW" class="sun-dir-btn" style="top:20%;left:20%"  onclick="setSunDir('NW')">NW</div>
-          <div id="sd-SE" class="sun-dir-btn" style="top:80%;left:80%"  onclick="setSunDir('SE')">SE</div>
-          <div id="sd-SW" class="sun-dir-btn" style="top:80%;left:20%"  onclick="setSunDir('SW')">SW</div>
-          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px">☀️</div>
+        <div style="font-size:11px;font-weight:700;margin-bottom:7px">☀️ 太陽の方向（地図上の向き）</div>
+        <!-- SVGコンパス -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+          <svg id="compassSvg" width="80" height="80" viewBox="0 0 100 100" style="flex-shrink:0;cursor:pointer" onclick="compassClick(event)">
+            <!-- 背景 -->
+            <circle cx="50" cy="50" r="46" fill="#F5F0E8" stroke="#D8D4CC" stroke-width="1.5"/>
+            <!-- 目盛りリング -->
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#E8E4DC" stroke-width=".5" stroke-dasharray="2 4"/>
+            <!-- 方位ラベル -->
+            <text x="50" y="12" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">北</text>
+            <text x="50" y="91" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">南</text>
+            <text x="91" y="51" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">東</text>
+            <text x="9" y="51" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">西</text>
+            <!-- 十字線（薄い） -->
+            <line x1="50" y1="15" x2="50" y2="85" stroke="#E0DCD4" stroke-width=".5"/>
+            <line x1="15" y1="50" x2="85" y2="50" stroke="#E0DCD4" stroke-width=".5"/>
+            <!-- 太陽矢印（JSで動く） -->
+            <line id="compassArrow" x1="50" y1="50" x2="50" y2="18" stroke="#E8920A" stroke-width="2.5" stroke-linecap="round"/>
+            <circle id="compassDot" cx="50" cy="18" r="4" fill="#E8920A"/>
+            <!-- 中心 -->
+            <text x="50" y="51" text-anchor="middle" dominant-baseline="middle" font-size="14">☀</text>
+          </svg>
+          <div style="flex:1">
+            <div id="sunAngleLabel" style="font-size:11px;font-weight:700;margin-bottom:6px;color:var(--amber)">太陽方向: 180° (南)</div>
+            <input type="range" id="sunAngleSlider" min="0" max="359" value="180"
+              style="width:100%;accent-color:#E8920A"
+              oninput="setSunAngle(parseInt(this.value))"
+              onchange="setSunAngle(parseInt(this.value))">
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:2px"><span>北(0°)</span><span>東(90°)</span><span>南(180°)</span><span>西(270°)</span></div>
+          </div>
         </div>
-        <div style="font-size:10px;color:var(--tx2);text-align:center" id="sunDirLabel">南向き（良好）</div>
+        <!-- クイック選択ボタン -->
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="setSunAngle(0)"   style="font-size:10px;padding:3px 7px">北</button>
+          <button class="btn btn-sm" onclick="setSunAngle(45)"  style="font-size:10px;padding:3px 7px">北東</button>
+          <button class="btn btn-sm" onclick="setSunAngle(90)"  style="font-size:10px;padding:3px 7px">東</button>
+          <button class="btn btn-sm" onclick="setSunAngle(135)" style="font-size:10px;padding:3px 7px">南東</button>
+          <button class="btn btn-sm btn-p" onclick="setSunAngle(180)" style="font-size:10px;padding:3px 7px">南★</button>
+          <button class="btn btn-sm" onclick="setSunAngle(225)" style="font-size:10px;padding:3px 7px">南西</button>
+          <button class="btn btn-sm" onclick="setSunAngle(270)" style="font-size:10px;padding:3px 7px">西</button>
+          <button class="btn btn-sm" onclick="setSunAngle(315)" style="font-size:10px;padding:3px 7px">北西</button>
+        </div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:6px" id="sunDirLabel">南向き（良好）— スライダーや矢印をタップして自由に調整できます</div>
       </div>
       <div class="card">
         <div style="font-size:11px;font-weight:700;margin-bottom:7px">凡例</div>
@@ -640,7 +669,105 @@ function renderSuggest(){
 function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);saveData();renderSuggest()}
 function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);saveData();renderSuggest()}
 function renderCatalog(){document.getElementById('catalogGrid').innerHTML=Object.entries(DB).map(([k,v])=>`<div class="cat-card" onclick="showCropInfo('${k}')"><div style="font-size:24px;margin-bottom:4px">${v.e}</div><div style="font-size:12px;font-weight:700;margin-bottom:2px">${v.n}</div><div style="font-size:10px;color:var(--tx3)">${(v.season||[]).map(m=>m+1+'月').join('・')}<br>約${v.days}日 · ${v.space}</div></div>`).join('');}
-function showFullGantt(){const all=[...myCrops.filter(c=>c.status==='active'),...myCrops.filter(c=>c.status==='archived')];buildGantt(document.getElementById('fullGanttInner'),all,150,35);document.getElementById('ganttModal').style.display='block';}
+function showFullGantt(){
+  const active=myCrops.filter(c=>c.status==='active');
+  if(!active.length){alert('育てている作物がありません');return}
+  const TOTAL_DAYS=180,LEFT_DAYS=30;
+  const startDate=new Date(TODAY.getTime()-LEFT_DAYS*864e5);
+  const LABEL_W=76,ROW_H=38,HEADER_H=34,TICK_H=14;
+  const TOTAL_W=Math.max(640,window.innerWidth||640);
+  const chartH=HEADER_H+TICK_H+active.length*ROW_H+16;
+  const modal=document.getElementById('ganttModal');
+  modal.style.display='block';
+  modal.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:15px;font-weight:700">📊 全作物の作業スケジュール</div><button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i> 閉じる</button></div><div style="font-size:10px;color:var(--tx3);margin-bottom:8px">縦の赤線=今日　旗=作業タスク（橙=今週・緑=収穫）</div><div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 110px)"><canvas id="ganttCanvas" style="display:block"></canvas></div>`;
+  setTimeout(()=>{
+    const cv=document.getElementById('ganttCanvas');if(!cv)return;
+    const dpr=window.devicePixelRatio||1;
+    const PX=TOTAL_W;
+    cv.style.width=PX+'px';cv.style.height=chartH+'px';
+    cv.width=PX*dpr;cv.height=chartH*dpr;
+    const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+    const cs=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    const BG=cs('--bg')||'#FAFAF7',BG2=cs('--bg2')||'#F1F0EB',TX=cs('--tx')||'#1C1C18',TX3=cs('--tx3')||'#9A9A90',BD=cs('--bd')||'#E0DFD8';
+    ctx.fillStyle=BG;ctx.fillRect(0,0,PX,chartH);
+    // ヘッダー
+    ctx.fillStyle=BG2;ctx.fillRect(0,0,PX,HEADER_H+TICK_H);
+    ctx.strokeStyle=BD;ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(0,HEADER_H+TICK_H);ctx.lineTo(PX,HEADER_H+TICK_H);ctx.stroke();
+    ctx.fillStyle=TX3;ctx.font='bold 9px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText('作物',3,HEADER_H/2);
+    // 月・旬目盛り
+    const todayX=LABEL_W+LEFT_DAYS/TOTAL_DAYS*(PX-LABEL_W);
+    for(let d=0;d<=TOTAL_DAYS;d++){
+      const dt=new Date(startDate.getTime()+d*864e5);
+      const x=LABEL_W+(d/TOTAL_DAYS)*(PX-LABEL_W);
+      if(dt.getDate()===1){
+        ctx.strokeStyle=BD;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,chartH);ctx.stroke();
+        ctx.fillStyle=TX3;ctx.font='bold 10px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(dt.getMonth()+1+'月',x+2,HEADER_H/2);
+      }
+      if(dt.getDate()===10||dt.getDate()===20){
+        ctx.strokeStyle='rgba(0,0,0,.05)';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(x,HEADER_H);ctx.lineTo(x,chartH);ctx.stroke();
+        ctx.fillStyle=TX3;ctx.font='9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(dt.getDate()+'日',x,HEADER_H+1);
+      }
+    }
+    // 各作物
+    active.forEach((crop,ri)=>{
+      const db=DB[crop.key];if(!db)return;
+      const eDays=edp(crop);
+      const y=HEADER_H+TICK_H+ri*ROW_H;
+      if(ri%2===1){ctx.fillStyle='rgba(0,0,0,.025)';ctx.fillRect(0,y,PX,ROW_H);}
+      ctx.strokeStyle=BD;ctx.lineWidth=.4;ctx.beginPath();ctx.moveTo(0,y+ROW_H);ctx.lineTo(PX,y+ROW_H);ctx.stroke();
+      // ラベル
+      ctx.fillStyle=TX;ctx.font='12px serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(db.e,2,y+ROW_H/2);
+      ctx.font='9px sans-serif';ctx.fillStyle=TX;ctx.fillText((crop.variety||db.n).slice(0,7),16,y+ROW_H/2);
+      // 生育バー
+      const pd=(crop.plantDate-startDate)/864e5;
+      const hd=pd+db.days;
+      const bs=Math.max(0,pd/TOTAL_DAYS),be=Math.min(1,hd/TOTAL_DAYS);
+      if(be>bs){
+        const bx=LABEL_W+bs*(PX-LABEL_W),bw=(be-bs)*(PX-LABEL_W);
+        const barH=10,barY=y+(ROW_H-barH)/2;
+        ctx.fillStyle=db.c+'33';ctx.beginPath();ctx.roundRect(bx,barY,bw,barH,3);ctx.fill();
+        const pe=Math.min(be,(LEFT_DAYS/TOTAL_DAYS));
+        if(pe>bs){const pw=(pe-bs)*(PX-LABEL_W);ctx.fillStyle=db.c+'88';ctx.beginPath();ctx.roundRect(bx,barY,pw,barH,3);ctx.fill();}
+      }
+      // タスクマーカー
+      db.tasks.forEach((task,ti)=>{
+        const td=pd+task.d;
+        if(td<0||td>TOTAL_DAYS)return;
+        const tx=LABEL_W+(td/TOTAL_DAYS)*(PX-LABEL_W);
+        const du=task.d-eDays;
+        const done=du<=-1,near=du>=0&&du<=7,harvest=task.t.includes('収穫');
+        // 縦線
+        ctx.strokeStyle=done?'rgba(0,0,0,.15)':near?'#D86000':harvest?'#1B8B3E':db.c;
+        ctx.lineWidth=done?.5:near?1.4:1;
+        ctx.setLineDash(done?[2,2]:[]);
+        ctx.beginPath();ctx.moveTo(tx,y+4);ctx.lineTo(tx,y+ROW_H-4);ctx.stroke();
+        ctx.setLineDash([]);
+        if(done)return;
+        // ラベル（上下交互）
+        const lbl=task.t.length>6?task.t.slice(0,5)+'…':task.t;
+        ctx.font='7.5px sans-serif';
+        const tw=ctx.measureText(lbl).width+6;
+        const above=ti%2===0;
+        const lbY=above?y+2:y+ROW_H-11;
+        const lbX=Math.min(Math.max(tx-tw/2,LABEL_W+1),PX-tw-2);
+        ctx.fillStyle=near?'#FFF3E0':harvest?'#E8F5E9':'rgba(255,255,255,.9)';
+        ctx.strokeStyle=near?'#D86000':harvest?'#1B8B3E':'#bbb';
+        ctx.lineWidth=.5;
+        ctx.beginPath();ctx.roundRect(lbX,lbY,tw,9,2);ctx.fill();ctx.stroke();
+        ctx.fillStyle=near?'#B84000':harvest?'#0E5C28':TX;
+        ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(lbl,lbX+3,lbY+1);
+      });
+    });
+    // 今日線
+    ctx.strokeStyle='#E24B4A';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(todayX,0);ctx.lineTo(todayX,chartH);ctx.stroke();
+    ctx.fillStyle='#E24B4A';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('今日',todayX,2);
+    // ラベル仕切り
+    ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,chartH);ctx.stroke();
+    // スクロール位置
+    const sc=document.getElementById('ganttScroll');if(sc)sc.scrollLeft=Math.max(0,todayX-100);
+  },60);
+}
+
 
 // 作物詳細
 async function showDetail(id){
@@ -708,16 +835,49 @@ function delPV(){const crop=myCrops.find(c=>c.id===pvCropId);crop.photos.splice(
 // ══════════════════════════════════════════════════════
 let COLS=10,ROWS=8;
 const cpx=()=>Math.floor((document.getElementById('mapWrap')?.clientWidth||330)/COLS);
-let mapGrid=[],mapUndo=[],mapTool='field',selCropKey='tomato',bedOrient='ns',sunDir='S',sunPaint='full',selObs='house',mapDragging=false;
+let mapGrid=[],mapUndo=[],mapTool='field',selCropKey='tomato',bedOrient='ns';
+// sunAngleDeg: 0=北, 90=東, 180=南, 270=西（地図上で「太陽はこの方角にある」）
+// デフォルト180=南（一般的な日本の庭）
+let sunAngleDeg=180,sunPaint='full',selObs='house',mapDragging=false;
 const OBSTACLES={house:{label:'家・建物',e:'🏠',color:'#607080',shadow:3},wall:{label:'塀・フェンス',e:'🧱',color:'#8A8070',shadow:1},tree:{label:'大きな木',e:'🌳',color:'#3B6D2A',shadow:2},fence:{label:'低フェンス',e:'🚧',color:'#A08050',shadow:1}};
 
 function initMapGrid(){mapGrid=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({type:null,crop:null,sun:null,obs:null,_shadow:false})))}
 initMapGrid();
 
+// グリッドサイズ変更時にデータを保持して拡縮する
+function resizeGrid(){
+  const newCOLS=parseInt(document.getElementById('colsRange').value);
+  const newROWS=parseInt(document.getElementById('rowsRange').value);
+  document.getElementById('colsLbl').textContent=newCOLS;
+  document.getElementById('rowsLbl').textContent=newROWS;
+  // 既存データをコピーしながら新グリッドを生成
+  const newGrid=Array.from({length:newROWS},(_,r)=>
+    Array.from({length:newCOLS},(_,c)=>{
+      if(r<ROWS&&c<COLS) return{...mapGrid[r][c]};
+      return{type:null,crop:null,sun:null,obs:null,_shadow:false};
+    })
+  );
+  COLS=newCOLS; ROWS=newROWS;
+  mapGrid=newGrid;
+  drawMap();
+}
+
 function cellFill(cell){if(cell.obs)return OBSTACLES[cell.obs]?.color||'#607080';if(cell.type==='field')return'#C8E09A';if(cell.type==='bed_ns')return'#9B7340';if(cell.type==='bed_ew')return'#B8874A';if(cell.type==='path')return'#EDE8DC';return'#F0EDE6'}
 function cellStroke(cell){if(cell.obs)return'#3A4550';if(cell.type==='field')return'#7EAD42';if(cell.type==='bed_ns'||cell.type==='bed_ew')return'#5A3E0A';if(cell.type==='path')return'#C8C0A8';return'#D8D4CC'}
 const SUN_OV={full:'rgba(255,210,40,.38)',half:'rgba(255,210,40,.16)',part:'rgba(160,160,220,.16)',shade:'rgba(80,80,150,.22)'};
 const SUN_E={full:'☀️',half:'🌤',part:'⛅',shade:'🌥'};
+
+// 角度から影ベクトルを計算（太陽の反対方向に影が伸びる）
+// sunAngleDeg: 太陽の方角(0=北,90=東,180=南,270=西)
+// 影は太陽の反対 → shadowAngle = sunAngleDeg + 180
+function getShadowVecFromAngle(angle){
+  const shadowAngle=(angle+180)%360;
+  const rad=shadowAngle*Math.PI/180;
+  // グリッド座標系: 上=北(r減少), 右=東(c増加)
+  const dr=Math.round(Math.cos(rad));  // 北方向がr減少
+  const dc=Math.round(Math.sin(rad));  // 東方向がc増加
+  return[dr,dc];
+}
 
 function drawMap(){
   const wrap=document.getElementById('mapWrap');if(!wrap)return;
@@ -736,15 +896,72 @@ function drawMap(){
     if(cell.crop&&!cell.obs){ctx.font=`${Math.floor(px*.5)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(DB[cell.crop]?.e||'🌱',x+px/2,y+px/2+1)}
     if(cell.sun&&!cell.crop&&!cell.obs&&px>=28){ctx.font=`${Math.floor(px*.27)}px serif`;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(SUN_E[cell.sun],x+px-1,y+px-1)}
   }}
-  drawMapCompass(ctx,cv.width-26,26,17);
+  drawMapCompass(ctx,cv.width-28,28,20);
 }
+
 function drawMapCompass(ctx,cx,cy,r){
-  ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.85)';ctx.fill();ctx.strokeStyle='#ccc';ctx.lineWidth=.7;ctx.stroke();
-  const dirs={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0]},labels={N:'北',S:'南',E:'東',W:'西'};
-  for(const[d,[dx,dy]]of Object.entries(dirs)){ctx.fillStyle=d===sunDir?'#BA7517':'#999';ctx.font=`${d===sunDir?'bold ':''}8px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(labels[d],cx+dx*(r-5),cy+dy*(r-5))}
-  const sv={N:[0,-1],S:[0,1],E:[1,0],W:[-1,0],NE:[.7,-.7],NW:[-.7,-.7],SE:[.7,.7],SW:[-.7,.7]};
-  const[ax,ay]=sv[sunDir]||[0,1];ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+ax*(r-7),cy+ay*(r-7));ctx.strokeStyle='#BA7517';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  ctx.save();
+  // 背景円
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+  ctx.strokeStyle='#ccc';ctx.lineWidth=.8;ctx.stroke();
+  // 方位ラベル（固定）
+  const DIRS=[['北',0],['東',90],['南',180],['西',270]];
+  DIRS.forEach(([label,deg])=>{
+    const rad=deg*Math.PI/180 - Math.PI/2; // 0度=上(北)
+    const lx=cx+Math.cos(rad)*(r-6),ly=cy+Math.sin(rad)*(r-6);
+    ctx.fillStyle='#888';ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(label,lx,ly);
+  });
+  // 太陽矢印（sunAngleDeg方向）
+  const sunRad=(sunAngleDeg-90)*Math.PI/180;
+  const ex=cx+Math.cos(sunRad)*(r-9),ey=cy+Math.sin(sunRad)*(r-9);
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);
+  ctx.strokeStyle='#E8920A';ctx.lineWidth=2;ctx.stroke();
+  // 先端に丸
+  ctx.beginPath();ctx.arc(ex,ey,3,0,Math.PI*2);
+  ctx.fillStyle='#E8920A';ctx.fill();
+  // 太陽マーク（中心）
+  ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('☀',cx,cy);
+  ctx.restore();
 }
+
+// コンパスUI の更新
+function updateCompassUI(){
+  const el=document.getElementById('compassDial');if(!el)return;
+  const sliderEl=document.getElementById('sunAngleSlider');if(sliderEl)sliderEl.value=sunAngleDeg;
+  const lblEl=document.getElementById('sunAngleLabel');if(lblEl){
+    const dirs=[[0,'北'],[22.5,'北北東'],[45,'北東'],[67.5,'東北東'],[90,'東'],[112.5,'東南東'],[135,'南東'],[157.5,'南南東'],[180,'南'],[202.5,'南南西'],[225,'南西'],[247.5,'西南西'],[270,'西'],[292.5,'西北西'],[315,'北西'],[337.5,'北北西'],[360,'北']];
+    const closest=dirs.reduce((a,b)=>Math.abs(b[0]-sunAngleDeg)<Math.abs(a[0]-sunAngleDeg)?b:a);
+    lblEl.textContent=`太陽方向: ${sunAngleDeg}° (${closest[1]})`;
+  }
+  // SVGコンパスを更新
+  const svgEl=document.getElementById('compassSvg');if(svgEl){
+    const rad=(sunAngleDeg-90)*Math.PI/180;
+    const x=50+Math.cos(rad)*32,y=50+Math.sin(rad)*32;
+    const arrowEl=document.getElementById('compassArrow');if(arrowEl){
+      arrowEl.setAttribute('x2',x.toFixed(1));arrowEl.setAttribute('y2',y.toFixed(1));
+    }
+    const dotEl=document.getElementById('compassDot');if(dotEl){
+      dotEl.setAttribute('cx',x.toFixed(1));dotEl.setAttribute('cy',y.toFixed(1));
+    }
+  }
+}
+
+function setSunAngle(deg){
+  sunAngleDeg=(deg+360)%360;
+  updateCompassUI();
+  drawMap();
+  // ラベル更新
+  const lbl=document.getElementById('sunDirLabel');if(lbl){
+    const qual=sunAngleDeg>=157&&sunAngleDeg<=203?'（良好）':sunAngleDeg>=0&&sunAngleDeg<=45||sunAngleDeg>=315?'（日当たり少）':'';
+    lbl.textContent=`太陽方向 ${sunAngleDeg}°${qual}`;
+  }
+}
+
+function clearMap(){if(!confirm('マップをリセットしますか？'))return;initMapGrid();mapUndo=[];drawMap()}
+function getShadowVec(){return getShadowVecFromAngle(sunAngleDeg)}
 
 function mapCellFrom(e,cv){const rect=cv.getBoundingClientRect();const px=cpx();const sx=cv.width/rect.width,sy=cv.height/rect.height;const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;const col=Math.floor((cx-rect.left)*sx/px),row=Math.floor((cy-rect.top)*sy/px);if(col<0||col>=COLS||row<0||row>=ROWS)return null;return{row,col}}
 function applyMapTool(r,c){const cell=mapGrid[r][c];if(mapTool==='field'){cell.type='field';cell.obs=null}else if(mapTool==='bed'){cell.type=`bed_${bedOrient}`;cell.obs=null}else if(mapTool==='path'){cell.type='path';cell.obs=null;cell.crop=null}else if(mapTool==='crop'){if(cell.type&&!cell.obs)cell.crop=selCropKey}else if(mapTool==='obstacle'){cell.obs=selObs;cell.crop=null}else if(mapTool==='sunpaint'){if(cell.type&&!cell.obs)cell.sun=sunPaint}else if(mapTool==='erase'){cell.type=null;cell.crop=null;cell.sun=null;cell.obs=null;cell._shadow=false}}
@@ -772,19 +989,14 @@ function setBedOrient(o){bedOrient=o;renderMapSubOpts()}
 function selMapCrop(k){selCropKey=k;renderMapSubOpts()}
 function selObstacle(k){selObs=k;renderMapSubOpts()}
 function setSunPaint2(m){sunPaint=m;renderMapSubOpts()}
-function setSunDir(d){
-  sunDir=d;document.querySelectorAll('[id^="sd-"]').forEach(el=>el.classList.remove('active'));document.getElementById('sd-'+d)?.classList.add('active');
-  const labels={N:'北向き（日当たり少）',S:'南向き（良好）',E:'東向き（午前に日当たり）',W:'西向き（午後に日当たり）',NE:'北東向き',NW:'北西向き',SE:'南東向き（比較的良）',SW:'南西向き（比較的良）'};
-  document.getElementById('sunDirLabel').textContent=labels[d]||d;drawMap();
-}
-function resizeGrid(){COLS=parseInt(document.getElementById('colsRange').value);ROWS=parseInt(document.getElementById('rowsRange').value);document.getElementById('colsLbl').textContent=COLS;document.getElementById('rowsLbl').textContent=ROWS;initMapGrid();populateSampleMap();drawMap()}
-function clearMap(){if(!confirm('マップをリセットしますか？'))return;initMapGrid();mapUndo=[];drawMap()}
-function getShadowVec(dir){const m={S:[-1,0],N:[1,0],E:[0,-1],W:[0,1],SE:[-1,-1],SW:[-1,1],NE:[1,-1],NW:[1,1]};return m[dir]||[-1,0]}
+
+// 古い setSunDir は新しい setSunAngle に移行（HTMLのコンパスボタンから呼ばれる場合の互換）
+function setSunDir(d){const m={N:0,NE:45,E:90,SE:135,S:180,SW:225,W:270,NW:315};setSunAngle(m[d]??180)}
 
 function analyzeMap(){
   saveMapUndo();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){mapGrid[r][c]._shadow=false;mapGrid[r][c]._shadowBy=null}
-  const[dr,dc]=getShadowVec(sunDir);
+  const[dr,dc]=getShadowVec();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){if(!mapGrid[r][c].obs)continue;const obs=OBSTACLES[mapGrid[r][c].obs];if(!obs)continue;for(let s=1;s<=obs.shadow;s++){const nr=r+dr*s,nc=c+dc*s;if(nr<0||nr>=ROWS||nc<0||nc>=COLS)break;if(mapGrid[nr][nc].obs)break;mapGrid[nr][nc]._shadow=true;mapGrid[nr][nc]._shadowBy=mapGrid[r][c].obs;if(!mapGrid[nr][nc].sun||mapGrid[nr][nc].sun==='full')mapGrid[nr][nc].sun=s<=1?'part':'shade'}}
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const crop=mapGrid[r][c].crop;if(!crop||!DB[crop])continue;const h=DB[crop].height_cm;if(h<100)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].type&&!mapGrid[nr][nc].obs){mapGrid[nr][nc]._shadow=true;mapGrid[nr][nc]._shadowBy='crop:'+crop;if(!mapGrid[nr][nc].sun)mapGrid[nr][nc].sun='part'}}
   drawMap();showCheckResults();showTab('mapcheck');
@@ -795,15 +1007,15 @@ function showCheckResults(){
   const placed={};
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop||!DB[cell.crop])continue;const k=cell.crop;if(!placed[k])placed[k]={key:k,cells:[],shadowCells:[]};placed[k].cells.push({r,c,sun:cell.sun,shadow:cell._shadow,shadowBy:cell._shadowBy});if(cell._shadow)placed[k].shadowCells.push({r,c,shadowBy:cell._shadowBy})}
   Object.values(placed).forEach(p=>{const db=DB[p.key];const req=db.light;const reqScore=LIGHT_SCORE[req]||4;const avgScore=p.cells.reduce((a,cell)=>a+(LIGHT_SCORE[cell.sun||'full']||2),0)/p.cells.length;const ok=avgScore>=reqScore;const shadowCauses=[...new Set(p.shadowCells.map(s=>s.shadowBy).filter(Boolean))].map(sb=>sb.startsWith('crop:')?`${DB[sb.split(':')[1]]?.e||''}${DB[sb.split(':')[1]]?.n||''}による影`:`${OBSTACLES[sb]?.e||''}${OBSTACLES[sb]?.label||sb}による影`);const obj={icon:ok?'✅':'❌',name:`${db.e} ${db.n}`,cells:p.cells.length,req:LIGHT_REQ[req]||req,shadowCauses,ok,detail:shadowCauses.length?`【原因】${shadowCauses.join('、')}が日光を遮っています。`:''};if(ok)goods.push(obj);else issues.push(obj)});
-  const[dr,dc]=getShadowVec(sunDir);
+  const[dr,dc]=getShadowVec();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop)continue;const h=DB[cell.crop]?.height_cm||0;if(h<100)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].crop)tallWarns.push({tall:cell.crop,shaded:mapGrid[nr][nc].crop,tallDb:DB[cell.crop],shadedDb:DB[mapGrid[nr][nc].crop]})}
   const seen=new Set();
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=mapGrid[r][c];if(!cell.crop)continue;[[0,1],[1,0]].forEach(([dr2,dc2])=>{const nr=r+dr2,nc=c+dc2;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&mapGrid[nr][nc].crop&&mapGrid[nr][nc].crop!==cell.crop){const pair=[cell.crop,mapGrid[nr][nc].crop].sort().join('|');if(seen.has(pair))return;seen.add(pair);const[a,b]=pair.split('|');const ca=COMP[a]||{};if(ca.bad?.includes(b))adjBad.push({a,b,da:DB[a],db:DB[b]});else if(ca.good?.includes(b))adjGood.push({a,b,da:DB[a],db:DB[b]});}})}
   let html='';
   if(!Object.keys(placed).length&&!tallWarns.length)html='<div class="banner info"><div class="banner-ico">ℹ️</div><div><div class="banner-body">作物が配置されていません。マップタブで作物を配置してから解析してください。</div></div></div>';
   issues.forEach(p=>{html+=`<div class="banner danger"><div class="banner-ico">${p.icon}</div><div><div class="banner-title">${p.name}（${p.cells}マス）</div><div class="banner-body">必要な日当たり: ${p.req}<br>${p.detail||'配置エリアの日当たりが不足しています'}</div></div></div>`});
-  tallWarns.forEach(w=>{html+=`<div class="banner warn"><div class="banner-ico">⚠️</div><div><div class="banner-title">${w.tallDb.e}${w.tallDb.n}が${w.shadedDb.e}${w.shadedDb.n}の日当たりを妨げる可能性</div><div class="banner-body">${w.tallDb.n}（最大${w.tallDb.height_cm}cm）が太陽方向（${sunDir}）に対して${w.shadedDb.n}の北側に位置しています。配置を入れ替えるか、背の低い作物を北側に持ってくることを検討してください。</div></div></div>`});
-  adjBad.forEach(p=>{html+=`<div class="banner warn"><div class="banner-ico">🔴</div><div><div class="banner-title">${p.da.e}${p.da.n} × ${p.db.e}${p.db.n} が隣接</div><div class="banner-body">この組み合わせは相性が良くありません。病害の共通リスクや生育の競合が起きる可能性があります。離して植えることをおすすめします。</div></div></div>`});
+  tallWarns.forEach(w=>{html+=`<div class="banner warn"><div class="banner-ico">⚠️</div><div><div class="banner-title">${w.tallDb.e}${w.tallDb.n}が${w.shadedDb.e}${w.shadedDb.n}の日当たりを妨げる可能性</div><div class="banner-body">${w.tallDb.n}（最大${w.tallDb.height_cm}cm）の影響。配置を入れ替えるか、背の低い作物を日陰側に持ってくることを検討してください。</div></div></div>`});
+  adjBad.forEach(p=>{html+=`<div class="banner warn"><div class="banner-ico">🔴</div><div><div class="banner-title">${p.da.e}${p.da.n} × ${p.db.e}${p.db.n} が隣接</div><div class="banner-body">この組み合わせは相性が良くありません。離して植えることをおすすめします。</div></div></div>`});
   goods.forEach(p=>{html+=`<div class="banner ok"><div class="banner-ico">${p.icon}</div><div><div class="banner-title">${p.name}（${p.cells}マス）</div><div class="banner-body">日当たりは問題ありません。必要: ${p.req}</div></div></div>`});
   adjGood.forEach(p=>{html+=`<div class="banner ok"><div class="banner-ico">💚</div><div><div class="banner-title">${p.da.e}${p.da.n} × ${p.db.e}${p.db.n} が隣接</div><div class="banner-body">コンパニオンプランツとして相性の良い組み合わせです！</div></div></div>`});
   if(!html)html='<div class="banner ok"><div class="banner-ico">✅</div><div class="banner-body">特に問題は見つかりませんでした。</div></div>';
@@ -893,6 +1105,19 @@ function showTab(tab){
   if(tab==='home')renderHome();else if(tab==='todo')renderTodo();else if(tab==='weather')renderWdetail();else if(tab==='map')setTimeout(()=>drawMap(),50);else if(tab==='suggest')renderSuggest();else if(tab==='catalog')renderCatalog();else if(tab==='agrochem')renderAgro();
 }
 
+// SVGコンパスをタップ/クリックして角度設定
+function compassClick(e){
+  const svg=document.getElementById('compassSvg');
+  const rect=svg.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const dx=(e.clientX||e.touches?.[0]?.clientX||cx)-cx;
+  const dy=(e.clientY||e.touches?.[0]?.clientY||cy)-cy;
+  // atan2でクリック角度を算出（0=右=東、反時計回り正）
+  // コンパスは上=北(0°)なので変換
+  const angle=Math.round((Math.atan2(dy,dx)*180/Math.PI+90+360)%360);
+  setSunAngle(angle);
+}
+
 // パネル開閉 + スワイプで閉じる
 function openPanel(c){
   document.getElementById('panelContent').innerHTML=c;
@@ -937,6 +1162,7 @@ function closePanel(){
     saveData();
   }
   populateSampleMap();
+  updateCompassUI();
   loadWeather();
   renderHome();
   setTimeout(()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()},200);
