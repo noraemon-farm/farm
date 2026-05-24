@@ -80,7 +80,7 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 /* パネル */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:199;display:none}
 .overlay.on{display:block}
-.panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px;position:fixed;bottom:62px;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:200;max-height:84vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px;position:fixed;bottom:62px;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);z-index:200;max-height:calc(100vh - 62px - env(safe-area-inset-bottom));overflow-y:auto;box-shadow:var(--shadow-lg)}
 .panel.on{transform:translateY(0)}
 .panel-handle{width:38px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 14px}
 /* 作物 */
@@ -469,15 +469,64 @@ const COMP={tomato:{good:['basil','carrot','komatsuna'],bad:['potato','corn']},c
 const LIGHT_REQ={full:'終日日当たり必要',half:'半日以上必要',part:'半日以下でも育つ'};
 const LIGHT_SCORE={full:4,half:3,part:2,shade:1,null:2};
 
-// 育てている作物
-let myCrops=[
-  {id:1,key:'tomato',variety:'ミニトマト（アイコ）',plantDate:new Date(new Date()-38*864e5),status:'active',photos:[],plantWeather:null},
-  {id:2,key:'potato',variety:'男爵',plantDate:new Date(new Date()-82*864e5),status:'active',photos:[],plantWeather:null},
-  {id:3,key:'corn',variety:'ゴールドラッシュ',plantDate:new Date(new Date()-22*864e5),status:'active',photos:[],plantWeather:null},
-  {id:4,key:'spinach',variety:'',plantDate:new Date(new Date()-18*864e5),status:'active',photos:[],plantWeather:null},
-];
+// ══ デフォルトサンプルデータ ══
+function makeDefaultCrops(){
+  const now=Date.now();
+  return[
+    {id:1,key:'tomato',variety:'ミニトマト（アイコ）',plantDate:new Date(now-38*864e5),status:'active',photos:[],plantWeather:null},
+    {id:2,key:'potato',variety:'男爵',plantDate:new Date(now-82*864e5),status:'active',photos:[],plantWeather:null},
+    {id:3,key:'corn',variety:'ゴールドラッシュ',plantDate:new Date(now-22*864e5),status:'active',photos:[],plantWeather:null},
+    {id:4,key:'spinach',variety:'',plantDate:new Date(now-18*864e5),status:'active',photos:[],plantWeather:null},
+  ];
+}
+
+// 育てている作物・農薬（localStorage と共有するので早めに宣言）
+let myCrops=makeDefaultCrops();
 let nid=5,todoChecked={},excluded=[],favorites=['tomato','potato','corn'];
+let userAgro=[],agroCat='all';
 let photoTarget=null,pvCropId=null,pvIdx=null;
+
+// ══ localStorage 保存・読み込み ══
+const LS_KEY='noraemon_v1';
+
+function saveData(){
+  try{
+    const payload={
+      myCrops:myCrops.map(c=>({
+        ...c,
+        plantDate:c.plantDate instanceof Date?c.plantDate.toISOString():c.plantDate,
+        endDate:c.endDate instanceof Date?c.endDate.toISOString():c.endDate,
+        photos:c.photos||[],
+        plantWeather:c.plantWeather||null,
+      })),
+      nid,todoChecked,excluded,favorites,userAgro
+    };
+    localStorage.setItem(LS_KEY,JSON.stringify(payload));
+  }catch(e){console.warn('保存失敗:',e)}
+}
+
+function loadData(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return false;
+    const data=JSON.parse(raw);
+    if(data.myCrops&&Array.isArray(data.myCrops)){
+      myCrops=data.myCrops.map(c=>({
+        ...c,
+        plantDate:new Date(c.plantDate),
+        endDate:c.endDate?new Date(c.endDate):undefined,
+        photos:c.photos||[],
+        plantWeather:c.plantWeather||null,
+      }));
+    }
+    if(typeof data.nid==='number')nid=data.nid;
+    if(data.todoChecked)todoChecked=data.todoChecked;
+    if(data.excluded)excluded=data.excluded;
+    if(data.favorites)favorites=data.favorites;
+    if(data.userAgro)userAgro=data.userAgro;
+    return true;
+  }catch(e){console.warn('読み込み失敗:',e);return false}
+}
 
 function dn(c){const db=DB[c.key];return db.n+(c.variety?`（${c.variety}）`:'')}
 function dsp(c){return Math.floor((TODAY-c.plantDate)/864e5)}
@@ -546,11 +595,16 @@ function futureTasks(){let ts=[];myCrops.filter(c=>c.status==='active').forEach(
 
 function tiHtml(t,small=false){
   const key=`${t.cid}-${t.d}`;const done=!!todoChecked[key];
-  const urgent=!done&&(t.overdue||t.daysUntil<=2);
-  let st=t.overdue?gm(t.t,t.oi||0):t.daysUntil===0?'今日がちょうど目安です':t.daysUntil<=2?`あと${t.daysUntil}日、もうすぐです`:`あと${t.daysUntil}日`;
+  const du=Number(t.daysUntil);
+  const urgent=!done&&(t.overdue||du<=2);
+  let st;
+  if(t.overdue){st=gm(t.t,t.oi||0);}
+  else if(du===0){st='今日がちょうど目安です';}
+  else if(du<=2){st=`あと${du}日、もうすぐです`;}
+  else{st=`あと${du}日`;}
   return`<div class="ti"><div class="ti-circle ${done?'done':''}" onclick="chk('${key}')">${done?'<i class="ti ti-check"></i>':''}</div><div class="ti-body"><div class="ti-task">${t.emoji} ${t.t}</div><div class="ti-crop ${urgent?'ti-gentle':''}">${t.cname} · ${st}</div>${!small?`<div style="font-size:10px;color:var(--tx3);margin-top:1px">${t.n}</div>`:''}${!small&&t.h?`<div class="ti-hint">🌿 ${t.h}</div>`:''}${!small?warnHtml(t.t):''}</div></div>`;
 }
-function chk(k){todoChecked[k]=!todoChecked[k];renderHome();renderTodo()}
+function chk(k){todoChecked[k]=!todoChecked[k];saveData();renderHome();renderTodo()}
 
 function buildGantt(container,cropList,totalDays=120,todayOff=30){
   const months=[];for(let i=0;i<5;i++){const d=new Date(TODAY.getFullYear(),TODAY.getMonth()+i-1,1);months.push(d.getMonth()+1+'月');}
@@ -579,8 +633,8 @@ function renderSuggest(){
   document.getElementById('excludeChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${excluded.includes(k)?'exc':''}" onclick="togExc('${k}')">${db.e} ${db.n}</span>`;}).join('');
   document.getElementById('favoriteChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${favorites.includes(k)?'sel':''}" onclick="togFav('${k}')">${db.e} ${db.n}</span>`;}).join('');
 }
-function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);renderSuggest()}
-function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);renderSuggest()}
+function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);saveData();renderSuggest()}
+function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);saveData();renderSuggest()}
 function renderCatalog(){document.getElementById('catalogGrid').innerHTML=Object.entries(DB).map(([k,v])=>`<div class="cat-card" onclick="showCropInfo('${k}')"><div style="font-size:24px;margin-bottom:4px">${v.e}</div><div style="font-size:12px;font-weight:700;margin-bottom:2px">${v.n}</div><div style="font-size:10px;color:var(--tx3)">${(v.season||[]).map(m=>m+1+'月').join('・')}<br>約${v.days}日 · ${v.space}</div></div>`).join('');}
 function showFullGantt(){const all=[...myCrops.filter(c=>c.status==='active'),...myCrops.filter(c=>c.status==='archived')];buildGantt(document.getElementById('fullGanttInner'),all,150,35);document.getElementById('ganttModal').style.display='block';}
 
@@ -614,6 +668,7 @@ function showEnd(id){
 function endCrop(id,reason){
   const crop=myCrops.find(c=>c.id===id);const db=DB[crop.key];
   crop.status='archived';crop.endDate=new Date();
+  saveData();
   const em={harvest:'🌾',season:'🍂',disease:'😔',other:'📦'};
   closePanel();
   setTimeout(()=>openPanel(`<div style="font-size:36px;text-align:center;margin-bottom:8px">${em[reason]}</div><div style="font-size:16px;font-weight:700;text-align:center;margin-bottom:14px">${db.n}をアーカイブしました</div><div class="sec">のらエモンからひとこと</div><div style="font-size:12px;line-height:1.7;background:var(--al);border-radius:var(--r);padding:11px;color:#633806;margin-bottom:14px">お疲れさまでした！${db.end}</div><button class="btn btn-p btn-bl" onclick="closePanel();renderHome()">ホームに戻る</button>`),80);
@@ -633,15 +688,16 @@ function startAdd(k){closePanel();setTimeout(()=>showAddCrop(k),80)}
 function addCrop(){
   const k=document.getElementById('nk').value;const v=(document.getElementById('nv').value||'').trim();const dv=document.getElementById('nd').value;const[y,m,d]=dv.split('-').map(Number);
   myCrops.push({id:nid++,key:k,variety:v,plantDate:new Date(y,m-1,d),status:'active',photos:[],plantWeather:null});
+  saveData();
   closePanel();showTab('home');
 }
 
 // 写真
 function trigPhoto(cid){photoTarget=cid;document.getElementById('photoInput').click()}
-function onPhotoSelected(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const crop=myCrops.find(c=>c.id===photoTarget);if(!crop.photos)crop.photos=[];const d=new Date();crop.photos.push({dataUrl:ev.target.result,date:`${d.getMonth()+1}/${d.getDate()}`});showDetail(photoTarget);};reader.readAsDataURL(file);e.target.value=''}
+function onPhotoSelected(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const crop=myCrops.find(c=>c.id===photoTarget);if(!crop.photos)crop.photos=[];const d=new Date();crop.photos.push({dataUrl:ev.target.result,date:`${d.getMonth()+1}/${d.getDate()}`});saveData();showDetail(photoTarget);};reader.readAsDataURL(file);e.target.value=''}
 function openPV(cid,idx){const crop=myCrops.find(c=>c.id===cid);const p=crop.photos[idx];pvCropId=cid;pvIdx=idx;document.getElementById('pvImg').src=p.dataUrl;document.getElementById('pvMeta').textContent=`${dn(crop)} · ${p.date}`;document.getElementById('pv').style.display='flex'}
 function closePV(){document.getElementById('pv').style.display='none'}
-function delPV(){const crop=myCrops.find(c=>c.id===pvCropId);crop.photos.splice(pvIdx,1);closePV();showDetail(pvCropId)}
+function delPV(){const crop=myCrops.find(c=>c.id===pvCropId);crop.photos.splice(pvIdx,1);saveData();closePV();showDetail(pvCropId)}
 
 // ══════════════════════════════════════════════════════
 //  畑マップ
@@ -779,7 +835,7 @@ const PRESET_AGRO=[
   {id:'lime',name:'苦土石灰',brand:'各社共通',cat:'fertilizer',ingredient:'炭酸カルシウム・酸化マグネシウム（Ca・Mg）',effect:'土壌のpHを矯正（酸性→中性）し、カルシウムとマグネシウムを補給する。根の発育促進、病気に強い土壌づくりに必須。',crops:['ほうれん草','キャベツ','ブロッコリー','タマネギ','ほとんどの野菜'],dilution:'植付け2週間前に1㎡あたり100〜200g撒布して土壌混和。',preHarvest:'肥料のため制限なし',caution:'化成肥料と同時施用すると窒素が逃げる（アンモニアガス発生）ため、施用後2週間は化成肥料を混ぜないこと。',timing:'作物の植付け2週間以上前に土壌混和。ほうれん草は特に重要（ph6.5以上必要）。',stock:5000,unit:'g',stockMax:10000,own:false},
 ];
 
-let userAgro=[],agroCat='all';
+// userAgro は上部で既に宣言済み
 function allAgro(){return[...PRESET_AGRO,...userAgro]}
 function stockColor(s,m){if(m===0||s===0)return'#E24B4A';const p=s/m;if(p>0.5)return'var(--green)';if(p>0.2)return'var(--amber)';return'#E24B4A'}
 function stockLabel(s,u,m){if(s===0&&u!=='本')return'在庫なし';if(m===0)return`${s}${u}`;return`残${s}${u}（${Math.round(s/m*100)}%）`}
@@ -803,13 +859,14 @@ function showAgroDetail(id){
   const isBee=a.caution?.includes('ミツバチ'),isFish=a.caution?.includes('魚毒'),isStrong=a.caution?.includes('重要')||a.caution?.includes('絶対');
   openPanel(`<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="width:48px;height:48px;border-radius:12px;background:${cat.bg};display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">${cat.emoji}</div><div style="flex:1;min-width:0"><div style="font-size:17px;font-weight:700;margin-bottom:2px">${a.name}</div><div style="font-size:12px;color:var(--tx3)">${a.brand||'自己登録'}</div><span class="tag ${cat.tagClass}" style="margin-top:4px;display:inline-flex">${cat.label}</span></div></div>${a.stockMax>0?`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:12px;font-weight:700">在庫状況</span><span style="font-size:12px;font-weight:700;color:${stockColor(a.stock,a.stockMax)}">${stockLabel(a.stock,a.unit,a.stockMax)}</span></div><div class="stock-bar"><div class="stock-bar-fill" style="width:${sp}%;background:${stockColor(a.stock,a.stockMax)}"></div></div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${a.effect}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<button class="btn btn-d btn-bl" style="margin-top:12px" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>`:''}`);
 }
-function adjStock(id,dir){const a=allAgro().find(x=>(x.id||x.name)===id);if(!a)return;const step=Math.ceil((a.stockMax||100)*0.05)||1;a.stock=Math.max(0,Math.min(a.stockMax||9999,a.stock+dir*step));showAgroDetail(id);renderAgro()}
-function delAgro(id){if(!confirm('この農薬を削除しますか？'))return;userAgro=userAgro.filter(a=>(a.id||a.name)!==id);closePanel();renderAgro()}
+function adjStock(id,dir){const a=allAgro().find(x=>(x.id||x.name)===id);if(!a)return;const step=Math.ceil((a.stockMax||100)*0.05)||1;a.stock=Math.max(0,Math.min(a.stockMax||9999,a.stock+dir*step));saveData();showAgroDetail(id);renderAgro()}
+function delAgro(id){if(!confirm('この農薬を削除しますか？'))return;userAgro=userAgro.filter(a=>(a.id||a.name)!==id);saveData();closePanel();renderAgro()}
 function registerAgro(){
   const name=document.getElementById('f-name').value.trim();if(!name){alert('製品名を入力してください');return}
   const cropsRaw=document.getElementById('f-crops').value;const crops=cropsRaw?cropsRaw.split(/[,、，]/).map(s=>s.trim()).filter(Boolean):[];
   const stock=parseFloat(document.getElementById('f-stock').value)||0,unit=document.getElementById('f-unit').value.trim();
   userAgro.push({id:'user_'+Date.now(),name,brand:'自己登録',cat:document.getElementById('f-cat').value,ingredient:document.getElementById('f-ingredient').value.trim(),effect:document.getElementById('f-effect').value.trim(),crops,dilution:document.getElementById('f-dilution').value.trim(),preHarvest:document.getElementById('f-preharvest').value.trim(),caution:document.getElementById('f-caution').value.trim(),stock,unit,stockMax:stock*2||0,timing:'',registered:new Date().toISOString().slice(0,10),own:true});
+  saveData();
   ['f-name','f-ingredient','f-effect','f-crops','f-dilution','f-preharvest','f-caution','f-stock','f-unit'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   showTab('agrochem');setTimeout(()=>{const el=document.querySelector('[data-cat="own"]');if(el)setAgroCat('own',el)},100);
 }
@@ -836,12 +893,20 @@ function showTab(tab){
 function openPanel(c){document.getElementById('panelContent').innerHTML=c;document.getElementById('panel').classList.add('on');document.getElementById('overlay').classList.add('on')}
 function closePanel(){document.getElementById('panel').classList.remove('on');document.getElementById('overlay').classList.remove('on')}
 
-// 初期化
-populateSampleMap();
-loadWeather();
-renderHome();
-setTimeout(()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()},200);
-window.addEventListener('resize',()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()});
+// ══ 起動 ══
+(function init(){
+  // localStorageからデータ読み込み（なければデフォルトサンプルをそのまま使う）
+  const loaded=loadData();
+  if(!loaded){
+    // 初回起動時のみサンプルデータを保存
+    saveData();
+  }
+  populateSampleMap();
+  loadWeather();
+  renderHome();
+  setTimeout(()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()},200);
+  window.addEventListener('resize',()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()});
+})();
 </script>
 </body>
 </html>
