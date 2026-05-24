@@ -306,49 +306,58 @@ canvas{display:block;touch-action:none}
       <div class="map-wrap" id="mapWrap"><canvas id="mapCanvas"></canvas></div>
       <div id="mapSubOpts"></div>
       <div class="card">
-        <div style="font-size:11px;font-weight:700;margin-bottom:7px">☀️ 太陽の方向（地図上の向き）</div>
-        <!-- SVGコンパス -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-          <svg id="compassSvg" width="80" height="80" viewBox="0 0 100 100" style="flex-shrink:0;cursor:pointer" onclick="compassClick(event)">
-            <!-- 背景 -->
-            <circle cx="50" cy="50" r="46" fill="#F5F0E8" stroke="#D8D4CC" stroke-width="1.5"/>
-            <!-- 目盛りリング -->
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#E8E4DC" stroke-width=".5" stroke-dasharray="2 4"/>
-            <!-- 方位ラベル -->
-            <text x="50" y="12" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">北</text>
-            <text x="50" y="91" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">南</text>
-            <text x="91" y="51" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">東</text>
-            <text x="9" y="51" text-anchor="middle" dominant-baseline="middle" fill="#888" font-size="8" font-weight="bold">西</text>
-            <!-- 十字線（薄い） -->
-            <line x1="50" y1="15" x2="50" y2="85" stroke="#E0DCD4" stroke-width=".5"/>
-            <line x1="15" y1="50" x2="85" y2="50" stroke="#E0DCD4" stroke-width=".5"/>
-            <!-- 太陽矢印（JSで動く） -->
-            <line id="compassArrow" x1="50" y1="50" x2="50" y2="18" stroke="#E8920A" stroke-width="2.5" stroke-linecap="round"/>
-            <circle id="compassDot" cx="50" cy="18" r="4" fill="#E8920A"/>
-            <!-- 中心 -->
-            <text x="50" y="51" text-anchor="middle" dominant-baseline="middle" font-size="14">☀</text>
-          </svg>
+        <div style="font-size:11px;font-weight:700;margin-bottom:4px">🧭 地図の向き（上がどの方角か）</div>
+        <div style="font-size:10px;color:var(--tx3);margin-bottom:10px">マス目は固定。コンパスを回して「この地図の上がどっちを向いているか」を設定します。</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <!-- 回転コンパス：方位ラベルが回る -->
+          <div style="position:relative;width:84px;height:84px;flex-shrink:0">
+            <svg id="compassSvg" width="84" height="84" viewBox="0 0 100 100"
+              style="cursor:grab;touch-action:none;display:block"
+              id="compassSvg">
+              <!-- 固定：外枠 -->
+              <circle cx="50" cy="50" r="46" fill="#F5F0E8" stroke="#D8D4CC" stroke-width="1.5"/>
+              <!-- 固定：目盛りリング -->
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#E8E4DC" stroke-width=".6" stroke-dasharray="3 5"/>
+              <!-- 固定：十字線 -->
+              <line x1="50" y1="14" x2="50" y2="86" stroke="#DDD" stroke-width=".6"/>
+              <line x1="14" y1="50" x2="86" y2="50" stroke="#DDD" stroke-width=".6"/>
+              <!-- 回転グループ：方位ラベルが回る -->
+              <g id="compassLabels" transform="rotate(0,50,50)">
+                <!-- 北（回転するので↑方向が「北」） -->
+                <text x="50" y="11" text-anchor="middle" dominant-baseline="middle" fill="#E24B4A" font-size="9" font-weight="bold">北</text>
+                <text x="50" y="91" text-anchor="middle" dominant-baseline="middle" fill="#999" font-size="8">南</text>
+                <text x="91" y="51" text-anchor="middle" dominant-baseline="middle" fill="#999" font-size="8">東</text>
+                <text x="9" y="51" text-anchor="middle" dominant-baseline="middle" fill="#999" font-size="8">西</text>
+                <!-- 北を示す赤い三角 -->
+                <polygon points="50,15 46,26 54,26" fill="#E24B4A" opacity=".7"/>
+              </g>
+              <!-- 固定：中心点 -->
+              <circle cx="50" cy="50" r="3" fill="#888"/>
+            </svg>
+          </div>
           <div style="flex:1">
-            <div id="sunAngleLabel" style="font-size:11px;font-weight:700;margin-bottom:6px;color:var(--amber)">太陽方向: 180° (南)</div>
-            <input type="range" id="sunAngleSlider" min="0" max="359" value="180"
-              style="width:100%;accent-color:#E8920A"
-              oninput="setSunAngle(parseInt(this.value))"
-              onchange="setSunAngle(parseInt(this.value))">
-            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:2px"><span>北(0°)</span><span>東(90°)</span><span>南(180°)</span><span>西(270°)</span></div>
+            <div id="mapOrientLabel" style="font-size:11px;font-weight:700;margin-bottom:6px;color:var(--green)">地図の上 = 北（0°）</div>
+            <input type="range" id="mapOrientSlider" min="0" max="359" value="0"
+              style="width:100%;accent-color:var(--gm)"
+              oninput="setMapOrient(parseInt(this.value))"
+              onchange="setMapOrient(parseInt(this.value))">
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:2px">
+              <span>0°(北)</span><span>90°(東)</span><span>180°(南)</span><span>270°(西)</span>
+            </div>
           </div>
         </div>
-        <!-- クイック選択ボタン -->
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <button class="btn btn-sm" onclick="setSunAngle(0)"   style="font-size:10px;padding:3px 7px">北</button>
-          <button class="btn btn-sm" onclick="setSunAngle(45)"  style="font-size:10px;padding:3px 7px">北東</button>
-          <button class="btn btn-sm" onclick="setSunAngle(90)"  style="font-size:10px;padding:3px 7px">東</button>
-          <button class="btn btn-sm" onclick="setSunAngle(135)" style="font-size:10px;padding:3px 7px">南東</button>
-          <button class="btn btn-sm btn-p" onclick="setSunAngle(180)" style="font-size:10px;padding:3px 7px">南★</button>
-          <button class="btn btn-sm" onclick="setSunAngle(225)" style="font-size:10px;padding:3px 7px">南西</button>
-          <button class="btn btn-sm" onclick="setSunAngle(270)" style="font-size:10px;padding:3px 7px">西</button>
-          <button class="btn btn-sm" onclick="setSunAngle(315)" style="font-size:10px;padding:3px 7px">北西</button>
+        <!-- クイックボタン -->
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn btn-sm btn-p" onclick="setMapOrient(0)"   style="font-size:10px;padding:3px 8px">上=北</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(45)"  style="font-size:10px;padding:3px 8px">上=北北東</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(90)"  style="font-size:10px;padding:3px 8px">上=東</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(135)" style="font-size:10px;padding:3px 8px">上=南東</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(180)" style="font-size:10px;padding:3px 8px">上=南</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(225)" style="font-size:10px;padding:3px 8px">上=南西</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(270)" style="font-size:10px;padding:3px 8px">上=西</button>
+          <button class="btn btn-sm"       onclick="setMapOrient(315)" style="font-size:10px;padding:3px 8px">上=北西</button>
         </div>
-        <div style="font-size:10px;color:var(--tx3);margin-top:6px" id="sunDirLabel">南向き（良好）— スライダーや矢印をタップして自由に調整できます</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:6px">ドラッグまたはスライダーで方角を調整。コンパスの「北」が実際の北を指すように合わせてください。</div>
       </div>
       <div class="card">
         <div style="font-size:11px;font-weight:700;margin-bottom:7px">凡例</div>
@@ -1039,9 +1048,9 @@ function delPV(){const crop=myCrops.find(c=>c.id===pvCropId);crop.photos.splice(
 let COLS=10,ROWS=8;
 const cpx=()=>Math.floor((document.getElementById('mapWrap')?.clientWidth||330)/COLS);
 let mapGrid=[],mapUndo=[],mapTool='field',selCropKey='tomato',bedOrient='ns';
-// sunAngleDeg: 0=北, 90=東, 180=南, 270=西（地図上で「太陽はこの方角にある」）
-// デフォルト180=南（一般的な日本の庭）
-let sunAngleDeg=180,sunPaint='full',selObs='house',mapDragging=false;
+// mapOrientDeg: 地図の「上」がどの方角を向いているか（0=上が北、90=上が東、180=上が南…）
+// 日当たり解析では「南は常に南」なので、mapOrientDegから北方向グリッド座標を逆算する
+let mapOrientDeg=0,sunPaint='full',selObs='house',mapDragging=false;
 const OBSTACLES={house:{label:'家・建物',e:'🏠',color:'#607080',shadow:3},wall:{label:'塀・フェンス',e:'🧱',color:'#8A8070',shadow:1},tree:{label:'大きな木',e:'🌳',color:'#3B6D2A',shadow:2},fence:{label:'低フェンス',e:'🚧',color:'#A08050',shadow:1}};
 
 function initMapGrid(){mapGrid=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({type:null,crop:null,sun:null,obs:null,_shadow:false})))}
@@ -1053,7 +1062,6 @@ function resizeGrid(){
   const newROWS=parseInt(document.getElementById('rowsRange').value);
   document.getElementById('colsLbl').textContent=newCOLS;
   document.getElementById('rowsLbl').textContent=newROWS;
-  // 既存データをコピーしながら新グリッドを生成
   const newGrid=Array.from({length:newROWS},(_,r)=>
     Array.from({length:newCOLS},(_,c)=>{
       if(r<ROWS&&c<COLS) return{...mapGrid[r][c]};
@@ -1070,16 +1078,26 @@ function cellStroke(cell){if(cell.obs)return'#3A4550';if(cell.type==='field')ret
 const SUN_OV={full:'rgba(255,210,40,.38)',half:'rgba(255,210,40,.16)',part:'rgba(160,160,220,.16)',shade:'rgba(80,80,150,.22)'};
 const SUN_E={full:'☀️',half:'🌤',part:'⛅',shade:'🌥'};
 
-// 角度から影ベクトルを計算（太陽の反対方向に影が伸びる）
-// sunAngleDeg: 太陽の方角(0=北,90=東,180=南,270=西)
-// 影は太陽の反対 → shadowAngle = sunAngleDeg + 180
-function getShadowVecFromAngle(angle){
-  const shadowAngle=(angle+180)%360;
-  const rad=shadowAngle*Math.PI/180;
-  // グリッド座標系: 上=北(r減少), 右=東(c増加)
-  const dr=Math.round(Math.cos(rad));  // 北方向がr減少
-  const dc=Math.round(Math.sin(rad));  // 東方向がc増加
-  return[dr,dc];
+// 「南から北向きの影が伸びる」をグリッド座標に変換
+// mapOrientDeg=0なら地図の上=北 → 南からの影はグリッド上方(r減少)
+// mapOrientDeg=90なら地図の上=東 → 南は地図の左方向 → 影はr増加・c増加…
+// 「グリッド上で南がどの方向にあるか」= mapOrientDeg + 180
+function getShadowVec(){
+  // 南の方角（グリッド座標系）：mapOrientDegが地図の上=北なので、
+  // 「グリッドの上から見た南の方向角」= mapOrientDeg + 180
+  // 影は南から北へ伸びる（地図の上方向）
+  const northInGrid = mapOrientDeg; // 地図の上から見た「北」の角度
+  // 北向きへの影ベクトル（障害物の南側に影が落ちる）
+  // 地図の上=r減少方向。mapOrientDeg=0なら北=r減少、mapOrientDeg=90なら北=c減少
+  const rad = (northInGrid - 90) * Math.PI / 180; // CSS角度→数学角度変換
+  const dr = -Math.round(Math.sin((northInGrid)*Math.PI/180)); // 上=北方向のr成分
+  const dc =  Math.round(Math.cos((northInGrid)*Math.PI/180)); // 右=東方向のc成分... 
+  // 簡略化：北向きのグリッドベクトルを4方位に丸める
+  const northRad = northInGrid * Math.PI / 180;
+  const nr = -Math.round(Math.cos(northRad)); // 北=上=r減少
+  const nc =  Math.round(Math.sin(northRad)); // 北=右成分（東側）
+  // 影は障害物の北側に伸びる（=南から日が当たるから）
+  return[nr, nc];
 }
 
 function drawMap(){
@@ -1099,72 +1117,91 @@ function drawMap(){
     if(cell.crop&&!cell.obs){ctx.font=`${Math.floor(px*.5)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(DB[cell.crop]?.e||'🌱',x+px/2,y+px/2+1)}
     if(cell.sun&&!cell.crop&&!cell.obs&&px>=28){ctx.font=`${Math.floor(px*.27)}px serif`;ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillText(SUN_E[cell.sun],x+px-1,y+px-1)}
   }}
-  drawMapCompass(ctx,cv.width-28,28,20);
+  // 右上コンパス：mapOrientDegに合わせて方位ラベルを回転して描画
+  drawMapCompass(ctx, cv.width-28, 28, 20);
 }
 
 function drawMapCompass(ctx,cx,cy,r){
   ctx.save();
-  // 背景円
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();
   ctx.strokeStyle='#ccc';ctx.lineWidth=.8;ctx.stroke();
-  // 方位ラベル（固定）
-  const DIRS=[['北',0],['東',90],['南',180],['西',270]];
-  DIRS.forEach(([label,deg])=>{
-    const rad=deg*Math.PI/180 - Math.PI/2; // 0度=上(北)
-    const lx=cx+Math.cos(rad)*(r-6),ly=cy+Math.sin(rad)*(r-6);
-    ctx.fillStyle='#888';ctx.font='7px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(label,lx,ly);
+  // mapOrientDegだけ逆回転して描画（地図の上=北ならラベルは通常通り）
+  ctx.translate(cx,cy);
+  ctx.rotate(-mapOrientDeg*Math.PI/180);
+  // 方位ラベル
+  const dirs=[['北',0,'#E24B4A',true],['南',180,'#888',false],['東',90,'#888',false],['西',270,'#888',false]];
+  dirs.forEach(([lbl,deg,col,bold])=>{
+    const rad=(deg-90)*Math.PI/180;
+    const lx=Math.cos(rad)*(r-6),ly=Math.sin(rad)*(r-6);
+    ctx.fillStyle=col;
+    ctx.font=`${bold?'bold ':''}7px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lbl,lx,ly);
   });
-  // 太陽矢印（sunAngleDeg方向）
-  const sunRad=(sunAngleDeg-90)*Math.PI/180;
-  const ex=cx+Math.cos(sunRad)*(r-9),ey=cy+Math.sin(sunRad)*(r-9);
-  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(ex,ey);
-  ctx.strokeStyle='#E8920A';ctx.lineWidth=2;ctx.stroke();
-  // 先端に丸
-  ctx.beginPath();ctx.arc(ex,ey,3,0,Math.PI*2);
-  ctx.fillStyle='#E8920A';ctx.fill();
-  // 太陽マーク（中心）
-  ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText('☀',cx,cy);
+  // 北三角
+  ctx.beginPath();ctx.moveTo(0,-(r-8));ctx.lineTo(-3,-(r-14));ctx.lineTo(3,-(r-14));
+  ctx.closePath();ctx.fillStyle='#E24B4A';ctx.fill();
   ctx.restore();
 }
 
-// コンパスUI の更新
-function updateCompassUI(){
-  const el=document.getElementById('compassDial');if(!el)return;
-  const sliderEl=document.getElementById('sunAngleSlider');if(sliderEl)sliderEl.value=sunAngleDeg;
-  const lblEl=document.getElementById('sunAngleLabel');if(lblEl){
-    const dirs=[[0,'北'],[22.5,'北北東'],[45,'北東'],[67.5,'東北東'],[90,'東'],[112.5,'東南東'],[135,'南東'],[157.5,'南南東'],[180,'南'],[202.5,'南南西'],[225,'南西'],[247.5,'西南西'],[270,'西'],[292.5,'西北西'],[315,'北西'],[337.5,'北北西'],[360,'北']];
-    const closest=dirs.reduce((a,b)=>Math.abs(b[0]-sunAngleDeg)<Math.abs(a[0]-sunAngleDeg)?b:a);
-    lblEl.textContent=`太陽方向: ${sunAngleDeg}° (${closest[1]})`;
+// 地図の向きを設定（mapOrientDeg = 地図の上がどの方角か）
+function setMapOrient(deg){
+  mapOrientDeg=(deg+360)%360;
+  // スライダー同期
+  const sl=document.getElementById('mapOrientSlider');if(sl)sl.value=mapOrientDeg;
+  // SVGコンパス回転（ラベルグループを回転）
+  const g=document.getElementById('compassLabels');if(g)g.setAttribute('transform',`rotate(${-mapOrientDeg},50,50)`);
+  // ラベル更新
+  const lbl=document.getElementById('mapOrientLabel');if(lbl){
+    const dirs=[[0,'北'],[22,'北北東'],[45,'北東'],[68,'東北東'],[90,'東'],[112,'東南東'],[135,'南東'],[158,'南南東'],[180,'南'],[202,'南南西'],[225,'南西'],[248,'西南西'],[270,'西'],[292,'西北西'],[315,'北西'],[338,'北北西']];
+    const closest=dirs.reduce((a,b)=>Math.abs(b[0]-mapOrientDeg)<Math.abs(a[0]-mapOrientDeg)?b:a);
+    lbl.textContent=`地図の上 = ${closest[1]}（${mapOrientDeg}°）`;
   }
-  // SVGコンパスを更新
-  const svgEl=document.getElementById('compassSvg');if(svgEl){
-    const rad=(sunAngleDeg-90)*Math.PI/180;
-    const x=50+Math.cos(rad)*32,y=50+Math.sin(rad)*32;
-    const arrowEl=document.getElementById('compassArrow');if(arrowEl){
-      arrowEl.setAttribute('x2',x.toFixed(1));arrowEl.setAttribute('y2',y.toFixed(1));
-    }
-    const dotEl=document.getElementById('compassDot');if(dotEl){
-      dotEl.setAttribute('cx',x.toFixed(1));dotEl.setAttribute('cy',y.toFixed(1));
-    }
-  }
+  drawMap();
 }
 
-function setSunAngle(deg){
-  sunAngleDeg=(deg+360)%360;
-  updateCompassUI();
-  drawMap();
-  // ラベル更新
-  const lbl=document.getElementById('sunDirLabel');if(lbl){
-    const qual=sunAngleDeg>=157&&sunAngleDeg<=203?'（良好）':sunAngleDeg>=0&&sunAngleDeg<=45||sunAngleDeg>=315?'（日当たり少）':'';
-    lbl.textContent=`太陽方向 ${sunAngleDeg}°${qual}`;
+// 互換用（古いコードから呼ばれる場合）
+function setSunAngle(deg){setMapOrient(deg)}
+function setSunDir(d){const m={N:0,NE:45,E:90,SE:135,S:180,SW:225,W:270,NW:315};setMapOrient(m[d]??0)}
+function updateCompassUI(){setMapOrient(mapOrientDeg)}
+
+// SVGコンパスのドラッグ操作
+(function setupCompassDrag(){
+  let dragging=false,startAngle=0,startOrient=0;
+  function getAngle(e,el){
+    const rect=el.getBoundingClientRect();
+    const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+    const ex=e.touches?e.touches[0].clientX:e.clientX;
+    const ey=e.touches?e.touches[0].clientY:e.clientY;
+    return Math.atan2(ey-cy,ex-cx)*180/Math.PI+90;
   }
-}
+  function onStart(e){
+    const el=document.getElementById('compassSvg');if(!el)return;
+    dragging=true;startAngle=getAngle(e,el);startOrient=mapOrientDeg;
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!dragging)return;
+    const el=document.getElementById('compassSvg');if(!el)return;
+    const a=getAngle(e,el);
+    const diff=a-startAngle;
+    setMapOrient(Math.round((startOrient+diff+360)%360));
+    e.preventDefault();
+  }
+  function onEnd(){dragging=false;}
+  document.addEventListener('DOMContentLoaded',()=>{
+    const el=document.getElementById('compassSvg');if(!el)return;
+    el.addEventListener('mousedown',onStart);
+    el.addEventListener('touchstart',onStart,{passive:false});
+  });
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onEnd);
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
+})();
 
 function clearMap(){if(!confirm('マップをリセットしますか？'))return;initMapGrid();mapUndo=[];drawMap()}
-function getShadowVec(){return getShadowVecFromAngle(sunAngleDeg)}
 
 function mapCellFrom(e,cv){const rect=cv.getBoundingClientRect();const px=cpx();const sx=cv.width/rect.width,sy=cv.height/rect.height;const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;const col=Math.floor((cx-rect.left)*sx/px),row=Math.floor((cy-rect.top)*sy/px);if(col<0||col>=COLS||row<0||row>=ROWS)return null;return{row,col}}
 function applyMapTool(r,c){const cell=mapGrid[r][c];if(mapTool==='field'){cell.type='field';cell.obs=null}else if(mapTool==='bed'){cell.type=`bed_${bedOrient}`;cell.obs=null}else if(mapTool==='path'){cell.type='path';cell.obs=null;cell.crop=null}else if(mapTool==='crop'){if(cell.type&&!cell.obs)cell.crop=selCropKey}else if(mapTool==='obstacle'){cell.obs=selObs;cell.crop=null}else if(mapTool==='sunpaint'){if(cell.type&&!cell.obs)cell.sun=sunPaint}else if(mapTool==='erase'){cell.type=null;cell.crop=null;cell.sun=null;cell.obs=null;cell._shadow=false}}
@@ -1240,7 +1277,7 @@ function saveMap(name){
       sun:cell.sun||null,
       obs:cell.obs||null,
     }))),
-    COLS,ROWS,sunAngleDeg,name:n,savedAt:new Date().toISOString()
+    COLS,ROWS,mapOrientDeg,name:n,savedAt:new Date().toISOString()
   };
   localStorage.setItem(MAP_LS_PREFIX+n,JSON.stringify(payload));
   alert(`「${n}」として保存しました`);
@@ -1257,7 +1294,7 @@ function loadMap(name){
     document.getElementById('colsLbl').textContent=COLS;
     document.getElementById('rowsLbl').textContent=ROWS;
     mapGrid=data.grid.map(row=>row.map(cell=>({...cell,_shadow:false})));
-    if(typeof data.sunAngleDeg==='number')setSunAngle(data.sunAngleDeg);
+    if(typeof data.mapOrientDeg==='number')setSunAngle(data.mapOrientDeg);
     currentMapName=name;
     mapUndo=[];
     drawMap();
