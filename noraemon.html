@@ -988,8 +988,7 @@ ${db.caution?'注意事項：'+db.caution:''}
     respEl.innerHTML=`
       <div style="background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:12px 13px;margin-top:4px">
         <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">🌱 のらエモンより</div>
-        <div style="font-size:13px;line-height:1.7;color:var(--tx)">${text.replace(/
-/g,'<br>')}</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--tx)">${text.replace(/\n/g,'<br>')}</div>
       </div>`;
   }catch(e){
     respEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ 通信エラーが発生しました。インターネット接続を確認してください。</div>';
@@ -1363,9 +1362,6 @@ function setBedOrient(o){bedOrient=o;renderMapSubOpts()}
 function selMapCrop(k){selCropKey=k;renderMapSubOpts()}
 function selObstacle(k){selObs=k;renderMapSubOpts()}
 function setSunPaint2(m){sunPaint=m;renderMapSubOpts()}
-
-// 古い setSunDir は新しい setSunAngle に移行（HTMLのコンパスボタンから呼ばれる場合の互換）
-function setSunDir(d){const m={N:0,NE:45,E:90,SE:135,S:180,SW:225,W:270,NW:315};setSunAngle(m[d]??180)}
 
 function analyzeMap(){
   saveMapUndo();
