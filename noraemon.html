@@ -486,23 +486,23 @@ let wdata=null;
 
 // ── 作物DB（全17種） ──────────────────────────────────
 const DB={
-  tomato:{n:'トマト',e:'🍅',c:'#D85A30',cl:'#FAECE7',season:[3,4,5],days:90,space:'50cm',light:'full',height_cm:150,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'やや弱',wi:'弱',varieties:['ミニトマト','中玉トマト','大玉トマト','アイコ','桃太郎','フルティカ','千果'],tasks:[{d:7,t:'芽かき',n:'第1花房下の脇芽を除去',h:'第1花房の花が咲き始めたら'},{d:14,t:'誘引',n:'支柱に8の字で誘引',h:'草丈30〜40cmになったら'},{d:30,t:'追肥1回目',n:'化成肥料を株元から20cm離して',h:'第1花房が結実しはじめたら'},{d:55,t:'追肥2回目',n:'窒素過多に注意',h:'実が色づきはじめたら'},{d:90,t:'収穫',n:'ヘタ付近が赤くなったら',h:'果実全体が真っ赤に色づいたら'}],end:'連作は3〜4年あけること。ナス科を避けて輪作。',plant:'完熟堆肥2kg/㎡、化成肥料100g/㎡を元肥。'},
-  cucumber:{n:'キュウリ',e:'🥒',c:'#3B6D11',cl:'#EAF3DE',season:[4,5,6],days:60,space:'60cm',light:'full',height_cm:200,ph:'5.5-6.5',tmp:'23-28℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['夏すずみ','シャキット','節成りきゅうり','四葉きゅうり'],tasks:[{d:5,t:'支柱立て',n:'定植後すぐ支柱とネット',h:'定植直後に'},{d:25,t:'追肥',n:'液肥を週1回',h:'一番果がついたら'},{d:50,t:'収穫',n:'20cm前後が適期',h:'実が鉛筆より太くなったら'}],end:'連作は2〜3年あけること。',plant:'株間60cm以上。元肥は少なめ。'},
-  eggplant:{n:'ナス',e:'🍆',c:'#533AB7',cl:'#EEEDFE',season:[4,5],days:120,space:'60cm',light:'full',height_cm:100,ph:'6.0-6.5',tmp:'27-32℃',ht:'畝高15cm',sh:'弱',wi:'中',varieties:['千両2号','長ナス','水ナス','米ナス'],tasks:[{d:10,t:'支柱立て',n:'3本仕立てが基本',h:'苗が根付いたら'},{d:15,t:'芽かき・誘引',n:'一番花下の脇芽を2本残す',h:'一番花が開花したら'},{d:65,t:'収穫',n:'10〜12cmが適期',h:'ガクのトゲが鋭く立っていたら'}],end:'連作は3〜4年。ナス科全体含む。',plant:'深耕（40cm）+完熟堆肥3kg/㎡。'},
-  pepper:{n:'ピーマン',e:'🫑',c:'#639922',cl:'#EAF3DE',season:[4,5],days:100,space:'50cm',light:'full',height_cm:80,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['カリフォルニアワンダー','ニューエース','パプリカ（赤）','パプリカ（黄）'],tasks:[{d:10,t:'支柱立て',n:'2〜3本支柱で倒伏防止',h:'苗が落ち着いたら'},{d:70,t:'収穫',n:'実が5〜6cmに育ったら',h:'緑色の未熟果で収穫'}],end:'連作は3〜4年。ナス科全体含む。',plant:'十分な完熟堆肥と元肥。'},
-  lettuce:{n:'レタス',e:'🥬',c:'#0F6E56',cl:'#E1F5EE',season:[2,3,8,9],days:60,space:'30cm',light:'half',height_cm:30,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['玉レタス','サニーレタス','ロメインレタス','バターヘッド'],tasks:[{d:10,t:'間引き',n:'本葉2〜3枚で1株に',h:'本葉が2〜3枚になったら'},{d:60,t:'収穫',n:'結球したら早めに',h:'頭を押して固く締まっていたら'}],end:'連作障害は少ない。pHの維持が重要。',plant:'株間25〜30cm。浅めに植える。'},
-  carrot:{n:'ニンジン',e:'🥕',c:'#D85A30',cl:'#FAECE7',season:[3,7,8],days:110,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.5',tmp:'15-20℃',ht:'深耕畝',sh:'弱',wi:'強',varieties:['黒田五寸','ベータリッチ','向陽2号'],tasks:[{d:10,t:'間引き1回目',n:'本葉1〜2枚で株間3cm',h:'本葉が1〜2枚になったら'},{d:35,t:'間引き3回目・土寄せ',n:'株間10〜12cmに',h:'本葉7〜8枚になったら'},{d:110,t:'収穫',n:'直径2〜3cmで収穫',h:'根の肩が直径2cm以上になったら'}],end:'連作は1〜2年あけること。',plant:'石を除いた深い軟土が必須（30cm以上）。'},
-  spinach:{n:'ほうれん草',e:'🌿',c:'#1D9E75',cl:'#E1F5EE',season:[2,3,8,9,10],days:50,space:'5cm',light:'half',height_cm:25,ph:'6.5-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',varieties:['アクティブ','サラダほうれん草','日本ほうれん草'],tasks:[{d:14,t:'間引き',n:'本葉2〜3枚で株間5cm',h:'本葉が2〜3枚になったら'},{d:50,t:'収穫',n:'草丈20〜25cmで収穫',h:'草丈が20cm以上になったら'}],end:'酸性土壌が最も嫌い。収穫後すぐ石灰をまく。',plant:'石灰を十分に施用（ph6.5以上）。'},
-  potato:{n:'ジャガイモ',e:'🥔',c:'#888780',cl:'#F1EFE8',season:[2,3],days:100,space:'30cm',light:'full',height_cm:70,ph:'5.5-6.5',tmp:'15-22℃',ht:'畝高20cm',sh:'弱',wi:'中',caution:'⚠️ 芽と緑化した部分は有毒。連作は3〜4年あける。',varieties:['男爵','メークイン','キタアカリ','とうや','アンデス赤','インカのめざめ'],tasks:[{d:21,t:'芽かき',n:'1株あたり2〜3芽に間引く',h:'芽が5〜10cmに伸びたら'},{d:30,t:'追肥・土寄せ1回目',n:'草丈20〜25cmになったら',h:'草丈が20〜25cmになったら'},{d:100,t:'収穫',n:'晴れの日に掘り上げ乾燥',h:'茎葉が完全に枯れたら収穫適期'}],end:'連作は3〜4年あけること。収穫後は深耕と石灰でph調整。',plant:'種芋を切り、切り口を草木灰で処理して1〜2日乾燥させてから植える。'},
-  sweetpotato:{n:'サツマイモ',e:'🍠',c:'#993C1D',cl:'#FAECE7',season:[4,5],days:130,space:'30cm',light:'full',height_cm:40,ph:'5.5-6.5',tmp:'25-30℃',ht:'高畝30cm',sh:'弱',wi:'中',caution:'⚠️ 窒素肥料のやりすぎはつるぼけの原因。元肥は少なめに。',varieties:['紅あずま','鳴門金時','安納芋','シルクスイート','べにはるか'],tasks:[{d:50,t:'つる返し1回目',n:'地面に根を張ったつるをめくり返す',h:'つるが1m以上伸びてきたら'},{d:130,t:'収穫',n:'霜が降りる前に掘り上げる',h:'茎葉が黄化・枯れ始めたら'}],end:'連作は2〜3年あけること。収穫後のつるや残渣はすぐ処分。',plant:'畝高30cm以上が必須。苗は斜め45度に挿す。元肥少なめ。'},
-  corn:{n:'トウモロコシ',e:'🌽',c:'#BA7517',cl:'#FAEEDA',season:[4,5],days:90,space:'30cm',light:'full',height_cm:200,ph:'6.0-6.8',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'強',caution:'⚠️ 必ず2列以上まとめて植えること（風媒花のため）。アワノメイガに注意。',varieties:['ゴールドラッシュ','ピーターコーン','甘々娘','もちとうもろこし'],tasks:[{d:20,t:'追肥・土寄せ',n:'草丈30〜40cmになったら',h:'草丈30〜40cmになったら'},{d:55,t:'受粉期・アワノメイガ防除',n:'絹糸が出たら受粉開始',h:'先端に雄穂が出てきたら'},{d:90,t:'収穫',n:'朝早く収穫しすぐ食べるか冷蔵を',h:'粒を押すと白い汁が出たら食べ頃'}],end:'収穫後はすぐに株を撤収（アワノメイガの越冬防止）。',plant:'2列以上まとめて植えること（風媒花のため）。株間30cm。'},
-  pumpkin:{n:'カボチャ',e:'🎃',c:'#D85A30',cl:'#FAEEDA',season:[4,5],days:100,space:'100cm',light:'full',height_cm:50,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝〜高畝',sh:'弱',wi:'中',caution:'⚠️ つるが広範囲に伸びる（1株で1〜2㎡必要）。',varieties:['栗かぼちゃ','バターナッツ','坊ちゃんかぼちゃ'],tasks:[{d:45,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:90,t:'収穫',n:'果梗がコルク化したら',h:'ヘたが茶色くコルク状になったら'}],end:'連作は3〜4年。ウリ科（キュウリ・スイカ等）も含む。',plant:'株間100cm以上。元肥は少なめ。'},
-  watermelon:{n:'スイカ',e:'🍉',c:'#2D8B4E',cl:'#E2F5EA',season:[4,5],days:100,space:'150cm',light:'full',height_cm:40,ph:'6.0-6.5',tmp:'25-30℃',ht:'高畝',sh:'弱',wi:'弱',caution:'⚠️ 広大なスペースが必要（1株で2〜3㎡）。連作は5〜6年あける。',varieties:['大玉スイカ','小玉スイカ','黒皮スイカ','黄色スイカ'],tasks:[{d:35,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:100,t:'収穫',n:'着果から35〜45日後が目安',h:'叩いてボンボンと低い音がしたら'}],end:'連作は5〜6年あけること（ウリ科の中で最も長い）。',plant:'高畝（排水重要）。株間150cm以上。接ぎ木苗推奨。'},
-  edamame:{n:'枝豆',e:'🫛',c:'#639922',cl:'#EAF3DE',season:[4,5,6],days:75,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝',sh:'弱',wi:'中',varieties:['茶豆','黒豆（枝豆用）','湯あがり娘','だだちゃ豆'],tasks:[{d:25,t:'土寄せ・追肥',n:'倒伏防止に株元に土寄せ',h:'草丈が20〜30cmになったら'},{d:75,t:'収穫',n:'莢を触ると豆の粒がわかるようになったら',h:'収穫後はすぐ茹でる'}],end:'連作は2〜3年あけること。根粒菌で土が豊かになる。',plant:'根粒菌がつくため元肥の窒素は少なめに。'},
-  onion:{n:'タマネギ',e:'🧅',c:'#BA7517',cl:'#FAEEDA',season:[9,10],days:200,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'15-20℃',ht:'平畝〜低畝',sh:'弱',wi:'強',caution:'⚠️ 秋に苗を植え付け、翌年初夏に収穫する長期作物。とう立ちに注意。',varieties:['泉州黄','O・P黄','ネオアース','赤タマネギ'],tasks:[{d:90,t:'追肥2回目',n:'2〜3月ごろの追肥が球の肥大に重要',h:'春になり葉の生長が再開したら'},{d:200,t:'収穫',n:'葉が倒れたら収穫',h:'葉の2/3以上が倒れたら収穫適期'}],end:'連作は3〜4年あけること。ネギ科全体（ネギ・ニラ等）も含む。',plant:'秋（9〜10月）に苗を定植。株間15cm。深く植えすぎると球が太らない。'},
-  broccoli:{n:'ブロッコリー',e:'🥦',c:'#1D9E75',cl:'#E1F5EE',season:[8,9],days:90,space:'50cm',light:'half',height_cm:60,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ アオムシが最大の天敵。定植直後から防虫ネットで覆うのが効果的。',varieties:['緑嶺','ハイツ','グリーンビューティー','スティックブロッコリー'],tasks:[{d:21,t:'追肥1回目',n:'化成肥料を株元から10cm離して',h:'本葉6〜7枚になったら'},{d:90,t:'収穫',n:'花蕾が締まって濃緑色の間に',h:'花蕾が12〜15cmでしっかり締まっているうちに'}],end:'連作は2〜3年。アブラナ科全体含む。',plant:'株間50cm以上。定植直後から防虫ネットを。'},
-  komatsuna:{n:'小松菜',e:'🥬',c:'#3B6D11',cl:'#EAF3DE',season:[3,4,8,9,10,11],days:40,space:'10cm',light:'part',height_cm:25,ph:'6.0-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',caution:'⚠️ アオムシ・コナガに注意。防虫ネット推奨。',varieties:['楽天','黒みすぎ','きよすみ','ミニ小松菜'],tasks:[{d:20,t:'間引き2回目',n:'株間8〜10cmに',h:'本葉3〜4枚になったら'},{d:40,t:'収穫',n:'草丈20〜25cmで株ごと引き抜く',h:'草丈20cm以上になったら'}],end:'連作は2年あけること。アブラナ科全体含む。',plant:'直播き（条まき）が基本。薄く土をかけ不織布で乾燥防止。'},
-  basil:{n:'バジル',e:'🌿',c:'#0F6E56',cl:'#E1F5EE',season:[4,5,6],days:60,space:'20cm',light:'full',height_cm:50,ph:'6.0-7.0',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'中',varieties:['スイートバジル','ジェノベーゼ','レモンバジル'],tasks:[{d:14,t:'摘心',n:'本葉4〜6枚で頂点を摘心',h:'本葉が4〜6枚になったら'},{d:35,t:'花芽摘み',n:'花が咲く前に摘み取る',h:'茎の先端に花穂が見えたら'}],end:'一年草。残渣はコンポストへ。',plant:'霜が終わった後に定植。'},
+  tomato:{n:'トマト',e:'🍅',c:'#D85A30',cl:'#FAECE7',germDays:7,germTempMin:18,season:[3,4,5],days:90,space:'50cm',light:'full',height_cm:150,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'やや弱',wi:'弱',varieties:['ミニトマト','中玉トマト','大玉トマト','アイコ','桃太郎','フルティカ','千果'],tasks:[{d:7,t:'芽かき',n:'第1花房下の脇芽を除去',h:'第1花房の花が咲き始めたら'},{d:14,t:'誘引',n:'支柱に8の字で誘引',h:'草丈30〜40cmになったら'},{d:30,t:'追肥1回目',n:'化成肥料を株元から20cm離して',h:'第1花房が結実しはじめたら'},{d:55,t:'追肥2回目',n:'窒素過多に注意',h:'実が色づきはじめたら'},{d:90,t:'収穫',n:'ヘタ付近が赤くなったら',h:'果実全体が真っ赤に色づいたら'}],end:'連作は3〜4年あけること。ナス科を避けて輪作。',plant:'完熟堆肥2kg/㎡、化成肥料100g/㎡を元肥。'},
+  cucumber:{n:'キュウリ',e:'🥒',c:'#3B6D11',cl:'#EAF3DE',germDays:4,germTempMin:18,season:[4,5,6],days:60,space:'60cm',light:'full',height_cm:200,ph:'5.5-6.5',tmp:'23-28℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['夏すずみ','シャキット','節成りきゅうり','四葉きゅうり'],tasks:[{d:5,t:'支柱立て',n:'定植後すぐ支柱とネット',h:'定植直後に'},{d:25,t:'追肥',n:'液肥を週1回',h:'一番果がついたら'},{d:50,t:'収穫',n:'20cm前後が適期',h:'実が鉛筆より太くなったら'}],end:'連作は2〜3年あけること。',plant:'株間60cm以上。元肥は少なめ。'},
+  eggplant:{n:'ナス',e:'🍆',c:'#533AB7',cl:'#EEEDFE',germDays:10,germTempMin:20,season:[4,5],days:120,space:'60cm',light:'full',height_cm:100,ph:'6.0-6.5',tmp:'27-32℃',ht:'畝高15cm',sh:'弱',wi:'中',varieties:['千両2号','長ナス','水ナス','米ナス'],tasks:[{d:10,t:'支柱立て',n:'3本仕立てが基本',h:'苗が根付いたら'},{d:15,t:'芽かき・誘引',n:'一番花下の脇芽を2本残す',h:'一番花が開花したら'},{d:65,t:'収穫',n:'10〜12cmが適期',h:'ガクのトゲが鋭く立っていたら'}],end:'連作は3〜4年。ナス科全体含む。',plant:'深耕（40cm）+完熟堆肥3kg/㎡。'},
+  pepper:{n:'ピーマン',e:'🫑',c:'#639922',cl:'#EAF3DE',germDays:10,germTempMin:18,season:[4,5],days:100,space:'50cm',light:'full',height_cm:80,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['カリフォルニアワンダー','ニューエース','パプリカ（赤）','パプリカ（黄）'],tasks:[{d:10,t:'支柱立て',n:'2〜3本支柱で倒伏防止',h:'苗が落ち着いたら'},{d:70,t:'収穫',n:'実が5〜6cmに育ったら',h:'緑色の未熟果で収穫'}],end:'連作は3〜4年。ナス科全体含む。',plant:'十分な完熟堆肥と元肥。'},
+  lettuce:{n:'レタス',e:'🥬',c:'#0F6E56',cl:'#E1F5EE',germDays:4,germTempMin:5,season:[2,3,8,9],days:60,space:'30cm',light:'half',height_cm:30,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['玉レタス','サニーレタス','ロメインレタス','バターヘッド'],tasks:[{d:10,t:'間引き',n:'本葉2〜3枚で1株に',h:'本葉が2〜3枚になったら'},{d:60,t:'収穫',n:'結球したら早めに',h:'頭を押して固く締まっていたら'}],end:'連作障害は少ない。pHの維持が重要。',plant:'株間25〜30cm。浅めに植える。'},
+  carrot:{n:'ニンジン',e:'🥕',c:'#D85A30',cl:'#FAECE7',germDays:10,germTempMin:10,season:[3,7,8],days:110,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.5',tmp:'15-20℃',ht:'深耕畝',sh:'弱',wi:'強',varieties:['黒田五寸','ベータリッチ','向陽2号'],tasks:[{d:10,t:'間引き1回目',n:'本葉1〜2枚で株間3cm',h:'本葉が1〜2枚になったら'},{d:35,t:'間引き3回目・土寄せ',n:'株間10〜12cmに',h:'本葉7〜8枚になったら'},{d:110,t:'収穫',n:'直径2〜3cmで収穫',h:'根の肩が直径2cm以上になったら'}],end:'連作は1〜2年あけること。',plant:'石を除いた深い軟土が必須（30cm以上）。'},
+  spinach:{n:'ほうれん草',e:'🌿',c:'#1D9E75',cl:'#E1F5EE',germDays:7,germTempMin:5,season:[2,3,8,9,10],days:50,space:'5cm',light:'half',height_cm:25,ph:'6.5-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',varieties:['アクティブ','サラダほうれん草','日本ほうれん草'],tasks:[{d:14,t:'間引き',n:'本葉2〜3枚で株間5cm',h:'本葉が2〜3枚になったら'},{d:50,t:'収穫',n:'草丈20〜25cmで収穫',h:'草丈が20cm以上になったら'}],end:'酸性土壌が最も嫌い。収穫後すぐ石灰をまく。',plant:'石灰を十分に施用（ph6.5以上）。'},
+  potato:{n:'ジャガイモ',e:'🥔',c:'#888780',cl:'#F1EFE8',germDays:14,germTempMin:8,season:[2,3],days:100,space:'30cm',light:'full',height_cm:70,ph:'5.5-6.5',tmp:'15-22℃',ht:'畝高20cm',sh:'弱',wi:'中',caution:'⚠️ 芽と緑化した部分は有毒。連作は3〜4年あける。',varieties:['男爵','メークイン','キタアカリ','とうや','アンデス赤','インカのめざめ'],tasks:[{d:21,t:'芽かき',n:'1株あたり2〜3芽に間引く',h:'芽が5〜10cmに伸びたら'},{d:30,t:'追肥・土寄せ1回目',n:'草丈20〜25cmになったら',h:'草丈が20〜25cmになったら'},{d:100,t:'収穫',n:'晴れの日に掘り上げ乾燥',h:'茎葉が完全に枯れたら収穫適期'}],end:'連作は3〜4年あけること。収穫後は深耕と石灰でph調整。',plant:'種芋を切り、切り口を草木灰で処理して1〜2日乾燥させてから植える。'},
+  sweetpotato:{n:'サツマイモ',e:'🍠',c:'#993C1D',cl:'#FAECE7',germDays:10,germTempMin:18,season:[4,5],days:130,space:'30cm',light:'full',height_cm:40,ph:'5.5-6.5',tmp:'25-30℃',ht:'高畝30cm',sh:'弱',wi:'中',caution:'⚠️ 窒素肥料のやりすぎはつるぼけの原因。元肥は少なめに。',varieties:['紅あずま','鳴門金時','安納芋','シルクスイート','べにはるか'],tasks:[{d:50,t:'つる返し1回目',n:'地面に根を張ったつるをめくり返す',h:'つるが1m以上伸びてきたら'},{d:130,t:'収穫',n:'霜が降りる前に掘り上げる',h:'茎葉が黄化・枯れ始めたら'}],end:'連作は2〜3年あけること。収穫後のつるや残渣はすぐ処分。',plant:'畝高30cm以上が必須。苗は斜め45度に挿す。元肥少なめ。'},
+  corn:{n:'トウモロコシ',e:'🌽',c:'#BA7517',cl:'#FAEEDA',germDays:5,germTempMin:12,season:[4,5],days:90,space:'30cm',light:'full',height_cm:200,ph:'6.0-6.8',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'強',caution:'⚠️ 必ず2列以上まとめて植えること（風媒花のため）。アワノメイガに注意。',varieties:['ゴールドラッシュ','ピーターコーン','甘々娘','もちとうもろこし'],tasks:[{d:20,t:'追肥・土寄せ',n:'草丈30〜40cmになったら',h:'草丈30〜40cmになったら'},{d:55,t:'受粉期・アワノメイガ防除',n:'絹糸が出たら受粉開始',h:'先端に雄穂が出てきたら'},{d:90,t:'収穫',n:'朝早く収穫しすぐ食べるか冷蔵を',h:'粒を押すと白い汁が出たら食べ頃'}],end:'収穫後はすぐに株を撤収（アワノメイガの越冬防止）。',plant:'2列以上まとめて植えること（風媒花のため）。株間30cm。'},
+  pumpkin:{n:'カボチャ',e:'🎃',c:'#D85A30',cl:'#FAEEDA',germDays:5,germTempMin:15,season:[4,5],days:100,space:'100cm',light:'full',height_cm:50,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝〜高畝',sh:'弱',wi:'中',caution:'⚠️ つるが広範囲に伸びる（1株で1〜2㎡必要）。',varieties:['栗かぼちゃ','バターナッツ','坊ちゃんかぼちゃ'],tasks:[{d:45,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:90,t:'収穫',n:'果梗がコルク化したら',h:'ヘたが茶色くコルク状になったら'}],end:'連作は3〜4年。ウリ科（キュウリ・スイカ等）も含む。',plant:'株間100cm以上。元肥は少なめ。'},
+  watermelon:{n:'スイカ',e:'🍉',c:'#2D8B4E',cl:'#E2F5EA',germDays:6,germTempMin:18,season:[4,5],days:100,space:'150cm',light:'full',height_cm:40,ph:'6.0-6.5',tmp:'25-30℃',ht:'高畝',sh:'弱',wi:'弱',caution:'⚠️ 広大なスペースが必要（1株で2〜3㎡）。連作は5〜6年あける。',varieties:['大玉スイカ','小玉スイカ','黒皮スイカ','黄色スイカ'],tasks:[{d:35,t:'人工授粉',n:'開花後の朝8時までに',h:'雌花が咲いたら毎朝'},{d:100,t:'収穫',n:'着果から35〜45日後が目安',h:'叩いてボンボンと低い音がしたら'}],end:'連作は5〜6年あけること（ウリ科の中で最も長い）。',plant:'高畝（排水重要）。株間150cm以上。接ぎ木苗推奨。'},
+  edamame:{n:'枝豆',e:'🫛',c:'#639922',cl:'#EAF3DE',germDays:5,germTempMin:15,season:[4,5,6],days:75,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'20-28℃',ht:'平畝',sh:'弱',wi:'中',varieties:['茶豆','黒豆（枝豆用）','湯あがり娘','だだちゃ豆'],tasks:[{d:25,t:'土寄せ・追肥',n:'倒伏防止に株元に土寄せ',h:'草丈が20〜30cmになったら'},{d:75,t:'収穫',n:'莢を触ると豆の粒がわかるようになったら',h:'収穫後はすぐ茹でる'}],end:'連作は2〜3年あけること。根粒菌で土が豊かになる。',plant:'根粒菌がつくため元肥の窒素は少なめに。'},
+  onion:{n:'タマネギ',e:'🧅',c:'#BA7517',cl:'#FAEEDA',germDays:7,germTempMin:8,season:[9,10],days:200,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'15-20℃',ht:'平畝〜低畝',sh:'弱',wi:'強',caution:'⚠️ 秋に苗を植え付け、翌年初夏に収穫する長期作物。とう立ちに注意。',varieties:['泉州黄','O・P黄','ネオアース','赤タマネギ'],tasks:[{d:90,t:'追肥2回目',n:'2〜3月ごろの追肥が球の肥大に重要',h:'春になり葉の生長が再開したら'},{d:200,t:'収穫',n:'葉が倒れたら収穫',h:'葉の2/3以上が倒れたら収穫適期'}],end:'連作は3〜4年あけること。ネギ科全体（ネギ・ニラ等）も含む。',plant:'秋（9〜10月）に苗を定植。株間15cm。深く植えすぎると球が太らない。'},
+  broccoli:{n:'ブロッコリー',e:'🥦',c:'#1D9E75',cl:'#E1F5EE',germDays:5,germTempMin:8,season:[8,9],days:90,space:'50cm',light:'half',height_cm:60,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ アオムシが最大の天敵。定植直後から防虫ネットで覆うのが効果的。',varieties:['緑嶺','ハイツ','グリーンビューティー','スティックブロッコリー'],tasks:[{d:21,t:'追肥1回目',n:'化成肥料を株元から10cm離して',h:'本葉6〜7枚になったら'},{d:90,t:'収穫',n:'花蕾が締まって濃緑色の間に',h:'花蕾が12〜15cmでしっかり締まっているうちに'}],end:'連作は2〜3年。アブラナ科全体含む。',plant:'株間50cm以上。定植直後から防虫ネットを。'},
+  komatsuna:{n:'小松菜',e:'🥬',c:'#3B6D11',cl:'#EAF3DE',germDays:5,germTempMin:8,season:[3,4,8,9,10,11],days:40,space:'10cm',light:'part',height_cm:25,ph:'6.0-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',caution:'⚠️ アオムシ・コナガに注意。防虫ネット推奨。',varieties:['楽天','黒みすぎ','きよすみ','ミニ小松菜'],tasks:[{d:20,t:'間引き2回目',n:'株間8〜10cmに',h:'本葉3〜4枚になったら'},{d:40,t:'収穫',n:'草丈20〜25cmで株ごと引き抜く',h:'草丈20cm以上になったら'}],end:'連作は2年あけること。アブラナ科全体含む。',plant:'直播き（条まき）が基本。薄く土をかけ不織布で乾燥防止。'},
+  basil:{n:'バジル',e:'🌿',c:'#0F6E56',cl:'#E1F5EE',germDays:7,germTempMin:18,season:[4,5,6],days:60,space:'20cm',light:'full',height_cm:50,ph:'6.0-7.0',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'中',varieties:['スイートバジル','ジェノベーゼ','レモンバジル'],tasks:[{d:14,t:'摘心',n:'本葉4〜6枚で頂点を摘心',h:'本葉が4〜6枚になったら'},{d:35,t:'花芽摘み',n:'花が咲く前に摘み取る',h:'茎の先端に花穂が見えたら'}],end:'一年草。残渣はコンポストへ。',plant:'霜が終わった後に定植。'},
 };
 
 const SEASON_ALL={0:[],1:['lettuce','spinach'],2:['lettuce','carrot','spinach','potato'],3:['tomato','lettuce','carrot','potato','komatsuna'],4:['tomato','cucumber','eggplant','pepper','corn','sweetpotato','pumpkin','watermelon','edamame'],5:['tomato','cucumber','basil','pepper','corn','sweetpotato','pumpkin','watermelon','edamame'],6:['cucumber','carrot','corn','edamame'],7:['carrot','spinach'],8:['lettuce','carrot','spinach','broccoli','komatsuna'],9:['spinach','lettuce','broccoli','komatsuna','onion'],10:['spinach','komatsuna','onion'],11:['komatsuna']};
@@ -570,7 +570,43 @@ function dsp(c){
   const pd=c.plantDate instanceof Date?c.plantDate:new Date(c.plantDate);
   return Math.max(0,Math.floor((TODAY.getTime()-pd.getTime())/864e5));
 }
-function edp(c){return dsp(c);}
+
+// 発芽温度補正係数（種まき時の気温が低いと発芽が遅れる）
+// plantDate の月の平均気温から発芽遅延を推定
+function germDelayDays(crop,db){
+  if(!db||crop.plantType!=='seed')return 0;
+  const baseDays=db.germDays||7;
+  const minTemp=db.germTempMin||15;
+  // 植付月の平均気温（関東中間地の月別平均気温）
+  const avgTemps=[5,6,9,14,19,23,27,28,24,18,12,7]; // 1月〜12月
+  const m=crop.plantDate instanceof Date?crop.plantDate.getMonth():(new Date(crop.plantDate)).getMonth();
+  const avgT=avgTemps[m]||15;
+  if(avgT>=minTemp)return baseDays; // 適温なら標準発芽日数
+  if(avgT<minTemp-8)return baseDays*4; // 大幅低温→4倍
+  if(avgT<minTemp-4)return baseDays*2.5;
+  if(avgT<minTemp)return baseDays*1.5;
+  return baseDays;
+}
+
+// 有効経過日数（種まきの場合は発芽日数を差し引いた「定植後相当日数」）
+function edp(c){
+  const db=DB[c.key];
+  const raw=dsp(c);
+  if(c.plantType==='seed'&&db){
+    const gd=Math.round(germDelayDays(c,db));
+    return Math.max(0,raw-gd);
+  }
+  return raw;
+}
+
+// 総所要日数（種まきの場合は発芽日数+栽培日数）
+function totalDays(c){
+  const db=DB[c.key];if(!db)return 90;
+  if(c.plantType==='seed'){
+    return (db.germDays||7)+db.days;
+  }
+  return db.days;
+}
 function fd(d){return`${d.getMonth()+1}月${d.getDate()}日`}
 function fdi(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
@@ -803,13 +839,27 @@ function showDetail(id){
   const crop=myCrops.find(c=>c.id===id);const db=DB[crop.key];if(!db)return;
   const arch=crop.status==='archived';
   const days=arch?Math.floor((crop.endDate-crop.plantDate)/864e5):dsp(crop);
-  const eDays=arch?days:edp(crop);const pct=Math.min(100,Math.round(eDays/db.days*100));
+  const eDays=arch?days:edp(crop);
+  const total=totalDays(crop);
+  const pct=Math.min(100,Math.round(eDays/total*100));
+  // 種まきの場合の発芽フェーズ情報
+  const isSeed=crop.plantType==='seed';
+  const db2=DB[crop.key];
+  const germD=isSeed?Math.round(germDelayDays(crop,db2)):0;
+  const rawDays=dsp(crop);
+  const isGerminating=isSeed&&rawDays<germD;
+  const germPct=isSeed?Math.min(100,Math.round(rawDays/germD*100)):0;
   const photos=crop.photos||[];
   const photoHtml=`<div class="photo-grid">${photos.map((p,i)=>`<div class="photo-thumb" onclick="openPV(${id},${i})"><img src="${p.dataUrl}" alt=""><div class="photo-date">${p.date}</div></div>`).join('')}${!arch?`<div class="photo-add" onclick="trigPhoto(${id})"><i class="ti ti-camera"></i>追加</div>`:''}</div>`;
   const tlHtml=db.tasks.map(t=>{const d=arch?-999:t.d-eDays;const cls=d<0?'d':d<=7?'a':'u';return`<div class="tl-item"><div class="tl-dot ${cls}"></div><div class="tl-day">${arch?`植付${t.d}日目`:d<0?`${-d}日前`:`${d===0?'今日':d+'日後'}（植付${t.d}日目）`}</div><div class="tl-task">${t.t}</div><div class="tl-note">${t.n}</div>${t.h?`<div class="tl-hint">🌿 ${t.h}</div>`:''}</div>`;}).join('');
   const comp=COMP[crop.key];let compHtml='';
   if(comp){if(comp.good?.length){compHtml+=`<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:5px">✅ 一緒に植えると良い</div>`;comp.good.forEach(g=>{const db2=DB[g];if(!db2)return;compHtml+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:20px">${db2.e}</span><div style="font-size:12px;font-weight:700">${db2.n}</div></div>`;});}if(comp.bad?.length){compHtml+=`<div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:5px;margin-top:8px">❌ 離して植えるべき</div>`;comp.bad.forEach(b=>{const db2=DB[b];if(!db2)return;compHtml+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:20px">${db2.e}</span><div style="font-size:12px;font-weight:700">${db2.n}</div></div>`;});}}
-  const btnHtml=arch?`<button class="btn btn-bl" style="margin-top:4px"><i class="ti ti-message-circle"></i> のらエモンに相談</button>`:`<div style="display:flex;gap:8px"><button class="btn" style="flex:1"><i class="ti ti-message-circle"></i> のらエモンに相談</button><button class="btn btn-d" style="flex:1" onclick="showEnd(${id})"><i class="ti ti-archive"></i> 終了する</button></div>`;
+  const btnHtml=arch
+    ?`<button class="btn btn-bl" style="margin-top:4px" onclick="askAI(${id})"><i class="ti ti-message-circle"></i> のらエモンに相談</button>`
+    :`<div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1" onclick="askAI(${id})"><i class="ti ti-message-circle"></i> のらエモンに相談</button>
+        <button class="btn btn-d" style="flex:1" onclick="showEnd(${id})"><i class="ti ti-archive"></i> 終了する</button>
+      </div>`;
   // メモ
   const memoVal=crop.memo||'';
   const plantTypeLabel=crop.plantType==='seed'?'🌱 種まき':'🌿 苗の植え付け';
@@ -829,11 +879,13 @@ function showDetail(id){
   ${db.caution?`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`:''}
   <div class="stat-row">
     <div class="stat-box"><div class="stat-val">${days}</div><div class="stat-lbl">経過日数</div></div>
-    <div class="stat-box"><div class="stat-val">${Math.max(0,pct)}%</div><div class="stat-lbl">進度</div></div>
+    <div class="stat-box"><div class="stat-val">${isGerminating?germPct+'%':''+Math.max(0,pct)+'%'}</div><div class="stat-lbl">${isGerminating?'発芽進度':'栽培進度'}</div></div>
     <div class="stat-box"><div class="stat-val">${photos.length}</div><div class="stat-lbl">写真</div></div>
   </div>
+  ${isGerminating?`<div style="font-size:11px;background:var(--tl);border-radius:var(--r);padding:7px 10px;margin-bottom:8px;color:var(--teal)">🌱 発芽待ち中（推定あと${Math.max(0,germD-rawDays)}日）。発芽までタスクのカウントは始まりません。</div>`:''}
+  ${isSeed&&!isGerminating&&!arch?`<div style="font-size:10px;color:var(--tx3);margin-bottom:6px">発芽まで約${germD}日かかりました。現在は発芽後${eDays}日目の栽培段階です。</div>`:''}
   <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:14px">
-    <div style="height:100%;width:${Math.max(0,pct)}%;background:${arch?'#B4B2A9':db.c};border-radius:3px"></div>
+    <div style="height:100%;width:${Math.max(0,isGerminating?germPct:pct)}%;background:${arch?'#B4B2A9':isGerminating?'#88BBA0':db.c};border-radius:3px"></div>
   </div>
   <div class="sec" style="margin-top:0">📝 メモ</div>
   <div style="margin-bottom:12px">
@@ -860,6 +912,88 @@ function showDetail(id){
   <div class="ir"><span class="ik">耐陰性</span><span class="iv">${db.sh}</span></div>
   ${arch?`<div class="sec">のらエモンからひとこと</div><div style="font-size:12px;line-height:1.7;background:var(--al);border-radius:var(--r);padding:11px;color:#633806;margin-bottom:14px">お疲れさまでした！${db.end}</div>`:''}
   <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bd)">${btnHtml}</div>`);
+}
+
+// のらエモンに相談（Claude API）
+async function askAI(id){
+  const crop=myCrops.find(c=>c.id===id);if(!crop)return;
+  const db=DB[crop.key];if(!db)return;
+  const rawDays=dsp(crop);
+  const eDays=edp(crop);
+  const isSeed=crop.plantType==='seed';
+  const germD=isSeed?Math.round(germDelayDays(crop,db)):0;
+  const isGerminating=isSeed&&rawDays<germD;
+  const pct=Math.min(100,Math.round(eDays/totalDays(crop)*100));
+  const nextTask=db.tasks.find(t=>t.d>eDays);
+
+  // 相談内容をパネルに表示してAPI呼び出し
+  openPanel(`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="font-size:30px">🌱</div>
+      <div style="font-size:15px;font-weight:700">のらエモンに相談</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--tx2)">
+      ${db.e} ${dn(crop)}　${isSeed?'🌱種まき':'🌿苗'} · ${fd(crop.plantDate)}〜 · ${rawDays}日目<br>
+      ${isGerminating?'発芽待ち中':'栽培進度'+pct+'%'}
+      ${nextTask?'　次の作業：'+nextTask.t:''}
+    </div>
+    <div class="fgrp">
+      <label class="flbl">相談内容（自由に書いてください）</label>
+      <textarea class="finp" id="aiQuestion" rows="3" placeholder="例：葉が黄色くなってきました。何が原因でしょうか？" style="font-size:13px"></textarea>
+    </div>
+    <button class="btn btn-p btn-bl" onclick="sendToAI(${id})" style="margin-bottom:8px"><i class="ti ti-send"></i> のらエモンに聞く</button>
+    <div id="aiResponse"></div>
+  `);
+}
+
+async function sendToAI(id){
+  const crop=myCrops.find(c=>c.id===id);if(!crop)return;
+  const db=DB[crop.key];if(!db)return;
+  const q=(document.getElementById('aiQuestion')?.value||'').trim();
+  const rawDays=dsp(crop);const eDays=edp(crop);
+  const isSeed=crop.plantType==='seed';
+  const germD=isSeed?Math.round(germDelayDays(crop,db)):0;
+  const isGerminating=isSeed&&rawDays<germD;
+  const nextTask=db.tasks.find(t=>t.d>eDays);
+  const respEl=document.getElementById('aiResponse');if(!respEl)return;
+
+  respEl.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:10px 0">🌱 のらエモンが考えています…</div>';
+
+  const systemPrompt=`あなたは「のらエモン」という家庭菜園のAIアシスタントです。ユーザーが育てている作物の状況をもとに、やさしく丁寧に、でも具体的にアドバイスしてください。返答は日本語で200〜350字程度にまとめてください。`;
+
+  const userContext=`
+作物：${db.n}${crop.variety?`（${crop.variety}）`:''}
+栽培方法：${isSeed?'種まき（'+germD+'日で発芽）':'苗の植え付け'}
+種まき/植付け日：${fd(crop.plantDate)}（${rawDays}日前）
+${isGerminating?'状況：まだ発芽待ち中':'発芽後/定植後：'+eDays+'日目'}
+次の作業予定：${nextTask?nextTask.t+'（あと'+Number(nextTask.d-eDays)+'日）':'特になし'}
+生育適温：${db.tmp}
+${db.caution?'注意事項：'+db.caution:''}
+メモ：${crop.memo||'なし'}
+今日の質問：${q||'今の状態と次にすべきことを教えてください'}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{role:'user',content:userContext}]
+      })
+    });
+    const data=await res.json();
+    const text=data.content?.[0]?.text||'返答を取得できませんでした';
+    respEl.innerHTML=`
+      <div style="background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:12px 13px;margin-top:4px">
+        <div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">🌱 のらエモンより</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--tx)">${text.replace(/
+/g,'<br>')}</div>
+      </div>`;
+  }catch(e){
+    respEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ 通信エラーが発生しました。インターネット接続を確認してください。</div>';
+  }
 }
 
 // 天気を都度取得するボタン処理
