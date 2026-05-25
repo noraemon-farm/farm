@@ -965,7 +965,7 @@ let userAgro=[],agroCat='all';
 let photoTarget=null,pvCropId=null,pvIdx=null;
 
 // ══ localStorage 保存・読み込み ══
-const LS_KEY='noraemon_v3'; // v3: 発芽日数対応・germDays追加
+const LS_KEY='noraemon_v1'; // v3: 発芽日数対応・germDays追加
 
 function saveData(){
   try{
@@ -1244,7 +1244,7 @@ function showFullGantt(){
   const archived=myCrops.filter(c=>c.status==='archived');
   const allPlanted=[...active]; // アーカイブは全作物ガントに含めない
   // planSelectedCrops の計画作物を「計画行」として追加
-  const planCrops=[]; // 全作物ガントは育てている作物のみ（計画作物は除く）
+  const planCrops=[...planSelectedCrops].filter(k=>!allPlanted.some(c=>c.key===k));
 
   const TOTAL_DAYS=210, LEFT_DAYS=30;
   const startDate=new Date(TODAY.getTime()-LEFT_DAYS*864e5);
@@ -1265,7 +1265,7 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
+    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px);touch-action:pan-x pan-y;cursor:grab">
       <canvas id="ganttCanvas" style="display:block"></canvas>
     </div>`;
 
@@ -1393,7 +1393,22 @@ function showFullGantt(){
     ctx.strokeStyle='#E24B4A';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(todayX,0);ctx.lineTo(todayX,chartH);ctx.stroke();
     ctx.fillStyle='#E24B4A';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('今日',todayX,2);
     ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,chartH);ctx.stroke();
-    const sc=document.getElementById('ganttScroll');if(sc)sc.scrollLeft=Math.max(0,todayX-100);
+    const sc=document.getElementById('ganttScroll');
+    if(sc){
+      sc.scrollLeft=Math.max(0,todayX-100);
+      // タッチスワイプ＋マウスドラッグ
+      if(!sc._sw){
+        sc._sw=true;
+        let x0=0,s0=0,drag=false;
+        sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;drag=true;},{passive:true});
+        sc.addEventListener('touchmove',e=>{if(drag)sc.scrollLeft=s0-(e.touches[0].clientX-x0);},{passive:true});
+        sc.addEventListener('touchend',()=>drag=false,{passive:true});
+        sc.addEventListener('mousedown',e=>{x0=e.clientX;s0=sc.scrollLeft;drag=true;e.preventDefault();});
+        sc.addEventListener('mousemove',e=>{if(drag)sc.scrollLeft=s0-(e.clientX-x0);});
+        sc.addEventListener('mouseup',()=>drag=false);
+        sc.addEventListener('mouseleave',()=>drag=false);
+      }
+    }
   },60);
 }
 
@@ -1977,7 +1992,7 @@ function showFullGantt(){
   const archived=myCrops.filter(c=>c.status==='archived');
   const allPlanted=[...active]; // アーカイブは全作物ガントに含めない
   // planSelectedCrops の計画作物を「計画行」として追加
-  const planCrops=[]; // 全作物ガントは育てている作物のみ（計画作物は除く）
+  const planCrops=[...planSelectedCrops].filter(k=>!allPlanted.some(c=>c.key===k));
 
   const TOTAL_DAYS=210, LEFT_DAYS=30;
   const startDate=new Date(TODAY.getTime()-LEFT_DAYS*864e5);
@@ -1998,7 +2013,7 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
+    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px);touch-action:pan-x pan-y;cursor:grab">
       <canvas id="ganttCanvas" style="display:block"></canvas>
     </div>`;
 
@@ -2126,7 +2141,22 @@ function showFullGantt(){
     ctx.strokeStyle='#E24B4A';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(todayX,0);ctx.lineTo(todayX,chartH);ctx.stroke();
     ctx.fillStyle='#E24B4A';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('今日',todayX,2);
     ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,chartH);ctx.stroke();
-    const sc=document.getElementById('ganttScroll');if(sc)sc.scrollLeft=Math.max(0,todayX-100);
+    const sc=document.getElementById('ganttScroll');
+    if(sc){
+      sc.scrollLeft=Math.max(0,todayX-100);
+      // タッチスワイプ＋マウスドラッグ
+      if(!sc._sw){
+        sc._sw=true;
+        let x0=0,s0=0,drag=false;
+        sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;drag=true;},{passive:true});
+        sc.addEventListener('touchmove',e=>{if(drag)sc.scrollLeft=s0-(e.touches[0].clientX-x0);},{passive:true});
+        sc.addEventListener('touchend',()=>drag=false,{passive:true});
+        sc.addEventListener('mousedown',e=>{x0=e.clientX;s0=sc.scrollLeft;drag=true;e.preventDefault();});
+        sc.addEventListener('mousemove',e=>{if(drag)sc.scrollLeft=s0-(e.clientX-x0);});
+        sc.addEventListener('mouseup',()=>drag=false);
+        sc.addEventListener('mouseleave',()=>drag=false);
+      }
+    }
   },60);
 }
 
@@ -2684,37 +2714,32 @@ function onKChange(){
 }
 function showAddCrop(key='tomato'){
   const allK=Object.keys(DB);
-  openPanel(`<div style="font-size:16px;font-weight:700;margin-bottom:14px">作物を追加</div>
-    <div class="fgrp"><label class="flbl">野菜を選ぶ</label>
-      <select class="finp" id="nk" onchange="onKChange()">${allK.map(k=>`<option value="${k}" ${k===key?'selected':''}>${DB[k].e} ${DB[k].n}</option>`).join('')}</select>
-    </div>
-    <div id="cb"></div>
-    <div class="fgrp"><label class="flbl">種まき／苗の植え付け</label>
-      <div style="display:flex;gap:6px">
-        <label style="flex:1;display:flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:12px">
-          <input type="radio" name="plantType" value="seedling" checked style="accent-color:var(--gm)"> 🌿 苗の植え付け
-        </label>
-        <label style="flex:1;display:flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:12px">
-          <input type="radio" name="plantType" value="seed" style="accent-color:var(--gm)"> 🌱 種まき
-        </label>
-      </div>
-    </div>
-    <div class="fgrp"><label class="flbl">品種・メモ <span style="font-size:10px;color:var(--tx3)">（任意）</span></label>
-      <input type="text" class="finp" id="nv" placeholder="例：男爵、べにはるかなど" maxlength="30">
-      <div id="vc" style="margin-top:4px">${vChips(key)}</div>
-    </div>
-    <div class="fgrp"><label class="flbl">植え付け日 / 種まき日</label>
-      <input type="date" class="finp" id="nd" value="${fdi(TODAY)}">
-    </div>
-    <div class="fgrp"><label class="flbl">メモ（任意）</label>
-      <textarea class="finp" id="nmemo" rows="2" placeholder="育て方のポイント、購入場所など…" style="font-size:12px"></textarea>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn" style="flex:1" onclick="closePanel()">キャンセル</button>
-      <button class="btn btn-p" style="flex:1" onclick="addCrop()"><i class="ti ti-plus"></i> 追加</button>
-    </div>`);
+  // ネストバックティックを避けるためoptions事前生成
+  const optHtml=allK.map(k=>'<option value="'+k+'" '+(k===key?'selected':'')+'>'+(DB[k]?.e||'')+' '+(DB[k]?.n||k)+'</option>').join('');
+  const vHtml=vChips(key);
+  openPanel('<div style="font-size:16px;font-weight:700;margin-bottom:14px">作物を追加</div>'+
+    '<div class="fgrp"><label class="flbl">野菜を選ぶ</label>'+
+    '<select class="finp" id="nk" onchange="onKChange()">'+optHtml+'</select></div>'+
+    '<div id="cb"></div>'+
+    '<div class="fgrp"><label class="flbl">種まき／苗の植え付け</label>'+
+    '<div style="display:flex;gap:6px">'+
+    '<label style="flex:1;display:flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:12px">'+
+    '<input type="radio" name="plantType" value="seedling" checked style="accent-color:var(--gm)"> 🌿 苗の植え付け</label>'+
+    '<label style="flex:1;display:flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid var(--bd2);border-radius:var(--r);cursor:pointer;font-size:12px">'+
+    '<input type="radio" name="plantType" value="seed" style="accent-color:var(--gm)"> 🌱 種まき</label></div></div>'+
+    '<div class="fgrp"><label class="flbl">品種 <span style="font-size:10px;color:var(--tx3)">（任意）</span></label>'+
+    '<input type="text" class="finp" id="nv" placeholder="例：男爵、べにはるかなど" maxlength="30">'+
+    '<div class="finp-hint">タップで入力できます</div>'+
+    '<div id="vc" style="margin-top:4px">'+vHtml+'</div></div>'+
+    '<div class="fgrp"><label class="flbl">植え付け日 / 種まき日</label>'+
+    '<input type="date" class="finp" id="nd" value="'+fdi(TODAY)+'"></div>'+
+    '<div class="fgrp"><label class="flbl">メモ（任意）</label>'+
+    '<textarea class="finp" id="nmemo" rows="2" placeholder="育て方のポイント、購入場所など…" style="font-size:12px"></textarea></div>'+
+    '<div style="display:flex;gap:8px;margin-top:14px">'+
+    '<button class="btn" style="flex:1" onclick="closePanel()">キャンセル</button>'+
+    '<button class="btn btn-p" style="flex:1" onclick="addCrop()"><i class="ti ti-plus"></i> 追加</button></div>');
   const db=DB[key];const cb=document.getElementById('cb');
-  if(cb&&db?.caution)cb.innerHTML=`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`;
+  if(cb&&db?.caution)cb.innerHTML='<div class="caution-box" style="margin-bottom:10px">'+db.caution+'</div>';
 }
 function startAdd(k){
   if(document.getElementById('panel')?.classList.contains('on'))closePanel();
