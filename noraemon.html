@@ -241,7 +241,32 @@ canvas{display:block;touch-action:none}
 <div class="app">
   <header class="hdr">
     <div class="hdr-l">
-      <div class="hdr-mascot">🌱</div>
+      <div class="hdr-mascot" style="background:none;border:none;box-shadow:none;overflow:visible">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="36" height="43" style="display:block">
+          <ellipse cx="35" cy="18" rx="12" ry="5" fill="#6AB04C" stroke="#3A6B10" stroke-width="1.2" opacity="0.9"/>
+          <ellipse cx="65" cy="18" rx="12" ry="5" fill="#6AB04C" stroke="#3A6B10" stroke-width="1.2" opacity="0.9"/>
+          <line x1="50" y1="28" x2="50" y2="18" stroke="#3A6B10" stroke-width="1.5" stroke-linecap="round"/>
+          <ellipse cx="44" cy="16" rx="5" ry="3" fill="#7DC55A" stroke="#3A6B10" stroke-width="1" transform="rotate(-20,44,16)"/>
+          <ellipse cx="56" cy="16" rx="5" ry="3" fill="#7DC55A" stroke="#3A6B10" stroke-width="1" transform="rotate(20,56,16)"/>
+          <ellipse cx="50" cy="44" rx="30" ry="7" fill="#C8A44A" stroke="#7A5C14" stroke-width="1.5"/>
+          <path d="M22 44 Q22 28 50 28 Q78 28 78 44" fill="#D4B05A" stroke="#7A5C14" stroke-width="1.5"/>
+          <path d="M23 40 Q50 35 77 40" fill="none" stroke="#7A5C14" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="50" cy="70" rx="22" ry="20" fill="#FFF8EC" stroke="#7A5C14" stroke-width="1.2"/>
+          <ellipse cx="41" cy="67" rx="7" ry="8" fill="white" stroke="#5A3A10" stroke-width="1.2"/>
+          <ellipse cx="59" cy="67" rx="7" ry="8" fill="white" stroke="#5A3A10" stroke-width="1.2"/>
+          <circle cx="42" cy="67" r="3" fill="#2A2010"/>
+          <circle cx="60" cy="67" r="3" fill="#2A2010"/>
+          <circle cx="43" cy="65" r="1" fill="white"/>
+          <circle cx="61" cy="65" r="1" fill="white"/>
+          <ellipse cx="50" cy="76" rx="4" ry="3" fill="#E8936A" stroke="#C06040" stroke-width="0.8"/>
+          <ellipse cx="34" cy="72" rx="5" ry="3" fill="#F0A080" opacity="0.4"/>
+          <ellipse cx="66" cy="72" rx="5" ry="3" fill="#F0A080" opacity="0.4"/>
+          <path d="M28 80 Q18 78 16 86 Q20 90 28 86" fill="#FFF8EC" stroke="#7A5C14" stroke-width="1.2"/>
+          <path d="M72 80 Q82 78 84 86 Q80 90 72 86" fill="#FFF8EC" stroke="#7A5C14" stroke-width="1.2"/>
+          <path d="M30 86 Q28 106 50 110 Q72 106 70 86 Q60 90 50 90 Q40 90 30 86Z" fill="#D4B05A" stroke="#7A5C14" stroke-width="1.2"/>
+          <path d="M36 88 Q36 106 50 108 Q64 106 64 88 Q57 91 50 91 Q43 91 36 88Z" fill="#6AB04C" stroke="#3A6B10" stroke-width="1"/>
+        </svg>
+      </div>
       <div>
         <div class="hdr-title" id="hdrTitle">家庭菜園お助けAI「のらエモン」</div>
         <div class="hdr-sub" id="hdrSub">三浦半島南部・中間地</div>
@@ -730,11 +755,11 @@ function saveRegion(){
 }
 let wdata=null;
 
-// ── 作物DB（全25種に拡張版） ──────────────────────────────────
+// ── 作物DB（全17種） ──────────────────────────────────
 const DB={
   tomato:{n:'トマト',e:'🍅',c:'#D85A30',cl:'#FAECE7',germDays:7,germTempMin:18,season:[3,4,5],days:90,space:'50cm',light:'full',height_cm:150,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'やや弱',wi:'弱',varieties:['ミニトマト','中玉トマト','大玉トマト','アイコ','桃太郎','フルティカ','千果'],tasks:[{d:7,t:'芽かき',n:'第1花房下の脇芽を除去',reason:'脇芽を除去することで養分が実に集中し、大きく甘い実が育ちます。第1花房下の脇芽だけ残すと樹勢も保てます。',h:'第1花房の花が咲き始めたら'},{d:14,t:'誘引',n:'支柱に8の字で誘引',reason:'茎が自重で折れるのを防ぎ、葉が重ならず日当たり・風通しが良くなります。8の字結びで締め付けを防いで。',h:'草丈30〜40cmになったら'},{d:30,t:'追肥1回目',n:'化成肥料を株元から20cm離して',reason:'定植後の初回追肥は根が安定し吸収できる状態になったサイン。この時期を逃さずに。',h:'第1花房が結実しはじめたら'},{d:55,t:'追肥2回目',n:'窒素過多に注意',reason:'実が増えると株が消耗します。窒素が多すぎると葉ばかり茂るので、カリ（K）中心の追肥を選びましょう。',h:'実が色づきはじめたら'},{d:90,t:'収穫',n:'ヘタ付近が赤くなったら',h:'果実全体が真っ赤に色づいたら'}],end:'連作は3〜4年あけること。ナス科を避けて輪作。',plant:'完熟堆肥2kg/㎡、化成肥料100g/㎡を元肥。'},
   cucumber:{n:'キュウリ',e:'🥒',c:'#3B6D11',cl:'#EAF3DE',germDays:4,germTempMin:18,season:[4,5,6],days:60,space:'60cm',light:'full',height_cm:200,ph:'5.5-6.5',tmp:'23-28℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['夏すずみ','シャキット','節成りきゅうり','四葉きゅうり'],tasks:[{d:5,t:'支柱立て',n:'定植後すぐ支柱とネット',reason:'茎が自重や風で折れるのを防ぐほか、果実が地面に触れることによる病気も予防できます。',h:'定植直後に'},{d:25,t:'追肥',n:'液肥を週1回',reason:'実がなり始めたら株の消耗が激しくなります。液肥を週1回与えることで収穫量・品質が安定します。',h:'一番果がついたら'},{d:50,t:'収穫',n:'20cm前後が適期',h:'実が鉛筆より太くなったら'}],end:'連作は2〜3年あけること。',plant:'株間60cm以上。元肥は少なめ。'},
-  eggplant:{n:'ナス',e:'🍆',c:'#533AB7',cl:'#EEEDFE',germDays:10,germTempMin:20,season:[4,5],days:120,space:'60cm',light:'full',height_cm:100,ph:'6.0-6.5',tmp:'27-32℃',ht:'畝高15cm',sh:'弱',wi:'中',varieties:['千料理2号','長ナス','水ナス','米ナス'],tasks:[{d:10,t:'支柱立て',n:'3本仕立てが基本',reason:'茎が自重や風で折れるのを防ぐほか、果実が地面に触れることによる病気も予防できます。',h:'苗が根付いたら'},{d:15,t:'芽かき・誘引',n:'一番花下の脇芽を2本残す',reason:'一番花の下の脇芽を2本だけ残し、3本仕立てにします。脇芽を多く残しすぎると実が小さくなります。',h:'一番花が開花したら'},{d:65,t:'収穫',n:'10〜12cmが適期',h:'ガクのトゲが鋭く立っていたら'}],end:'連作は3〜4年。ナス科全体含む。',plant:'深耕（40cm）+完熟堆肥3kg/㎡。'},
+  eggplant:{n:'ナス',e:'🍆',c:'#533AB7',cl:'#EEEDFE',germDays:10,germTempMin:20,season:[4,5],days:120,space:'60cm',light:'full',height_cm:100,ph:'6.0-6.5',tmp:'27-32℃',ht:'畝高15cm',sh:'弱',wi:'中',varieties:['千両2号','長ナス','水ナス','米ナス'],tasks:[{d:10,t:'支柱立て',n:'3本仕立てが基本',reason:'茎が自重や風で折れるのを防ぐほか、果実が地面に触れることによる病気も予防できます。',h:'苗が根付いたら'},{d:15,t:'芽かき・誘引',n:'一番花下の脇芽を2本残す',reason:'一番花の下の脇芽を2本だけ残し、3本仕立てにします。脇芽を多く残しすぎると実が小さくなります。',h:'一番花が開花したら'},{d:65,t:'収穫',n:'10〜12cmが適期',h:'ガクのトゲが鋭く立っていたら'}],end:'連作は3〜4年。ナス科全体含む。',plant:'深耕（40cm）+完熟堆肥3kg/㎡。'},
   pepper:{n:'ピーマン',e:'🫑',c:'#639922',cl:'#EAF3DE',germDays:10,germTempMin:18,season:[4,5],days:100,space:'50cm',light:'full',height_cm:80,ph:'6.0-6.5',tmp:'25-30℃',ht:'畝高10cm',sh:'弱',wi:'弱',varieties:['カリフォルニアワンダー','ニューエース','パプリカ（赤）','パプリカ（黄）'],tasks:[{d:10,t:'支柱立て',n:'2〜3本支柱で倒伏防止',reason:'茎が自重や風で折れるのを防ぐほか、果実が地面に触れることによる病気も予防できます。',h:'苗が落ち着いたら'},{d:70,t:'収穫',n:'実が5〜6cmに育ったら',h:'緑色の未熟果で収穫'}],end:'連作は3〜4年。ナス科全体含む。',plant:'十分な完熟堆肥と元肥。'},
   lettuce:{n:'レタス',e:'🥬',c:'#0F6E56',cl:'#E1F5EE',germDays:4,germTempMin:5,season:[2,3,8,9],days:60,space:'30cm',light:'half',height_cm:30,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['玉レタス','サニーレタス','ロメインレタス','バターヘッド'],tasks:[{d:10,t:'間引き',n:'本葉2〜3枚で1株に',reason:'込み合った株を間引くことで、残した株が十分な光・養分・スペースを確保できます。',h:'本葉が2〜3枚になったら'},{d:60,t:'収穫',n:'結球したら早めに',h:'頭を押して固く締まっていたら'}],end:'連作障害は少ない。pHの維持が重要。',plant:'株間25〜30cm。浅めに植える。'},
   carrot:{n:'ニンジン',e:'🥕',c:'#D85A30',cl:'#FAECE7',germDays:10,germTempMin:10,season:[3,7,8],days:110,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.5',tmp:'15-20℃',ht:'深耕畝',sh:'弱',wi:'強',varieties:['黒田五寸','ベータリッチ','向陽2号'],tasks:[{d:10,t:'間引き1回目',n:'本葉1〜2枚で株間3cm',reason:'込み合いを解消して根の発育スペースを確保します。引き抜くとき隣の株を傷めないよう慎重に。',h:'本葉が1〜2枚になったら'},{d:35,t:'間引き3回目・土寄せ',n:'株間10〜12cmに',reason:'最終的な株間を確保すると同時に、根元に土を寄せてニンジンの肩の緑化を防ぎます。',h:'本葉7〜8枚になったら'},{d:110,t:'収穫',n:'直径2〜3cmで収穫',h:'根の肩が直径2cm以上になったら'}],end:'連作は1〜2年あけること。',plant:'石を除いた深い軟土が必須（30cm以上）。'},
@@ -748,16 +773,15 @@ const DB={
   onion:{n:'タマネギ',e:'🧅',c:'#BA7517',cl:'#FAEEDA',germDays:7,germTempMin:8,season:[9,10],days:200,space:'15cm',light:'full',height_cm:60,ph:'6.0-6.5',tmp:'15-20℃',ht:'平畝〜低畝',sh:'弱',wi:'強',caution:'⚠️ 秋に苗を植え付け、翌年初夏に収穫する長期作物。とう立ちに注意。',varieties:['泉州黄','O・P黄','ネオアース','赤タマネギ'],tasks:[{d:90,t:'追肥2回目',n:'2〜3月ごろの追肥が球の肥大に重要',reason:'実が増えると株が消耗します。窒素が多すぎると葉ばかり茂るので、カリ（K）中心の追肥を選びましょう。',h:'春になり葉の生長が再開したら'},{d:200,t:'収穫',n:'葉が倒れたら収穫',h:'葉の2/3以上が倒れたら収穫適期'}],end:'連作は3〜4年あけること。ネギ科全体（ネギ・ニラ等）も含む。',plant:'秋（9〜10月）に苗を定植。株間15cm。深く植えすぎると球が太らない。'},
   broccoli:{n:'ブロッコリー',e:'🥦',c:'#1D9E75',cl:'#E1F5EE',germDays:5,germTempMin:8,season:[8,9],days:90,space:'50cm',light:'half',height_cm:60,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ アオムシが最大の天敵。定植直後から防虫ネットで覆うのが効果的。',varieties:['緑嶺','ハイツ','グリーンビューティー','スティックブロッコリー'],tasks:[{d:21,t:'追肥1回目',n:'化成肥料を株元から10cm離して',reason:'定植後の初回追肥は根が安定し吸収できる状態になったサイン。この時期を逃さずに。',h:'本葉6〜7枚になったら'},{d:90,t:'収穫',n:'花蕾が締まって濃緑色の間に',h:'花蕾が12〜15cmでしっかり締まっているうちに'}],end:'連作は2〜3年。アブラナ科全体含む。',plant:'株間50cm以上。定植直後から防虫ネットを。'},
   komatsuna:{n:'小松菜',e:'🥬',c:'#3B6D11',cl:'#EAF3DE',germDays:5,germTempMin:8,season:[3,4,8,9,10,11],days:40,space:'10cm',light:'part',height_cm:25,ph:'6.0-7.0',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'強',caution:'⚠️ アオムシ・コナガに注意。防虫ネット推奨。',varieties:['楽天','黒みすぎ','きよすみ','ミニ小松菜'],tasks:[{d:20,t:'間引き2回目',n:'株間8〜10cmに',reason:'最終株間に向けて調整します。間引いた株はサラダなどに利用できます。',h:'本葉3〜4枚になったら'},{d:40,t:'収穫',n:'草丈20〜25cmで株ごと引き抜く',h:'草丈20cm以上になったら'}],end:'連作は2年あけること。アブラナ科全体含む。',plant:'直播き（条まき）が基本。薄く土をかけ不織布で乾燥防止。'},
-  basil:{n:'バジル',e:'🌿',c:'#0F6E56',cl:'#E1F5EE',germDays:7,germTempMin:18,season:[4,5,6],days:60,space:'20cm',light:'full',height_cm:50,ph:'6.0-7.0',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'中',varieties:['スイートバジル','ジェノベーゼ','レモンバジル'],tasks:[{d:14,t:'摘心',n:'本葉4〜6枚で頂点を摘心',reason:'頂点を摘み取ることで脇芽の生育が促進されます。これにより複数の茎が伸びて収量が増えます。',h:'本葉が4〜6枚になったら'},{d:35,t:'花芽摘み',n:'花が咲く前に摘み取る',reason:'花を咲かせると株が消耗し葉の香りや量が減ります。花穂が出たら早めに摘み取りましょう。',h:'茎の先端に花穂が見えたら'}],end:'一年草.残渣はコンポストへ。',plant:'霜が終わった後に定植.'},
+  basil:{n:'バジル',e:'🌿',c:'#0F6E56',cl:'#E1F5EE',germDays:7,germTempMin:18,season:[4,5,6],days:60,space:'20cm',light:'full',height_cm:50,ph:'6.0-7.0',tmp:'25-30℃',ht:'平畝',sh:'弱',wi:'中',varieties:['スイートバジル','ジェノベーゼ','レモンバジル'],tasks:[{d:14,t:'摘心',n:'本葉4〜6枚で頂点を摘心',reason:'頂点を摘み取ることで脇芽の生育が促進されます。これにより複数の茎が伸びて収量が増えます。',h:'本葉が4〜6枚になったら'},{d:35,t:'花芽摘み',n:'花が咲く前に摘み取る',reason:'花を咲かせると株が消耗し葉の香りや量が減ります。花穂が出たら早めに摘み取りましょう。',h:'茎の先端に花穂が見えたら'}],end:'一年草。残渣はコンポストへ。',plant:'霜が終わった後に定植.'},
   taro:{n:'サトイモ',e:'🥜',c:'#8B6914',cl:'#F5EDD5',germDays:14,germTempMin:15,season:[3,4],days:160,space:'50cm',light:'half',height_cm:100,ph:'6.0-6.5',tmp:'25-30℃',ht:'深耕畝',sh:'中',wi:'中',varieties:['土垂','セレベス','赤芽（八ツ頭）','えび芋'],tasks:[{d:30,t:'発芽確認・土寄せ',n:'芽が出始めたら軽く土寄せ',reason:'土寄せは子芋・孫芋の形成を促し、収量アップにつながります。',h:'葉が出始めたら'},{d:70,t:'追肥・土寄せ2回目',n:'化成肥料を施し高めに土寄せ',reason:'生育中期の追肥と高い土寄せで子芋を増やし品質を高めます。',h:'草丈40〜50cmになったら'},{d:130,t:'水やり強化',n:'乾燥が大敵。水を切らさない',reason:'サトイモは水分を特に好みます。乾燥が続くと芋が小さくなり品質が落ちます。',h:'雨が少ない時期は特に注意'},{d:160,t:'収穫',n:'葉が枯れ始めたら株ごと掘り起こす',h:'初霜の前後、茎葉が黄化してきたら'}],end:'連作は3〜4年あけること。芋類全般を避けて輪作。',plant:'種芋を芽を上にして深さ10〜15cmに植え付け。完熟堆肥を十分に。'},
   daikon:{n:'大根',e:'🌿',c:'#E8E8E8',cl:'#F5F5F5',germDays:5,germTempMin:8,season:[8,9,2,3],days:70,space:'30cm',light:'full',height_cm:60,ph:'6.0-6.8',tmp:'15-20℃',ht:'深耕畝',sh:'弱',wi:'強',varieties:['青首大根','三浦大根','聖護院大根','紅芯大根','時なし大根'],tasks:[{d:7,t:'間引き1回目',n:'本葉2〜3枚で株間10cmに',reason:'初期の間引きは発育スペースを確保し、根が真っ直ぐ育つのを助けます。',h:'本葉が2〜3枚になったら'},{d:20,t:'間引き2回目・追肥',n:'株間30cmに。化成肥料を施す',reason:'最終株間を確保します。込み合うと根が曲がったり細くなる原因に。',h:'本葉5〜6枚になったら'},{d:40,t:'土寄せ',n:'根の露出部分に土を寄せる',reason:'大根の肩が露出すると緑化して辛くなります。土寄せで品質を保ちましょう。',h:'根の肩が見え始めたら'},{d:70,t:'収穫',n:'葉が垂れてきたら収穫適期',h:'根の直径が6〜7cmになったら'}],end:'連作は2〜3年あけること。アブラナ科全体（白菜・ブロッコリー等）を含む。',plant:'石をよく取り除いた深耕土（30cm以上）が必須。直播きのみ。'},
   ginger:{n:'生姜',e:'🫚',c:'#D4A017',cl:'#FAF0DC',germDays:20,germTempMin:18,season:[4,5],days:210,space:'25cm',light:'half',height_cm:60,ph:'5.5-6.5',tmp:'25-30℃',ht:'高畝',sh:'中',wi:'中',varieties:['大生姜（三州生姜）','中生姜','小生姜（矢生姜・葉生姜）'],tasks:[{d:30,t:'発芽確認',n:'地表から芽が出ているか確認',reason:'生姜は発芽が非常に遅いため焦りは禁物。地温が18℃以上なら自然に出てきます。',h:'地表から小さな芽が見えたら'},{d:60,t:'追肥・土寄せ',n:'有機肥料を施し株元に土寄せ',reason:'土寄せで根茎の成長スペースを確保。肥料はゆっくり効く有機肥料が向いています。',h:'草丈20〜30cmになったら'},{d:120,t:'追肥2回目・敷きわら',n:'乾燥防止のため株元にわらを敷く',reason:'生姜は乾燥を非常に嫌います。敷きわらは地温保持と乾燥防止に必須。',h:'夏場は特に水切れに注意'},{d:210,t:'収穫',n:'地上部が枯れてから掘り起こす',h:'初霜の前後、茎葉が黄化・倒伏してきたら'}],end:'連作は3〜4年あけること。同じ場所での連作は根茎腐敗病の原因になる。',plant:'種生姜を催芽（温床で芽出し）してから植えると均一に発芽する。深さ8〜10cmに植え付け。'},
   negi:{n:'長ネギ',e:'🧅',c:'#E8F5DC',cl:'#F0FAE8',germDays:10,germTempMin:5,season:[2,3,8,9],days:150,space:'10cm',light:'full',height_cm:80,ph:'6.0-7.0',tmp:'15-20℃',ht:'深溝',sh:'弱',wi:'強',varieties:['千住ネギ','下仁田ネギ','九条ネギ（葉ネギ）','夏扇'],tasks:[{d:20,t:'間引き',n:'本葉2〜3枚で株間3cmに',reason:'込み合うと軟腐病などが発生しやすくなります。適度な密度を保ちましょう。',h:'本葉が2〜3枚になったら'},{d:60,t:'本植え・追肥',n:'溝に移植し化成肥料を施す',reason:'長ネギは溝底に植えて少しずつ土を戻すことで白い部分（軟白部）を長くできます。',h:'苗の高さが30cm以上になったら'},{d:90,t:'土寄せ1回目',n:'ネギの白い部分に土を寄せる',reason:'土寄せが軟白部分を長くするための最重要作業。3〜4回繰り返すと白い部分が長くなります。',h:'ネギが太り始めたら'},{d:120,t:'土寄せ2回目',n:'さらに土を寄せる',reason:'土寄せを繰り返すほど白い軟白部分が長く、甘みが増します。',h:'2〜3週間ごとに繰り返す'},{d:150,t:'収穫',n:'根ごと引き抜く',h:'軟白部分が30cm以上になったら'}],end:'連作は2〜3年あけること。ネギ科全体（タマネギ・ニラ等）を含む。',plant:'溝を深く掘り（20〜30cm）、溝底に植えて少しずつ土を戻していく「溝植え」が基本。'},
   cabbage:{n:'キャベツ',e:'🥬',c:'#7DB87D',cl:'#E8F5E8',germDays:5,germTempMin:8,season:[3,4,8,9],days:90,space:'50cm',light:'full',height_cm:40,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ アオムシ・コナガが最大の天敵。定植直後から防虫ネットを。',varieties:['春系・YR春空','夏蒔秋どり系','秋冬どり系','ちぢみキャベツ（サボイ）'],tasks:[{d:14,t:'活着確認・防虫ネット確認',n:'アオムシの卵・幼虫を早期発見',reason:'定植直後が最も害虫の被害を受けやすい時期。早期発見・防虫ネットが品質を左右します。',h:'定植後2週間、葉が展開してきたら'},{d:28,t:'追肥1回目',n:'化成肥料を株元から10cm離して',reason:'外葉の生育を促す追肥で、後の結球の大きさが決まります。',h:'本葉6〜8枚になったら'},{d:55,t:'追肥2回目',n:'結球の肥大に向けて追肥',reason:'結球が始まる前の追肥が品質を大きく左右します。',h:'結球が始まりそうな頃'},{d:90,t:'収穫',n:'球を手で押して固く締まっていたら',h:'球径が10〜15cmになり手で押してかたく締まったら'}],end:'連作は2〜3年あけること。アブラナ科全体（大根・白菜等）を含む。',plant:'株間50cm以上。定植直後から防虫ネットで覆うことを強く推奨。'},
-  hakusai:{n:'白菜',e:'🥬',c:'#E8F5DC',cl:'#F0FAF0',germDays:5,germTempMin:8,season:[8,9],days:85,space:'45cm',light:'full',height_cm:50,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ 定植が遅れると結球しない（品種ごとの播種期厳守）。',varieties:['黄芯系（CR-にいはる等）','小型白菜（タイニーシュシュ等）','晩生系（冬白菜）'],tasks:[{d:14,t:'追肥1回目',n:'化成肥料を株元に施す',reason:'定植直後の外葉の生育が後の結球量を決定します。早めの追肥が重要。',h:'活着したら'},{d:35,t:'追肥2回目',n:'球の肥大に向けて追肥',reason:'外葉が大きく育った後、内側の葉が結球を始めます。この時期の追肥が重要。',h:'外葉が大きく展開してきたら'},{d:55,t:'害虫チェック',n:'アオムシ・アブラムシを確認',reason:'外葉の害虫を放置すると球の中まで侵入します。防虫ネットの隙間も確認。',h:'外葉の裏に卵や幼虫がいないか確認'},{d:85,t:'収穫',n:'球頂を手で押して固く締まっていたら',h:'頭部を手で押してしっかり結球していたら'}],end:'連作は2〜3年あけること。アブラナ科全体含む。',plant:'8〜9月上旬の播種期を守ることが必須。遅れると結球しない。株間45cm以上。'},
+  hakusai:{n:'白菜',e:'🥬',c:'#E8F5DC',cl:'#F0FAF0',germDays:5,germTempMin:8,season:[8,9],days:85,space:'45cm',light:'full',height_cm:50,ph:'6.0-6.8',tmp:'15-20℃',ht:'畝高10cm',sh:'中',wi:'中',caution:'⚠️ 定植が遅れると結球しない（品種ごとの播種期厳守）。',varieties:['黄芯系（CR-にいはる等）','小型白菜（タイニーシュシュ等）','晩生系（冬白菜）'],tasks:[{d:14,t:'追肥1回目',n:'化成肥料を株元に施す',reason:'定植直後の外葉の生育が後の結球量を決定します。早めの追肥が重要。',h:'活着したら'},{d:35,t:'追肥2回目',n:'球の肥大に向けて追肥',reason:'外葉が大きく育った後、内側の葉が結球を始めます。この時期の追肥が重要。',h:'外葉が大きく展開してきたら'},{d:55,t:'害虫チェック',n:'アオムシ・アブラムシを確認',reason:'外葉の害虫を放置すると球の中まで侵入します。防虫ネットの隙間も確認。',h:'外葉の裏に卵や幼虫がいないか確認'},{d:85,t:'収穫',n:'球頂を手で押して固く締まっていたら',h:'頭部を手で押してしっかり結球していたら'}],end:'連作は2〜3年あけること。アブラナ科全体を含む。',plant:'8〜9月上旬の播種期を守ることが必須。遅れると結球しない。株間45cm以上。'},
   asparagus:{n:'アスパラガス',e:'🌿',c:'#5A8B3E',cl:'#EAF5E2',germDays:14,germTempMin:15,season:[2,3],days:730,space:'40cm',light:'full',height_cm:150,ph:'6.0-7.0',tmp:'15-25℃',ht:'高畝',sh:'弱',wi:'中',varieties:['ウェルカム','グリーンタワー','メリーワシントン','紫アスパラ'],tasks:[{d:30,t:'定植後の管理',n:'雑草を取り除き倒伏しないよう支柱を立てる',reason:'アスパラガスは定植後2〜3年は収穫せず株を充実させる必要があります。',h:'発芽・定植後に'},{d:180,t:'追肥（株の充実期）',n:'有機肥料・化成肥料を施す',reason:'最初の2〜3年は株を充実させる期間。十分な追肥で翌年以降の豊作が決まります。',h:'秋の株の充実期（1年目・2年目）'},{d:365,t:'2年目の管理',n:'春に細い茎が出たら収穫せず生育させる',reason:'2年目も収穫を我慢。茎を残してフルに光合成させることで根茎が充実します。',h:'2年目の春'},{d:730,t:'3年目から本格収穫',n:'10〜15cmに伸びた若い茎を収穫',reason:'3年目以降は毎年春から収穫可能。株が充実しているほど収量が増えます。',h:'3年目以降の春'}],end:'多年草なので連作障害はなく、同じ場所で10〜15年収穫できる。ただし土壌病害に注意。',plant:'深耕（40cm）が必須。完熟堆肥を大量に投入。1年目は収穫せず株を充実させること。'},
-  shungiku:{n:'春菊',e:'🌿',c:'#3A8B5A',cl:'#E2F5EC',germDays:7,germTempMin:10,season:[3,4,8,9,10],days:45,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['大葉春菊','中葉春菊','小葉春菊（摘み取り系）'],tasks:[{d:7,t:'発芽確認',n:'乾燥防止に不織布をかける',reason:'春菊の種は発芽に光が必要（好光性種子）。薄く土をかけて発芽を待ちます。',h:'種まきから5〜10日で発芽するはず'},{d:15,t:'間引き',n:'株間10cmに間引く',reason:'込み合いを解消して风通しをよくすることで病害予防もしっかり。',h:'本葉2〜3枚になったら'},{d:30,t:'追肥',n:'液肥を週1回',reason:'収穫を繰り返すので、こまめな液肥で生育を維持します。',h:'草丈15cmになったら'},{d:45,t:'収穫（摘み取り）',n:'頂点を摘んで脇芽を出させる',reason:'頂点を摘み取ることで脇芽が出て長期間収穫できます。',h:'草丈20cm以上になったら'}],end:'一年草。抽苔（とう立ち）したら撤収。連作障害は少ない。',plant:'直播き。好光性種子なので土をごく薄くかける。発芽率が低めなので多めに播く。'},
-};
+  shungiku:{n:'春菊',e:'🌿',c:'#3A8B5A',cl:'#E2F5EC',germDays:7,germTempMin:10,season:[3,4,8,9,10],days:45,space:'10cm',light:'half',height_cm:40,ph:'6.0-6.8',tmp:'15-20℃',ht:'平畝',sh:'中',wi:'中',varieties:['大葉春菊','中葉春菊','小葉春菊（摘み取り系）'],tasks:[{d:7,t:'発芽確認',n:'乾燥防止に不織布をかける',reason:'春菊の種は発芽に光が必要（好光性種子）。薄く土をかけて発芽を待ちます。',h:'種まきから5〜10日で発芽するはず'},{d:15,t:'間引き',n:'株間10cmに間引く',reason:'込み合いを解消して风通しをよくすることで病害予防にもなります。',h:'本葉2〜3枚になったら'},{d:30,t:'追肥',n:'液肥を週1回',reason:'収穫を繰り返すので、こまめな液肥で生育を維持します。',h:'草丈15cmになったら'},{d:45,t:'収穫（摘み取り）',n:'頂点を摘んで脇芽を出させる',reason:'頂点を摘み取ることで脇芽が出て長期間収穫できます。',h:'草丈20cm以上になったら'}],end:'一年草。抽苔（とう立ち）したら撤収。連作障害は少ない。',plant:'直播き。好光性種子なので土をごく薄くかける。発芽率が低めなので多めに播く。'},
 };
 
 const SEASON_ALL={0:['negi'],1:['lettuce','spinach','negi'],2:['lettuce','carrot','spinach','potato','taro','negi','daikon','cabbage'],3:['tomato','lettuce','carrot','potato','komatsuna','taro','daikon','cabbage'],4:['tomato','cucumber','eggplant','pepper','corn','sweetpotato','pumpkin','watermelon','edamame','ginger','negi','asparagus'],5:['tomato','cucumber','basil','pepper','corn','sweetpotato','pumpkin','watermelon','edamame','ginger'],6:['cucumber','carrot','corn','edamame','shungiku'],7:['carrot','spinach','negi','shungiku'],8:['lettuce','carrot','spinach','broccoli','komatsuna','daikon','cabbage','hakusai','shungiku','negi'],9:['spinach','lettuce','broccoli','komatsuna','onion','daikon','hakusai','shungiku','negi'],10:['spinach','komatsuna','onion','shungiku','negi'],11:['komatsuna','negi']};
@@ -1347,6 +1371,33 @@ function setShadowSeason(s){
     if(el)el.className='btn btn-sm'+(k===s?' btn-p':'');
   });
   if(document.getElementById('scr-map')?.classList.contains('on'))drawMap();
+}
+
+// ══ マップ変数宣言 ══
+let COLS=10,ROWS=8;
+const cpx=()=>Math.floor((document.getElementById('mapWrap')?.clientWidth||330)/COLS);
+let mapGrid=[],mapUndo=[],mapTool='field',selCropKey='tomato',bedOrient='ns';
+let mapOrientDeg=0,sunPaint='full',selObs='house',mapDragging=false;
+const OBSTACLES={house:{label:'家・建物',e:'🏠',color:'#607080',shadow:3},wall:{label:'塀・フェンス',e:'🧱',color:'#8A8070',shadow:1},tree:{label:'大きな木',e:'🌳',color:'#3B6D2A',shadow:2},fence:{label:'低フェンス',e:'🚧',color:'#A08050',shadow:1}};
+function initMapGrid(){mapGrid=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({type:null,crop:null,sun:null,obs:null,_shadow:false})))}
+initMapGrid();
+function resizeGrid(){
+  const newCOLS=parseInt(document.getElementById('colsRange').value);
+  const newROWS=parseInt(document.getElementById('rowsRange').value);
+  document.getElementById('colsLbl').textContent=newCOLS;
+  document.getElementById('rowsLbl').textContent=newROWS;
+  const newGrid=Array.from({length:newROWS},(_,r)=>Array.from({length:newCOLS},(_,c)=>r<ROWS&&c<COLS?{...mapGrid[r][c]}:{type:null,crop:null,sun:null,obs:null,_shadow:false}));
+  COLS=newCOLS;ROWS=newROWS;mapGrid=newGrid;drawMap();
+}
+function cellFill(cell){if(cell.obs)return OBSTACLES[cell.obs]?.color||'#607080';if(cell.type==='field')return'#C8E09A';if(cell.type==='bed_ns')return'#9B7340';if(cell.type==='bed_ew')return'#B8874A';if(cell.type==='path')return'#EDE8DC';return'#F0EDE6'}
+function cellStroke(cell){if(cell.obs)return'#3A4550';if(cell.type==='field')return'#7EAD42';if(cell.type==='bed_ns'||cell.type==='bed_ew')return'#5A3E0A';if(cell.type==='path')return'#C8C0A8';return'#D8D4CC'}
+const SUN_OV={full:'rgba(255,210,40,.38)',half:'rgba(255,210,40,.16)',part:'rgba(160,160,220,.16)',shade:'rgba(80,80,150,.22)'};
+const SUN_E={full:'☀️',half:'🌤',part:'⛅',shade:'🌥'};
+function getShadowVec(){
+  const northRad=mapOrientDeg*Math.PI/180;
+  const nr=-Math.round(Math.cos(northRad));
+  const nc=Math.round(Math.sin(northRad));
+  return[nr,nc];
 }
 
 function drawMap(){
