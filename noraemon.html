@@ -93,7 +93,7 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 .ci-date{font-size:11px;color:var(--tx2)}
 .ci-next{font-size:11px;color:var(--teal);margin-top:1px}
 /* ガント */
-.gantt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x;cursor:grab}
+.gantt-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .gantt-inner{min-width:500px}
 .g-hdr{display:flex;height:20px;margin-bottom:2px}
 .g-hdr-l{width:80px;flex-shrink:0}
@@ -986,7 +986,7 @@ function saveData(){
 function loadData(){
   try{
     // 旧キーからのマイグレーション
-    for(const oldKey of ['noraemon_v1','noraemon_v2']){
+    for(const oldKey of ['noraemon_v3','noraemon_v2']){  // v3が最新の可能性があるので先にチェック
       const oldRaw=localStorage.getItem(oldKey);
       if(oldRaw&&!localStorage.getItem(LS_KEY)){
         try{
@@ -1007,14 +1007,36 @@ function loadData(){
             if(old.excluded)excluded=old.excluded;
             if(old.favorites)favorites=old.favorites;
             if(old.userAgro)userAgro=old.userAgro;
-            saveData(); // v3として保存
-            console.log('旧データをv3に移行しました');
+            saveData(); // v1として保存
+            // 旧キーを削除
+            if(oldKey!==LS_KEY) localStorage.removeItem(oldKey);
+            console.log(oldKey+'→'+LS_KEY+' に移行しました');
             return true;
           }
         }catch(me){console.warn('マイグレーション失敗:',me)}
       }
     }
-    const raw=localStorage.getItem(LS_KEY);
+    // v3 キーのデータがあれば v1 に統合（過去のバージョン変更の後処理）
+    const rawV3=localStorage.getItem('noraemon_v3');
+    const rawV1=localStorage.getItem(LS_KEY);
+    let raw=rawV1;
+    if(rawV3&&!rawV1){
+      // v3 のみある → v1 として読み込み
+      raw=rawV3;
+      localStorage.setItem(LS_KEY,rawV3);
+      localStorage.removeItem('noraemon_v3');
+    } else if(rawV3&&rawV1){
+      // 両方ある → より多いmyCropsを持つ方を使う
+      try{
+        const d3=JSON.parse(rawV3);
+        const d1=JSON.parse(rawV1);
+        if((d3.myCrops?.length||0)>(d1.myCrops?.length||0)){
+          raw=rawV3;
+          localStorage.setItem(LS_KEY,rawV3);
+          localStorage.removeItem('noraemon_v3');
+        }
+      }catch(me){}
+    }
     if(!raw)return false;
     const data=JSON.parse(raw);
     if(data.myCrops&&Array.isArray(data.myCrops)){
@@ -1278,8 +1300,8 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px);touch-action:pan-x pan-y;cursor:grab">
-      <canvas id="ganttCanvas" style="display:block"></canvas>
+    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
+      <canvas id="ganttCanvas" style="display:block;touch-action:pan-x"></canvas>
     </div>`;
 
   setTimeout(()=>{
@@ -1410,16 +1432,12 @@ function showFullGantt(){
     if(sc){
       sc.scrollLeft=Math.max(0,todayX-100);
       // タッチスワイプ＋マウスドラッグ
-      if(!sc._sw){
-        sc._sw=true;
+      // 毎回新しいdivなのでフラグ不要、直接登録
+      {
         let x0=0,s0=0,drag=false;
         sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;drag=true;},{passive:true});
-        sc.addEventListener('touchmove',e=>{if(drag)sc.scrollLeft=s0-(e.touches[0].clientX-x0);},{passive:true});
+        sc.addEventListener('touchmove',e=>{if(drag){e.preventDefault();sc.scrollLeft=s0-(e.touches[0].clientX-x0);}},{passive:false});
         sc.addEventListener('touchend',()=>drag=false,{passive:true});
-        sc.addEventListener('mousedown',e=>{x0=e.clientX;s0=sc.scrollLeft;drag=true;e.preventDefault();});
-        sc.addEventListener('mousemove',e=>{if(drag)sc.scrollLeft=s0-(e.clientX-x0);});
-        sc.addEventListener('mouseup',()=>drag=false);
-        sc.addEventListener('mouseleave',()=>drag=false);
       }
     }
   },60);
@@ -2026,8 +2044,8 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px);touch-action:pan-x pan-y;cursor:grab">
-      <canvas id="ganttCanvas" style="display:block"></canvas>
+    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
+      <canvas id="ganttCanvas" style="display:block;touch-action:pan-x"></canvas>
     </div>`;
 
   setTimeout(()=>{
@@ -2158,16 +2176,12 @@ function showFullGantt(){
     if(sc){
       sc.scrollLeft=Math.max(0,todayX-100);
       // タッチスワイプ＋マウスドラッグ
-      if(!sc._sw){
-        sc._sw=true;
+      // 毎回新しいdivなのでフラグ不要、直接登録
+      {
         let x0=0,s0=0,drag=false;
         sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;drag=true;},{passive:true});
-        sc.addEventListener('touchmove',e=>{if(drag)sc.scrollLeft=s0-(e.touches[0].clientX-x0);},{passive:true});
+        sc.addEventListener('touchmove',e=>{if(drag){e.preventDefault();sc.scrollLeft=s0-(e.touches[0].clientX-x0);}},{passive:false});
         sc.addEventListener('touchend',()=>drag=false,{passive:true});
-        sc.addEventListener('mousedown',e=>{x0=e.clientX;s0=sc.scrollLeft;drag=true;e.preventDefault();});
-        sc.addEventListener('mousemove',e=>{if(drag)sc.scrollLeft=s0-(e.clientX-x0);});
-        sc.addEventListener('mouseup',()=>drag=false);
-        sc.addEventListener('mouseleave',()=>drag=false);
       }
     }
   },60);
@@ -2534,6 +2548,14 @@ function closePanel(){
   renderHome();
   setTimeout(()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()},200);
   window.addEventListener('resize',()=>{if(document.getElementById('scr-map')?.classList.contains('on'))drawMap()});
+  // ホームガントのタッチスワイプ
+  (function setupHomeGanttSwipe(){
+    const wrap=document.getElementById('homeGanttWrap');if(!wrap)return;
+    let x0=0,s0=0,drag=false;
+    wrap.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=wrap.scrollLeft;drag=true;},{passive:true});
+    wrap.addEventListener('touchmove',e=>{if(drag)wrap.scrollLeft=s0-(e.touches[0].clientX-x0);},{passive:true});
+    wrap.addEventListener('touchend',()=>drag=false,{passive:true});
+  })();
 })();
 
 
