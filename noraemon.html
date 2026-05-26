@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0526-1425</title>
+<title>のらエモン｜家庭菜園お助けAI v0526-1434</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -1931,7 +1931,7 @@ function showTab(tab){
   tabs.forEach(t=>document.getElementById('scr-'+t)?.classList.toggle('on',t===tab));
   ['home','todo','weather','menu'].forEach(t=>document.getElementById('nav-'+t)?.classList.toggle('on',t===tab));
   const titles={home:'家庭菜園お助けAI「のらエモン」',todo:'📋 今週のTo-Do',weather:'🌤 天気詳細',menu:'メニュー',map:'🗺 畑マップエディタ',mapcheck:'🔍 解析結果',agrochem:'🧪 農薬・肥料ライブラリ','agro-register':'📝 農薬・肥料を登録',suggest:'🌟 植え付け提案',catalog:'📋 作物一覧',plan:'📅 今年の栽培計画',pest:'🔍 病害虫・病気診断'};
-  const subs={home:`${region.name} · ${ZONE_LABELS[region.zone||'normal']||'中間地'}`,todo:'',weather:'週間予報と作業アドバイス',menu:'',map:'障害物・日当たり・作物配置を管理',mapcheck:'日当たり・相性チェック',agrochem:'手持ちの農薬・肥料を管理',suggest:'今の時期におすすめ',catalog:'全17種の栽培情報',plan:'種まき・苗購入・土作り時期を確認',pest:'症状から病害虫を判定'};
+  const subs={home:`${region.name} · ${ZONE_LABELS[region.zone||'normal']||'中間地'}`,todo:'',weather:'週間予報と作業アドバイス',menu:'',map:'障害物・日当たり・作物配置を管理',mapcheck:'日当たり・相性チェック',agrochem:'手持ちの農薬・肥料を管理',suggest:'今の時期におすすめ',catalog:'全'+Object.keys(DB).length+'種の栽培情報',plan:'種まき・苗購入・土作り時期を確認',pest:'症状から病害虫を判定'};
   document.getElementById('hdrTitle').textContent=titles[tab]||'のらエモン';
   document.getElementById('hdrSub').textContent=subs[tab]||'';
   const hdrBtn=document.getElementById('hdrBtn');
@@ -2012,7 +2012,16 @@ function renderPlanGantt(){
     const db=DB[key];
     // 推奨植付月（planMonthが指定あればそれ、なければ最初の推奨月）
     let plantMonth=planMonth;
-    if(!plantMonth&&db.season?.length) plantMonth=db.season[0]+1;
+    if(!plantMonth&&db.season?.length){
+      const todayM0=TODAY.getMonth(); // 0-indexed
+      // 今年植えられる最も近い月を探す
+      const futureSeason=db.season.filter(m=>m>todayM0);
+      if(futureSeason.length>0){
+        plantMonth=Math.min(...futureSeason)+1; // 最も近い将来の月
+      } else {
+        plantMonth=db.season[0]+1; // 全部過ぎていたら来年の最初の月
+      }
+    }
     if(!plantMonth) plantMonth=TODAY.getMonth()+1;
 
     // 植付予定日（今年の推奨月1日）
