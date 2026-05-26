@@ -1278,6 +1278,7 @@ function tiHtml(t,small=false){
   const hintHtml=(!small&&taskHint)?('<div class="ti-hint">🌿 '+taskHint+'</div>'):'';
   const warnH=(!small)?warnHtml(taskName):'';
   const onclk='chk("'+key+'")';
+  if(typeof window!=='undefined')console.log('[tiHtml] du='+du+' st='+st+' daysUntil='+t.daysUntil+' type='+typeof t.daysUntil);
   return '<div class="ti">'+
     '<div class="'+circleClass+'" onclick="'+onclk+'">'+checkIcon+'</div>'+
     '<div class="ti-body">'+
