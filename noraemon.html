@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- noraemon build 172df43e tiHtml-fixed -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -1256,7 +1257,7 @@ function buildGantt(container,cropList,totalDays=120,todayOff=30){
 
 
 function tiHtml(t,small=false){
-  const key=t.cid+'-'+t.d;
+  const key=t.cid+'-'+t.d; // tiHtml-v3
   const done=!!todoChecked[key];
   const du=isFinite(Number(t.daysUntil))?Math.round(Number(t.daysUntil)):999;
   const urgent=!done&&(t.overdue||du<=2);
@@ -2649,6 +2650,13 @@ function closePanel(){
 // ══ 起動 ══
 
 (function init(){
+  // Service Worker を解除してキャッシュをバイパス
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(r=>r.unregister());
+    });
+  }
+  console.log('[のらエモン] tiHtml version: '+(/tiHtml-v(\d+)/.exec(tiHtml.toString())||['','?'])[1]);
   // localStorageからデータ読み込み（なければデフォルトサンプルをそのまま使う）
   // 現在地を復元
   try{const sr=store.getItem('noraemon_region');if(sr)region=JSON.parse(sr);}catch(e){}
