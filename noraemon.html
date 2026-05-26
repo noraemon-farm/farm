@@ -131,7 +131,9 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 .ti-circle.done i{font-size:11px}
 .ti-body{flex:1;min-width:0}
 .ti-task{font-size:12px;font-weight:700}
-.ti-crop{font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ti-crop{font-size:11px;color:var(--tx2);display:flex;align-items:baseline;gap:0;min-width:0}
+.ti-cropname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.ti-st{white-space:nowrap;flex-shrink:0;font-weight:600;color:var(--green)}
 .ti-gentle{color:var(--amber)}
 .ti-hint{font-size:10px;color:var(--teal);margin-top:3px;background:var(--tl);border-radius:5px;padding:3px 7px;display:inline-block;line-height:1.4}
 .ti-warn{font-size:10px;color:var(--blue);margin-top:3px;background:var(--bl);border-radius:5px;padding:3px 7px;display:inline-block}
@@ -1283,7 +1285,7 @@ function tiHtml(t,small=false){
     '<div class="'+circleClass+'" onclick="'+onclk+'">'+checkIcon+'</div>'+
     '<div class="ti-body">'+
     '<div class="ti-task">'+emoji+' '+taskName+'</div>'+
-    '<div class="'+cropClass+'">'+cropName+' · '+st+'</div>'+
+    '<div class="'+cropClass+'"><span class="ti-cropname">'+cropName+'</span><span class="ti-st"> · '+st+'</span></div>'+
     noteHtml+hintHtml+warnH+
     '</div></div>';
 }
@@ -1297,15 +1299,8 @@ function reloadData(){
 function renderHome(){
   renderWbar();
   const week=weekTasks();
-  const todoHtml=week.slice(0,7).map(t=>tiHtml(t,true)).join('')||
+  document.getElementById('todoList').innerHTML=week.slice(0,7).map(t=>tiHtml(t,true)).join('')||
     '<div style="color:var(--tx3);font-size:13px;padding:8px 0">今週の作業はありません 🎉</div>';
-  document.getElementById('todoList').innerHTML=todoHtml;
-  // DOMに書き込んだ直後の内容をコンソールで確認
-  const el=document.getElementById('todoList');
-  if(el&&week.length>0){
-    const crops=el.querySelectorAll('.ti-crop');
-    crops.forEach((c,i)=>{console.warn('[DOM確認] .ti-crop['+i+']の実際のtextContent:',JSON.stringify(c.textContent));});
-  }
   const _activeForGantt=myCrops.filter(c=>c.status==='active');
   if(_activeForGantt.length===0){
     // データがない場合は全キーを再試行
