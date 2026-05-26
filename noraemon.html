@@ -976,13 +976,41 @@ function saveData(){
         plantDate:c.plantDate instanceof Date?c.plantDate.toISOString():c.plantDate,
         endDate:c.endDate instanceof Date?c.endDate.toISOString():c.endDate,
         photos:c.photos||[],
-        plantWeather:c.plantWeather||null,
+        plantWeather:null,
       })),
       nid,todoChecked,excluded,favorites,userAgro
     };
-    localStorage.setItem(LS_KEY,JSON.stringify(payload));
-  }catch(e){console.warn('保存失敗:',e)}
+    const json=JSON.stringify(payload);
+    localStorage.setItem(LS_KEY,json);
+    // 書いた直後に読み返して確認
+    const verify=localStorage.getItem(LS_KEY);
+    if(!verify){
+      console.error('[のらエモン] 保存直後に読み返せない！');
+      showSaveError('保存後の確認に失敗しました');
+    } else {
+      const v=JSON.parse(verify);
+      console.log('[のらエモン] 保存OK: '+LS_KEY+' myCrops='+v.myCrops.length+'件 '+json.length+'B');
+    }
+  }catch(e){
+    console.error('[のらエモン] saveData失敗:',e.name,e.message);
+    showSaveError(e.name+': '+e.message);
+  }
 }
+
+function showSaveError(msg){
+  // 保存エラーを画面に赤バナーで表示
+  const el=document.getElementById('saveErrorBanner');
+  if(el){el.style.display='block';el.textContent='⚠️ 保存エラー: '+msg;}
+  else{
+    const d=document.createElement('div');
+    d.id='saveErrorBanner';
+    d.style.cssText='position:fixed;bottom:80px;left:0;right:0;background:#E53935;color:white;padding:10px 14px;font-size:13px;z-index:9999;text-align:center';
+    d.textContent='⚠️ 保存エラー: '+msg;
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),8000);
+  }
+}
+
 
 function loadData(){
   try{
@@ -2823,7 +2851,9 @@ function addCrop(){
   const plantType=ptEl?ptEl.value:'seedling';
   const memo=(document.getElementById('nmemo')?.value||'').trim();
   myCrops.push({id:nid++,key:k,variety:v,plantDate:new Date(y,m-1,d),status:'active',photos:[],plantWeather:null,plantType,memo});
-  saveData();closePanel();showTab('home');
+  saveData();
+  console.log('[のらエモン] addCrop後 myCrops='+myCrops.length+' LS確認='+!!(localStorage.getItem(LS_KEY)));
+  closePanel();showTab('home');
 }
 
 // 作物編集
