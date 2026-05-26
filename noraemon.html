@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0526-0753</title>
+<title>のらエモン｜家庭菜園お助けAI v0526-1416</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -264,7 +264,7 @@ canvas{display:block;touch-action:none}
         <div class="gantt-wrap" id="homeGanttWrap" style="-webkit-overflow-scrolling:touch;overflow-x:auto"><div class="gantt-inner" id="homeGantt"></div></div>
         <div style="font-size:10px;color:var(--tx3);margin-top:5px">名前タップで詳細を表示</div>
       </div>
-      <div id="wbar"></div>
+      <div id="wbar"><div style="font-size:11px;color:var(--tx3);padding:4px 0">🌤 天気情報を取得中…</div></div>
       <div class="sec">☀️ 天気・病害虫注意報</div>
       <div id="homeWeatherAlert" style="padding:0 0 8px"><div style="font-size:11px;color:var(--tx3)">天気データ取得中…</div></div>
       <div id="archiveSec"></div>
@@ -1151,7 +1151,10 @@ async function loadWeather(){
     const u=`https://api.open-meteo.com/v1/forecast?latitude=${region.lat}&longitude=${region.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,apparent_temperature&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Asia%2FTokyo&forecast_days=7`;
     wdata=await(await fetch(u)).json();
     renderWbar();renderWdetail();
-  }catch(e){document.getElementById('wbar').innerHTML='';}
+  }catch(e){
+    console.error('天気取得失敗:', e);
+    document.getElementById('wbar').innerHTML='<div style="font-size:11px;color:var(--tx3);padding:4px 0">🌤 天気データを取得できませんでした</div>';
+  }
 }
 
 async function fetchPlantWx(crop){
