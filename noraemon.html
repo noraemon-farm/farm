@@ -1297,8 +1297,15 @@ function reloadData(){
 function renderHome(){
   renderWbar();
   const week=weekTasks();
-  document.getElementById('todoList').innerHTML=week.slice(0,7).map(t=>tiHtml(t,true)).join('')||
+  const todoHtml=week.slice(0,7).map(t=>tiHtml(t,true)).join('')||
     '<div style="color:var(--tx3);font-size:13px;padding:8px 0">今週の作業はありません 🎉</div>';
+  document.getElementById('todoList').innerHTML=todoHtml;
+  // DOMに書き込んだ直後の内容をコンソールで確認
+  const el=document.getElementById('todoList');
+  if(el&&week.length>0){
+    const crops=el.querySelectorAll('.ti-crop');
+    crops.forEach((c,i)=>{console.warn('[DOM確認] .ti-crop['+i+']の実際のtextContent:',JSON.stringify(c.textContent));});
+  }
   const _activeForGantt=myCrops.filter(c=>c.status==='active');
   if(_activeForGantt.length===0){
     // データがない場合は全キーを再試行
