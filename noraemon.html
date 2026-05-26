@@ -1256,12 +1256,10 @@ function buildGantt(container,cropList,totalDays=120,todayOff=30){
 
 
 function tiHtml(t,small=false){
-  const key=`${t.cid}-${t.d}`;
+  const key=t.cid+'-'+t.d;
   const done=!!todoChecked[key];
-  // daysUntil を確実に整数に変換。NaN/undefined/null は 999 扱い
   const du=isFinite(Number(t.daysUntil))?Math.round(Number(t.daysUntil)):999;
   const urgent=!done&&(t.overdue||du<=2);
-  // タスク名・メモ・ヒントを文字列として確実に取得
   const taskName=String(t.t||'');
   const taskNote=String(t.n||'');
   const taskHint=String(t.h||'');
@@ -1271,19 +1269,23 @@ function tiHtml(t,small=false){
   if(t.overdue){st=gm(taskName,t.oi||0);}
   else if(du===0){st='今日がちょうど目安です';}
   else if(du===1){st='あと1日、明日です';}
-  else if(du<=14){st=`あと${du}日`;}
-  else{st=`あと${du}日`;}
-  return`<div class="ti">
-    <div class="ti-circle ${done?'done':''}" onclick="chk('${key}')">${done?'<i class="ti ti-check"></i>':''}</div>
-    <div class="ti-body">
-      <div class="ti-task">${emoji} ${taskName}</div>
-      <div class="ti-crop ${urgent?'ti-gentle':''}">${cropName} · ${st}</div>
-      ${!small&&taskNote?`<div style="font-size:10px;color:var(--tx3);margin-top:1px">${taskNote}</div>`:''}
-      ${!small&&taskHint?`<div class="ti-hint">🌿 ${taskHint}</div>`:''}
-      ${!small?warnHtml(taskName):''}
-    </div>
-  </div>`;
+  else{st='あと'+du+'日';}
+  const circleClass='ti-circle'+(done?' done':'');
+  const cropClass='ti-crop'+(urgent?' ti-gentle':'');
+  const checkIcon=done?'<i class="ti ti-check"></i>':'';
+  const noteHtml=(!small&&taskNote)?('<div style="font-size:10px;color:var(--tx3);margin-top:1px">'+taskNote+'</div>'):'';
+  const hintHtml=(!small&&taskHint)?('<div class="ti-hint">🌿 '+taskHint+'</div>'):'';
+  const warnH=(!small)?warnHtml(taskName):'';
+  const onclk='chk("'+key+'")';
+  return '<div class="ti">'+
+    '<div class="'+circleClass+'" onclick="'+onclk+'">'+checkIcon+'</div>'+
+    '<div class="ti-body">'+
+    '<div class="ti-task">'+emoji+' '+taskName+'</div>'+
+    '<div class="'+cropClass+'">'+cropName+' · '+st+'</div>'+
+    noteHtml+hintHtml+warnH+
+    '</div></div>';
 }
+
 function reloadData(){
   myCrops=[];nid=1;
   const loaded=loadData();
