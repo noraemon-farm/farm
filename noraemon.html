@@ -266,6 +266,7 @@ canvas{display:block;touch-action:none}
       <div class="sec">☀️ 天気・病害虫注意報</div>
       <div id="homeWeatherAlert" style="padding:0 0 8px"><div style="font-size:11px;color:var(--tx3)">天気データ取得中…</div></div>
       <div id="archiveSec"></div>
+      <div id="homeDebug"></div>
     </div>
     <!-- Todo -->
     <div class="scr" id="scr-todo">
@@ -985,62 +986,33 @@ function saveData(){
 
 function loadData(){
   try{
-    // 旧キーからのマイグレーション
-    for(const oldKey of ['noraemon_v3','noraemon_v2']){  // v3が最新の可能性があるので先にチェック
-      const oldRaw=localStorage.getItem(oldKey);
-      if(oldRaw&&!localStorage.getItem(LS_KEY)){
-        try{
-          const old=JSON.parse(oldRaw);
-          // 旧データをv3形式に変換して保存
-          if(old.myCrops){
-            myCrops=old.myCrops.map(c=>({
-              ...c,
-              plantDate:new Date(c.plantDate),
-              endDate:c.endDate?new Date(c.endDate):undefined,
-              photos:c.photos||[],
-              plantWeather:null, // 天気キャッシュはリセット
-              plantType:c.plantType||'seedling', // なければ苗扱い
-              memo:c.memo||'',
-            }));
-            if(typeof old.nid==='number')nid=old.nid;
-            if(old.todoChecked)todoChecked=old.todoChecked;
-            if(old.excluded)excluded=old.excluded;
-            if(old.favorites)favorites=old.favorites;
-            if(old.userAgro)userAgro=old.userAgro;
-            saveData(); // v1として保存
-            // 旧キーを削除
-            if(oldKey!==LS_KEY) localStorage.removeItem(oldKey);
-            console.log(oldKey+'→'+LS_KEY+' に移行しました');
-            return true;
-          }
-        }catch(me){console.warn('マイグレーション失敗:',me)}
-      }
-    }
-    // v3 キーのデータがあれば v1 に統合（過去のバージョン変更の後処理）
-    const rawV3=localStorage.getItem('noraemon_v3');
-    const rawV1=localStorage.getItem(LS_KEY);
-    let raw=rawV1;
-    if(rawV3&&!rawV1){
-      // v3 のみある → v1 として読み込み
-      raw=rawV3;
-      localStorage.setItem(LS_KEY,rawV3);
-      localStorage.removeItem('noraemon_v3');
-    } else if(rawV3&&rawV1){
-      // 両方ある → より多いmyCropsを持つ方を使う
+    // 全候補キーを試みて最もmyCropsが多いデータを使う
+    const candidateKeys=['noraemon_v1','noraemon_v2','noraemon_v3'];
+    let bestData=null, bestCount=0, bestKey=null;
+    
+    for(const key of candidateKeys){
+      const raw=localStorage.getItem(key);
+      if(!raw) continue;
       try{
-        const d3=JSON.parse(rawV3);
-        const d1=JSON.parse(rawV1);
-        if((d3.myCrops?.length||0)>(d1.myCrops?.length||0)){
-          raw=rawV3;
-          localStorage.setItem(LS_KEY,rawV3);
-          localStorage.removeItem('noraemon_v3');
+        const d=JSON.parse(raw);
+        const cnt=d.myCrops?.length||0;
+        console.log('[のらエモン] キー',key,': myCrops=',cnt,'件');
+        if(cnt>bestCount||(bestData===null&&raw)){
+          bestData=d; bestCount=cnt; bestKey=key;
         }
-      }catch(me){}
+      }catch(pe){console.warn('parse失敗:',key,pe);}
     }
-    if(!raw)return false;
-    const data=JSON.parse(raw);
-    if(data.myCrops&&Array.isArray(data.myCrops)){
-      myCrops=data.myCrops.map(c=>({
+    
+    if(!bestData){
+      console.log('[のらエモン] 保存データなし');
+      return false;
+    }
+    
+    console.log('[のらエモン] 採用:', bestKey, 'myCrops:', bestCount);
+    
+    // myCropsを復元
+    if(bestData.myCrops&&Array.isArray(bestData.myCrops)){
+      myCrops=bestData.myCrops.map(c=>({
         ...c,
         plantDate:new Date(c.plantDate),
         endDate:c.endDate?new Date(c.endDate):undefined,
@@ -1050,13 +1022,17 @@ function loadData(){
         memo:c.memo||'',
       }));
     }
-    if(typeof data.nid==='number')nid=data.nid;
-    if(data.todoChecked)todoChecked=data.todoChecked;
-    if(data.excluded)excluded=data.excluded;
-    if(data.favorites)favorites=data.favorites;
-    if(data.userAgro)userAgro=data.userAgro;
+    if(typeof bestData.nid==='number')nid=bestData.nid;
+    if(bestData.todoChecked)todoChecked=bestData.todoChecked;
+    if(bestData.excluded)excluded=bestData.excluded;
+    if(bestData.favorites)favorites=bestData.favorites;
+    if(bestData.userAgro)userAgro=bestData.userAgro;
+    
+    // LS_KEY(v1)に正規化して保存
+    saveData();
+    // 旧キーはそのまま残す（データ消失防止のため削除しない）
     return true;
-  }catch(e){console.warn('読み込み失敗:',e);return false}
+  }catch(e){console.warn('[のらエモン] 読み込み失敗:',e);return false}
 }
 
 function dn(c){const db=DB[c.key];return db.n+(c.variety?`（${c.variety}）`:'')}
@@ -1196,6 +1172,10 @@ function buildGantt(container,cropList,totalDays=120,todayOff=30){
   const tp=todayOff/totalDays*100;
   let html=`<div class="g-hdr"><div class="g-hdr-l"></div><div class="g-hdr-m">${months.map(m=>`<div class="g-month">${m}</div>`).join('')}</div></div>`;
   cropList.forEach(crop=>{const db=DB[crop.key];if(!db)return;const days=dsp(crop),eDays=edp(crop);const s=Math.max(0,(todayOff-days)/totalDays*100),e=Math.min(100,(todayOff-days+db.days)/totalDays*100),w=e-s;const lbl=crop.variety||db.n;const dots=db.tasks.filter(t=>t.d>eDays).slice(0,4).map(t=>{const p=(todayOff-days+t.d)/totalDays*100;return p>=0&&p<=100?`<div class="g-dot" style="left:${p.toFixed(1)}%;border:1.5px solid ${db.c}"></div>`:'';}).join('');html+=`<div class="g-row"><div class="g-lbl" title="${dn(crop)}" onclick="showDetail(${crop.id})">${db.e} ${lbl}</div><div class="g-track"><div class="g-bar" style="left:${s.toFixed(1)}%;width:${Math.max(2,w).toFixed(1)}%;background:${db.c}">${w>22?lbl:''}</div><div class="g-today" style="left:${tp.toFixed(1)}%"></div>${dots}</div></div>`;});
+  if(!cropList.length){
+    container.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">作物がまだ登録されていません<br><span style="font-size:11px">右上の「＋追加」から始めましょう</span></div>';
+    return;
+  }
   container.innerHTML=html;
 }
 
@@ -1204,10 +1184,26 @@ function renderHome(){
   const week=weekTasks();
   document.getElementById('todoList').innerHTML=week.slice(0,7).map(t=>tiHtml(t,true)).join('')||
     '<div style="color:var(--tx3);font-size:13px;padding:8px 0">今週の作業はありません 🎉</div>';
-  buildGantt(document.getElementById('homeGantt'),myCrops.filter(c=>c.status==='active'));
+  const _activeForGantt=myCrops.filter(c=>c.status==='active');
+  if(_activeForGantt.length===0){
+    // データがない場合は全キーを再試行
+    console.warn('[のらエモン] 作物データなし。再ロード試行...');
+    ['noraemon_v1','noraemon_v2','noraemon_v3'].forEach(k=>{
+      const r=localStorage.getItem(k);
+      console.log('[のらエモン]',k,':',r?JSON.parse(r).myCrops?.length+'件':'なし');
+    });
+  }
+  buildGantt(document.getElementById('homeGantt'),_activeForGantt);
   // 要注意バナーは廃止
   document.getElementById('alerts').innerHTML='';
   document.getElementById('archiveSec').innerHTML='';
+  // ★デバッグ: localStorageのキーと myCrops件数を表示
+  (function dbg(){
+    const keys=[],n=localStorage.length;
+    for(let i=0;i<n;i++){const k=localStorage.key(i);if(k)keys.push(k+'('+((localStorage.getItem(k)||'').length)+'B)');}
+    const el=document.getElementById('homeDebug');
+    if(el)el.innerHTML='<div style="font-size:9px;color:#aaa;padding:4px 0">🔧 LS: '+keys.join(', ')+'<br>myCrops='+myCrops.length+' LS_KEY='+LS_KEY+'</div>';
+  })();
   // 天気＋病害虫注意報
   renderHomeWeatherAlert();
 }
@@ -1240,10 +1236,18 @@ function renderHomeWeatherAlert(){
 function renderTodo(){const week=weekTasks(),future=futureTasks();document.getElementById('todoFull').innerHTML=week.map(t=>tiHtml(t,false)).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">今週の作業はありません 🎉</div>';document.getElementById('todoFuture').innerHTML=future.map(t=>tiHtml(t,false)).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">来週以降の予定はまだありません</div>';}
 function renderSuggest(){
   const suggest=SEASON_ALL[MONTH]||[];
-  document.getElementById('suggestList').innerHTML=suggest.map(k=>{const db=DB[k];if(excluded.includes(k))return'';const fav=favorites.includes(k);return`<div class="ci"><div class="ci-ico" style="background:${db.cl}">${db.e}</div><div class="ci-info"><div class="ci-name">${db.n} ${fav?'⭐':''}</div><div class="ci-date">収穫まで約${db.days}日 · 株間${db.space}</div><div class="ci-next">ph ${db.ph} · ${db.tmp}</div>${db.caution?`<div style="font-size:10px;color:var(--amber);margin-top:1px">${db.caution.substring(0,36)}…</div>`:''}</div><button class="btn btn-sm btn-p" onclick="startAdd('${k}')">植付</button></div>`;}).filter(Boolean).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">この時期に植え付けできる作物がありません</div>';
-  const allK=Object.keys(DB);
-  document.getElementById('excludeChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${excluded.includes(k)?'exc':''}" onclick="togExc('${k}')">${db.e} ${db.n}</span>`;}).join('');
-  document.getElementById('favoriteChips').innerHTML=allK.map(k=>{const db=DB[k];return`<span class="chip ${favorites.includes(k)?'sel':''}" onclick="togFav('${k}')">${db.e} ${db.n}</span>`;}).join('');
+  // 50音順で表示
+  const orderedSuggest=CATALOG_ORDER.filter(k=>suggest.includes(k)).concat(suggest.filter(k=>!CATALOG_ORDER.includes(k)));
+  document.getElementById('suggestList').innerHTML=orderedSuggest.map(k=>{
+    const db=DB[k];if(!db)return'';
+    if(excluded.includes(k))return'';
+    const fav=favorites.includes(k);
+    return`<div class="ci"><div class="ci-ico" style="background:${db.cl}">${db.e}</div><div class="ci-info"><div class="ci-name">${db.n} ${fav?'⭐':''}</div><div class="ci-date">収穫まで約${db.days}日 · 株間${db.space}</div><div class="ci-next">ph ${db.ph} · ${db.tmp}</div>${db.caution?`<div style="font-size:10px;color:var(--amber);margin-top:1px">${db.caution.substring(0,36)}…</div>`:''}</div><button class="btn btn-sm btn-p" onclick="startAdd('${k}')">植付</button></div>`;
+  }).filter(Boolean).join('')||'<div style="color:var(--tx3);font-size:13px;padding:8px">この時期に植え付けできる作物がありません</div>';
+  // 除外・優先も50音順
+  const allK=CATALOG_ORDER.concat(Object.keys(DB).filter(k=>!CATALOG_ORDER.includes(k)));
+  document.getElementById('excludeChips').innerHTML=allK.map(k=>{const db=DB[k];if(!db)return'';return`<span class="chip ${excluded.includes(k)?'exc':''}" onclick="togExc('${k}')">${db.e} ${db.n}</span>`;}).join('');
+  document.getElementById('favoriteChips').innerHTML=allK.map(k=>{const db=DB[k];if(!db)return'';return`<span class="chip ${favorites.includes(k)?'sel':''}" onclick="togFav('${k}')">${db.e} ${db.n}</span>`;}).join('');
 }
 function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);saveData();renderSuggest()}
 function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);saveData();renderSuggest()}
@@ -1300,8 +1304,8 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
-      <canvas id="ganttCanvas" style="display:block;touch-action:pan-x"></canvas>
+    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x">
+      <canvas id="ganttCanvas" style="display:block;pointer-events:none"></canvas>
     </div>`;
 
   setTimeout(()=>{
@@ -1966,7 +1970,7 @@ function renderPlanGantt(){
     </div>`;
 
   setTimeout(()=>{
-    const cv=document.getElementById('planCanvas');if(!cv)return;
+    const cv=document.getElementById('ganttCanvas');if(!cv)return;
     const dpr=window.devicePixelRatio||1;
     cv.style.width=TOTAL_W+'px';cv.style.height=chartH+'px';
     cv.width=TOTAL_W*dpr;cv.height=chartH*dpr;
@@ -2015,6 +2019,16 @@ function renderPlanGantt(){
     ctx.strokeStyle='#E24B4A';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(todayX,0);ctx.lineTo(todayX,chartH);ctx.stroke();
     ctx.fillStyle='#E24B4A';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('今日',todayX,2);
     ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,chartH);ctx.stroke();
+    // スクロール位置を今日付近に設定
+    const sc=document.getElementById('ganttScroll');
+    if(sc){
+      sc.scrollLeft=Math.max(0,todayX-80);
+      // タッチスワイプ登録（canvas はpointer-events:none なのでscに届く）
+      let x0=0,s0=0,dr=false;
+      sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;dr=true;},{passive:true});
+      sc.addEventListener('touchmove',e=>{if(dr){e.preventDefault();sc.scrollLeft=s0-(e.touches[0].clientX-x0);}},{passive:false});
+      sc.addEventListener('touchend',()=>{dr=false;},{passive:true});
+    }
   },50);
 }
 
@@ -2044,8 +2058,8 @@ function showFullGantt(){
       <button class="btn btn-sm" onclick="document.getElementById('ganttModal').style.display='none'"><i class="ti ti-x"></i></button>
     </div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:4px">赤線=今日　橙タスク=今週　🌱下段=計画中（未植付）</div>
-    <div id="ganttScroll" style="overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 100px)">
-      <canvas id="ganttCanvas" style="display:block;touch-action:pan-x"></canvas>
+    <div id="ganttScroll" style="overflow-x:scroll;overflow-y:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-x">
+      <canvas id="ganttCanvas" style="display:block;pointer-events:none"></canvas>
     </div>`;
 
   setTimeout(()=>{
@@ -2176,13 +2190,7 @@ function showFullGantt(){
     if(sc){
       sc.scrollLeft=Math.max(0,todayX-100);
       // タッチスワイプ＋マウスドラッグ
-      // 毎回新しいdivなのでフラグ不要、直接登録
-      {
-        let x0=0,s0=0,drag=false;
-        sc.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;s0=sc.scrollLeft;drag=true;},{passive:true});
-        sc.addEventListener('touchmove',e=>{if(drag){e.preventDefault();sc.scrollLeft=s0-(e.touches[0].clientX-x0);}},{passive:false});
-        sc.addEventListener('touchend',()=>drag=false,{passive:true});
-      }
+      // CSS overflow-x:scroll + touch-action:pan-x で自然スクロール
     }
   },60);
 }
@@ -2538,8 +2546,8 @@ function closePanel(){
   try{const sr=localStorage.getItem('noraemon_region');if(sr)region=JSON.parse(sr);}catch(e){}
   const loaded=loadData();
   if(!loaded){
-    // 初回起動時のみサンプルデータを保存
-    saveData();
+    console.log('[のらエモン] 初回起動 - データなし');
+    // 初回起動時は保存しない（空データで上書きしない）
   }
   populateSampleMap();
   updateHdrSub(); // 現在地・気候帯をヘッダーに反映
