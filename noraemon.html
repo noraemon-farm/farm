@@ -266,7 +266,6 @@ canvas{display:block;touch-action:none}
       <div class="sec">☀️ 天気・病害虫注意報</div>
       <div id="homeWeatherAlert" style="padding:0 0 8px"><div style="font-size:11px;color:var(--tx3)">天気データ取得中…</div></div>
       <div id="archiveSec"></div>
-      <div id="homeDebug"></div>
     </div>
     <!-- Todo -->
     <div class="scr" id="scr-todo">
@@ -737,7 +736,7 @@ function saveRegion(){
     if(r)region={...r};
     else{const[lat,lon,...nameParts]=sel.split(',');region={name:nameParts.join(','),lat:parseFloat(lat),lon:parseFloat(lon),zone:'normal'};}
   }
-  try{localStorage.setItem('noraemon_region',JSON.stringify(region));}catch(e){}
+  try{store.setItem('noraemon_region',JSON.stringify(region));}catch(e){}
   closePanel();
   wdata=null;loadWeather();
   updateHdrSub();
@@ -966,7 +965,39 @@ let userAgro=[],agroCat='all';
 let photoTarget=null,pvCropId=null,pvIdx=null;
 
 // ══ localStorage 保存・読み込み ══
-const LS_KEY='noraemon_v1'; // v3: 発芽日数対応・germDays追加
+const LS_KEY='noraemon_v1';
+
+// ストレージラッパー（Brave等でlocalStorageが使えない場合のフォールバック）
+const _memStore={};
+const store={
+  getItem(k){
+    try{const v=localStorage.getItem(k);if(v!==null)return v;}catch(e){}
+    try{const v=sessionStorage.getItem(k);if(v!==null)return v;}catch(e){}
+    return _memStore[k]??null;
+  },
+  setItem(k,v){
+    let saved=false;
+    try{localStorage.setItem(k,v);saved=true;}catch(e){}
+    try{sessionStorage.setItem(k,v);saved=true;}catch(e){}
+    _memStore[k]=v;
+    return saved;
+  },
+  removeItem(k){
+    try{localStorage.removeItem(k);}catch(e){}
+    try{sessionStorage.removeItem(k);}catch(e){}
+    delete _memStore[k];
+  },
+  get length(){
+    try{return localStorage.length;}catch(e){}
+    try{return sessionStorage.length;}catch(e){}
+    return Object.keys(_memStore).length;
+  },
+  key(i){
+    try{return localStorage.key(i);}catch(e){}
+    try{return sessionStorage.key(i);}catch(e){}
+    return Object.keys(_memStore)[i]??null;
+  }
+}; // v3: 発芽日数対応・germDays追加
 
 function saveData(){
   try{
@@ -981,9 +1012,9 @@ function saveData(){
       nid,todoChecked,excluded,favorites,userAgro
     };
     const json=JSON.stringify(payload);
-    localStorage.setItem(LS_KEY,json);
+    store.setItem(LS_KEY,json);
     // 書いた直後に読み返して確認
-    const verify=localStorage.getItem(LS_KEY);
+    const verify=store.getItem(LS_KEY);
     if(!verify){
       console.error('[のらエモン] 保存直後に読み返せない！');
       showSaveError('保存後の確認に失敗しました');
@@ -1019,7 +1050,7 @@ function loadData(){
     let bestData=null, bestCount=0, bestKey=null;
     
     for(const key of candidateKeys){
-      const raw=localStorage.getItem(key);
+      const raw=store.getItem(key);
       if(!raw) continue;
       try{
         const d=JSON.parse(raw);
@@ -1266,7 +1297,7 @@ function renderHome(){
     // データがない場合は全キーを再試行
     console.warn('[のらエモン] 作物データなし。再ロード試行...');
     ['noraemon_v1','noraemon_v2','noraemon_v3'].forEach(k=>{
-      const r=localStorage.getItem(k);
+      const r=store.getItem(k);
       console.log('[のらエモン]',k,':',r?JSON.parse(r).myCrops?.length+'件':'なし');
     });
   }
@@ -1275,18 +1306,7 @@ function renderHome(){
   document.getElementById('alerts').innerHTML='';
   document.getElementById('archiveSec').innerHTML='';
   // ★デバッグ: localStorageのキーと myCrops件数を表示
-  // デバッグ情報を見やすく表示
-  (function dbg(){
-    const el=document.getElementById('homeDebug');if(!el)return;
-    const keys=[],n=localStorage.length;
-    for(let i=0;i<n;i++){const k=localStorage.key(i);if(k)keys.push(k+':'+((localStorage.getItem(k)||'').length)+'B');}
-    el.innerHTML=`<div style="font-size:11px;background:#FFF3CD;border-radius:6px;padding:8px;margin:4px 0;color:#856404">
-      🔧 <b>デバッグ</b> myCrops=${myCrops.length}件<br>
-      保存キー: ${keys.join(', ')||'なし'}<br>
-      LS_KEY=${LS_KEY}
-      <button onclick="reloadData()" style="margin-left:8px;padding:2px 8px;font-size:10px">再読込</button>
-    </div>`;
-  })();
+
   // 天気＋病害虫注意報
   renderHomeWeatherAlert();
 }
@@ -1764,12 +1784,12 @@ function saveMap(name){
     }))),
     COLS,ROWS,mapOrientDeg,name:n,savedAt:new Date().toISOString()
   };
-  localStorage.setItem(MAP_LS_PREFIX+n,JSON.stringify(payload));
+  store.setItem(MAP_LS_PREFIX+n,JSON.stringify(payload));
   alert(`「${n}」として保存しました`);
 }
 
 function loadMap(name){
-  const raw=localStorage.getItem(MAP_LS_PREFIX+name);
+  const raw=store.getItem(MAP_LS_PREFIX+name);
   if(!raw){alert('マップが見つかりません');return}
   try{
     const data=JSON.parse(raw);
@@ -1789,8 +1809,8 @@ function loadMap(name){
 
 function getSavedMapNames(){
   const names=[];
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
+  for(let i=0;i<store.length;i++){
+    const k=store.key(i);
     if(k&&k.startsWith(MAP_LS_PREFIX))names.push(k.slice(MAP_LS_PREFIX.length));
   }
   return names;
@@ -1818,7 +1838,7 @@ function showMapManager(){
 
 function deleteMap(name){
   if(!confirm(`「${name}」を削除しますか？`))return;
-  localStorage.removeItem(MAP_LS_PREFIX+name);
+  store.removeItem(MAP_LS_PREFIX+name);
   if(currentMapName===name)currentMapName='デフォルト';
   showMapManager();
 }
@@ -2626,7 +2646,7 @@ function closePanel(){
 (function init(){
   // localStorageからデータ読み込み（なければデフォルトサンプルをそのまま使う）
   // 現在地を復元
-  try{const sr=localStorage.getItem('noraemon_region');if(sr)region=JSON.parse(sr);}catch(e){}
+  try{const sr=store.getItem('noraemon_region');if(sr)region=JSON.parse(sr);}catch(e){}
   const loaded=loadData();
   if(!loaded){
     console.log('[のらエモン] 初回起動 - データなし');
@@ -2839,8 +2859,8 @@ function onKChange(){
   if(cb)cb.innerHTML=db?.caution?`<div class="caution-box" style="margin-bottom:10px">${db.caution}</div>`:'';
 }
 function showAddCrop(key='tomato'){
-  const allK=Object.keys(DB);
-  // ネストバックティックを避けるためoptions事前生成
+  // CATALOG_ORDER の50音順でoptions生成
+  const allK=CATALOG_ORDER.filter(k=>DB[k]).concat(Object.keys(DB).filter(k=>!CATALOG_ORDER.includes(k)));
   const optHtml=allK.map(k=>'<option value="'+k+'" '+(k===key?'selected':'')+'>'+(DB[k]?.e||'')+' '+(DB[k]?.n||k)+'</option>').join('');
   const vHtml=vChips(key);
   openPanel('<div style="font-size:16px;font-weight:700;margin-bottom:14px">作物を追加</div>'+
@@ -2881,7 +2901,7 @@ function addCrop(){
   const memo=(document.getElementById('nmemo')?.value||'').trim();
   myCrops.push({id:nid++,key:k,variety:v,plantDate:new Date(y,m-1,d),status:'active',photos:[],plantWeather:null,plantType,memo});
   saveData();
-  console.log('[のらエモン] addCrop後 myCrops='+myCrops.length+' LS確認='+!!(localStorage.getItem(LS_KEY)));
+  console.log('[のらエモン] addCrop後 myCrops='+myCrops.length+' LS確認='+!!(store.getItem(LS_KEY)));
   closePanel();showTab('home');
 }
 
