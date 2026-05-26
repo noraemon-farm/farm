@@ -129,7 +129,7 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 .ti-circle.done i{font-size:11px}
 .ti-body{flex:1;min-width:0}
 .ti-task{font-size:12px;font-weight:700}
-.ti-crop{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:2px;min-width:0}.ti-cn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.ti-du{white-space:nowrap!important;flex-shrink:0!important;color:var(--tx)!important;font-size:11px!important;visibility:visible!important;opacity:1!important;display:inline!important}
+.ti-crop{font-size:11px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ti-gentle{color:var(--amber)}
 .ti-hint{font-size:10px;color:var(--teal);margin-top:3px;background:var(--tl);border-radius:5px;padding:3px 7px;display:inline-block;line-height:1.4}
 .ti-warn{font-size:10px;color:var(--blue);margin-top:3px;background:var(--bl);border-radius:5px;padding:3px 7px;display:inline-block}
@@ -1258,13 +1258,12 @@ function tiHtml(t,small=false){
   const key=t.cid+'-'+t.d;
   const done=!!todoChecked[key];
   const _raw=Number(t.daysUntil);
-  const du=(isFinite(_raw)&&_raw===_raw)?Math.round(_raw):999;
+  const du=(isFinite(_raw)&&!isNaN(_raw))?Math.round(_raw):999;
   const urgent=!done&&(t.overdue||du<=2);
   const taskName=String(t.t||'');
   const taskNote=String(t.n||'');
   const taskHint=String(t.h||'');
   const emoji=String(t.emoji||'🌱');
-  const cropName=String(t.cname||'');
   let st;
   if(t.overdue){st=gm(taskName,t.oi||0);}
   else if(du===0){st='今日がちょうど目安です';}
@@ -1276,15 +1275,14 @@ function tiHtml(t,small=false){
   const noteHtml=(!small&&taskNote)?('<div style="font-size:10px;color:var(--tx3);margin-top:1px">'+taskNote+'</div>'):'';
   const hintHtml=(!small&&taskHint)?('<div class="ti-hint">🌿 '+taskHint+'</div>'):'';
   const warnH=(!small)?warnHtml(taskName):'';
-  const onclk="chk('" + key + "')";
-  const daySpan='<span style="flex-shrink:0;white-space:nowrap;padding-left:4px"> · '+st+'</span>';
-  const nameSpan='<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+cropName+'</span>';
-  const cropLine='<div style="display:flex;align-items:center;font-size:11px;color:#5A5A52">'+nameSpan+daySpan+'</div>';
+  const onclk="chk('"+key+"')";
+  const cname=String(t.cname||'');
+  const cropText=cname+' · '+st;
   return '<div class="ti">'+
     '<div class="'+circleClass+'" onclick="'+onclk+'">'+checkIcon+'</div>'+
     '<div class="ti-body">'+
     '<div class="ti-task">'+emoji+' '+taskName+'</div>'+
-    cropLine+
+    '<div class="'+cropClass+'">'+cropText+'</div>'+
     noteHtml+hintHtml+warnH+
     '</div></div>';
 }
