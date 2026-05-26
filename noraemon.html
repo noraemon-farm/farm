@@ -1171,14 +1171,34 @@ function buildGantt(container,cropList,totalDays=120,todayOff=30){
   const months=[];for(let i=0;i<5;i++){const d=new Date(TODAY.getFullYear(),TODAY.getMonth()+i-1,1);months.push(d.getMonth()+1+'月');}
   const tp=todayOff/totalDays*100;
   let html=`<div class="g-hdr"><div class="g-hdr-l"></div><div class="g-hdr-m">${months.map(m=>`<div class="g-month">${m}</div>`).join('')}</div></div>`;
-  cropList.forEach(crop=>{const db=DB[crop.key];if(!db)return;const days=dsp(crop),eDays=edp(crop);const s=Math.max(0,(todayOff-days)/totalDays*100),e=Math.min(100,(todayOff-days+db.days)/totalDays*100),w=e-s;const lbl=crop.variety||db.n;const dots=db.tasks.filter(t=>t.d>eDays).slice(0,4).map(t=>{const p=(todayOff-days+t.d)/totalDays*100;return p>=0&&p<=100?`<div class="g-dot" style="left:${p.toFixed(1)}%;border:1.5px solid ${db.c}"></div>`:'';}).join('');html+=`<div class="g-row"><div class="g-lbl" title="${dn(crop)}" onclick="showDetail(${crop.id})">${db.e} ${lbl}</div><div class="g-track"><div class="g-bar" style="left:${s.toFixed(1)}%;width:${Math.max(2,w).toFixed(1)}%;background:${db.c}">${w>22?lbl:''}</div><div class="g-today" style="left:${tp.toFixed(1)}%"></div>${dots}</div></div>`;});
-  if(!cropList.length){
-    container.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">作物がまだ登録されていません<br><span style="font-size:11px">右上の「＋追加」から始めましょう</span></div>';
+  let rowCount=0;
+  cropList.forEach(crop=>{
+    const db=DB[crop.key];
+    if(!db){console.warn('[のらエモン] DBに存在しないkey:',crop.key);return;}
+    const days=dsp(crop),eDays=edp(crop);
+    const s=Math.max(0,(todayOff-days)/totalDays*100),e=Math.min(100,(todayOff-days+db.days)/totalDays*100),w=e-s;
+    const lbl=crop.variety||db.n;
+    const dots=db.tasks.filter(t=>t.d>eDays).slice(0,4).map(t=>{const p=(todayOff-days+t.d)/totalDays*100;return p>=0&&p<=100?`<div class="g-dot" style="left:${p.toFixed(1)}%;border:1.5px solid ${db.c}"></div>`:'';}).join('');
+    html+=`<div class="g-row"><div class="g-lbl" title="${dn(crop)}" onclick="showDetail(${crop.id})">${db.e} ${lbl}</div><div class="g-track"><div class="g-bar" style="left:${s.toFixed(1)}%;width:${Math.max(2,w).toFixed(1)}%;background:${db.c}">${w>22?lbl:''}</div><div class="g-today" style="left:${tp.toFixed(1)}%"></div>${dots}</div></div>`;
+    rowCount++;
+  });
+  if(!cropList.length || rowCount===0){
+    const msg=cropList.length===0
+      ? '作物がまだ登録されていません<br><span style="font-size:11px">右上の「＋追加」から始めましょう</span>'
+      : '作物データの読み込みに失敗しました<br><span style="font-size:11px">一度リロードしてみてください</span>';
+    container.innerHTML=`<div style="color:var(--tx3);font-size:13px;padding:12px 0;text-align:center">${msg}</div>`;
     return;
   }
   container.innerHTML=html;
 }
 
+
+function reloadData(){
+  myCrops=[];nid=1;
+  const loaded=loadData();
+  renderHome();
+  alert('再読込: '+(loaded?'成功 '+myCrops.length+'件':'データなし'));
+}
 function renderHome(){
   renderWbar();
   const week=weekTasks();
@@ -1198,11 +1218,17 @@ function renderHome(){
   document.getElementById('alerts').innerHTML='';
   document.getElementById('archiveSec').innerHTML='';
   // ★デバッグ: localStorageのキーと myCrops件数を表示
+  // デバッグ情報を見やすく表示
   (function dbg(){
+    const el=document.getElementById('homeDebug');if(!el)return;
     const keys=[],n=localStorage.length;
-    for(let i=0;i<n;i++){const k=localStorage.key(i);if(k)keys.push(k+'('+((localStorage.getItem(k)||'').length)+'B)');}
-    const el=document.getElementById('homeDebug');
-    if(el)el.innerHTML='<div style="font-size:9px;color:#aaa;padding:4px 0">🔧 LS: '+keys.join(', ')+'<br>myCrops='+myCrops.length+' LS_KEY='+LS_KEY+'</div>';
+    for(let i=0;i<n;i++){const k=localStorage.key(i);if(k)keys.push(k+':'+((localStorage.getItem(k)||'').length)+'B');}
+    el.innerHTML=`<div style="font-size:11px;background:#FFF3CD;border-radius:6px;padding:8px;margin:4px 0;color:#856404">
+      🔧 <b>デバッグ</b> myCrops=${myCrops.length}件<br>
+      保存キー: ${keys.join(', ')||'なし'}<br>
+      LS_KEY=${LS_KEY}
+      <button onclick="reloadData()" style="margin-left:8px;padding:2px 8px;font-size:10px">再読込</button>
+    </div>`;
   })();
   // 天気＋病害虫注意報
   renderHomeWeatherAlert();
@@ -1950,8 +1976,8 @@ function renderPlanGantt(){
   area.innerHTML=`
     <div class="sec">栽培計画ガントチャート</div>
     <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">🟫土作り　🟩苗購入　🟦種まき　🟧栽培期間　赤線=今日</div>
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-      <canvas id="planCanvas" style="display:block"></canvas>
+    <div id="planScroll" style="overflow-x:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-x">
+      <canvas id="planCanvas" style="display:block;pointer-events:none;touch-action:none"></canvas>
     </div>
     <div class="sec">準備スケジュール</div>
     <div class="card">
@@ -1970,7 +1996,7 @@ function renderPlanGantt(){
     </div>`;
 
   setTimeout(()=>{
-    const cv=document.getElementById('ganttCanvas');if(!cv)return;
+    const cv=document.getElementById('planCanvas');if(!cv)return;
     const dpr=window.devicePixelRatio||1;
     cv.style.width=TOTAL_W+'px';cv.style.height=chartH+'px';
     cv.width=TOTAL_W*dpr;cv.height=chartH*dpr;
@@ -2020,7 +2046,7 @@ function renderPlanGantt(){
     ctx.fillStyle='#E24B4A';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('今日',todayX,2);
     ctx.strokeStyle=BD;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(LABEL_W,0);ctx.lineTo(LABEL_W,chartH);ctx.stroke();
     // スクロール位置を今日付近に設定
-    const sc=document.getElementById('ganttScroll');
+    const sc=document.getElementById('planScroll');
     if(sc){
       sc.scrollLeft=Math.max(0,todayX-80);
       // タッチスワイプ登録（canvas はpointer-events:none なのでscに届く）
