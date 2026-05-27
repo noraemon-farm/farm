@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0526-1434</title>
+<title>のらエモン｜家庭菜園お助けAI v0527-0516</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -23,7 +23,7 @@
   --r:8px;--rl2:14px;
   --shadow:0 2px 12px rgba(40,40,20,.09);
   --shadow-lg:0 8px 32px rgba(40,40,20,.14);
-  --font:system-ui,-apple-system,sans-serif;
+  --font:system-ui,-apple-system,Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{font-size:15px}
@@ -1276,8 +1276,8 @@ function tiHtml(t,small=false){
   const circleClass='ti-circle'+(done?' done':'');
   const cropClass='ti-crop'+(urgent?' ti-gentle':'');
   const checkIcon=done?'<i class="ti ti-check"></i>':'';
-  const noteHtml=(!small&&taskNote)?('<div style="font-size:10px;color:var(--tx3);margin-top:1px">'+taskNote+'</div>'):'';
-  const hintHtml=(!small&&taskHint)?('<div class="ti-hint">🌿 '+taskHint+'</div>'):'';
+  const noteHtml=(!small&&taskNote)?('<div style="font-size:10px;color:var(--tx3);margin-top:1px;font-family:system-ui,Arial,sans-serif">'+taskNote+'</div>'):'';
+  const hintHtml=(!small&&taskHint)?('<div class="ti-hint" style="font-family:system-ui,Arial,sans-serif">🌿 '+taskHint+'</div>'):'';
   const warnH=(!small)?warnHtml(taskName):'';
   const onclk="chk('"+key+"')";
   const cname=String(t.cname||'');
