@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0527-1052</title>
+<title>のらエモン｜家庭菜園お助けAI v0527-1348</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2352,87 +2352,38 @@ const PEST_SYMPTOMS=[
 ];
 
 const PEST_DB=[
-  {name:'アブラムシ',type:'虫',e:'🐜',color:'#8B6914',
+  {name:'アオバハゴロモ',type:'虫',e:'🐝',color:'#6AB04C',
+    symptoms:['茎や葉に白いフワフワした綿状のものがついている','幼虫が白い蝋物質で覆われている','汁を吸われて株が弱る'],
+    desc:'成虫は薄緑色で羽を持つ。幼虫は白い蝋状物質を分泌して身を守る。汁を吸い株を弱らせる。',
+    weather:{humid:true,hot:true},weatherNote:'梅雨〜夏に多発。',
+    crops:['tomato','pepper','eggplant','basil'],
+    treatment:'白い綿状のものを見たら幼虫ごと取り除く。スミチオン乳剤が有効。',
+    prevention:'雑草を除去（越冬場所になる）。防虫ネット設置。',
+    searchQuery:'アオバハゴロモ 幼虫 白い',imgUrl:'https://www.google.com/search?tbm=isch&q=アオバハゴロモ+幼虫+白い綿'}
+  ,{name:'アブラムシ',type:'虫',e:'🐜',color:'#8B6914',
     symptoms:['葉に黄色い斑点がある','葉が丸まっている・縮れている','葉の裏に小さな虫がいる','葉が黒くすすけている'],
     desc:'緑・黒・白など色はさまざま。葉の裏や新芽にびっしり集まり、汁を吸って株を弱らせる。すす病も誘発。',
     weather:{humid:true,hot:false},weatherNote:'アブラムシは乾燥した天候で爆発的に増えやすい。',
     crops:['tomato','cucumber','eggplant','pepper','broccoli','komatsuna','basil'],
+    searchQuery:'アブラムシ+野菜+被害',imgUrl:'https://www.google.com/search?tbm=isch&q=アブラムシ+野菜+被害',
     treatment:'牛乳スプレー・水で洗い流す・木酢液・ニームオイル。薬剤：アドマイヤー・オルトランなど。天敵（テントウムシ）を活用。',
-    prevention:'反射マルチで飛来防止。密植を避けて風通しよく。'},
-  {name:'ヨトウムシ',type:'虫',e:'🐛',color:'#5A3E0A',
-    symptoms:['葉に穴が開いている','葉脈だけ残して食べられている','実に傷・穴がある'],
-    desc:'夜行性。昼間は土中に潜み、夜に葉・茎・実を食害。幼虫は集団で、成長すると単独で大型化。',
-    weather:{humid:false,hot:false},weatherNote:'年2回発生（5〜6月、9〜10月）。気温変化の激しい時期に多い。',
-    crops:['tomato','eggplant','pepper','lettuce','komatsuna','spinach'],
-    treatment:'夜間にライトを当てて捕殺。薬剤：ダイアジノン・ヨトウムシ専用剤。ベイト剤も有効。',
-    prevention:'株元の土をこまめに確認（卵・幼虫を見つけ次第除去）。防虫ネット。'},
-  {name:'ウリハムシ',type:'虫',e:'🪲',color:'#B87316',
-    symptoms:['葉に穴が開いている','実に傷・穴がある'],
-    desc:'ウリ科の天敵。成虫が葉を円形に食べ、幼虫は根を食害。橙色の小型甲虫。カラカラと飛ぶ。',
-    weather:{humid:false,hot:true},weatherNote:'気温が高い晴れた日に活発に活動する。',
-    crops:['cucumber','pumpkin','watermelon'],
-    treatment:'見つけ次第捕殺（早朝が捕まえやすい）。シルバーマルチで飛来防止。薬剤：スミチオン。',
-    prevention:'防虫ネットで物理的防除が最も効果的。'},
-  {name:'アワノメイガ',type:'虫',e:'🦋',color:'#639922',
+    prevention:'反射マルチで飛来防止。密植を避けて風通しよく。'}
+  ,{name:'アワノメイガ',type:'虫',e:'🦋',color:'#639922',
     symptoms:['実に傷・穴がある','茎・葉に白い綿のようなものがついている'],
     desc:'トウモロコシの最大害虫。絹糸（雌穂）が出る頃に産卵。幼虫が穂・茎・芯を食害。フンが目印。',
     weather:{humid:true,hot:true},weatherNote:'梅雨明け後の高温多湿期（7〜8月）に多発。',
     crops:['corn'],
+    searchQuery:'アワノメイガ+トウモロコシ+被害',imgUrl:'https://www.google.com/search?tbm=isch&q=アワノメイガ+トウモロコシ+被害',
     treatment:'絹糸が褐色になったら要確認。穴を見つけたら針金で幼虫を除去。薬剤：スミチオン乳剤を穂に散布。',
-    prevention:'収穫後すぐに茎を処分（越冬防止）。絹糸が出たらすぐに農薬散布。'},
-  {name:'うどんこ病',type:'病気',e:'🍄',color:'#EEEAFD',
-    symptoms:['葉が白い粉をふいたようになっている'],
-    desc:'糸状菌によるカビ病。葉の表面に白い粉状のカビが広がる。生育不良・光合成低下を引き起こす。',
-    weather:{humid:true,hot:false,tempRange:'昼夜の寒暖差が大きい時期'},
-    weatherNote:'乾燥ぎみで昼夜の温度差が大きい時期（5〜6月、9〜10月）に多発。',
-    crops:['cucumber','pumpkin','watermelon','tomato','basil'],
-    treatment:'発生初期にカリグリーン・重曹スプレー・木酢液。薬剤：トップジンM・ベンレート・ダコニール。',
-    prevention:'密植を避け風通しよく。窒素過多に注意。予防的に殺菌剤を散布。'},
-  {name:'疫病',type:'病気',e:'🍄',color:'#533AB7',
-    symptoms:['葉に黄色い斑点がある','実が腐っている・変色している','株が突然しおれた'],
-    desc:'卵菌による病害。葉に暗緑色の水浸状の斑点→黒褐色に拡大。高温多湿で急速に進行。ジャガイモ・トマトに致命的。',
-    weather:{humid:true,hot:true},weatherNote:'高温多湿（気温20〜25℃、湿度80%以上）で爆発的に広がる。梅雨時期に特に注意。',
-    crops:['potato','tomato','cucumber','watermelon'],
-    treatment:'発病部位を即除去・処分。薬剤：コサイド・ダコニール・リドミル。感染株はビニール袋で処分（堆肥不可）。',
-    prevention:'風通し良く。雨が当たらないよう。予防的にコサイドを散布（特に梅雨前）。'},
-  {name:'灰色かび病',type:'病気',e:'🍄',color:'#888',
-    symptoms:['実が腐っている・変色している','茎・葉に白い綿のようなものがついている'],
-    desc:'ボトリティス菌による病害。灰色のカビが花・果実・葉に発生。低温多湿条件で広がりやすい。',
-    weather:{humid:true,hot:false},weatherNote:'低温多湿（気温15〜20℃）で多発。雨が続いた後に急増。',
-    crops:['tomato','cucumber','eggplant','lettuce','strawberry'],
-    treatment:'発病部位を除去（袋に入れて廃棄）。薬剤：トップジンM・ベンレート・ネオボン。',
-    prevention:'花がらをこまめに除去。密植を避ける。換気・風通しを良く。'},
-  {name:'根こぶ病',type:'病気',e:'🍄',color:'#993C1D',
-    symptoms:['株が突然しおれた','葉全体が黄色くなっている（下葉から）'],
-    desc:'アブラナ科に多い土壌病害。根にこぶができ、水・養分の吸収が妨げられる。抜いてみると根が変形している。',
-    weather:{humid:true,hot:false},weatherNote:'酸性土壌（pH5.5以下）で多発。排水不良の場所でも出やすい。',
-    crops:['broccoli','komatsuna'],
-    treatment:'発病株は根ごと丁寧に除去（土中に残さない）。石灰でpH矯正（6.5〜7.0を目標）。',
-    prevention:'連作を避ける。苦土石灰で酸性矯正。排水改善。'},
-  {name:'カメムシ',type:'虫',e:'🐛',color:'#5A6B14',
-    symptoms:['実に傷・穴がある','実が変色している・凹んでいる','葉に刺し跡がある','独特の臭いがする'],
-    desc:'茶色や緑の甲虫状の害虫。実に口を刺して汁を吸い、変色・落果の原因になる。臭いを出して警戒させる。トマト・ピーマン・枝豆などに多い。',
-    weather:{humid:false,hot:true},weatherNote:'高温乾燥時に飛来しやすい。',
-    crops:['tomato','pepper','edamame','corn'],
-    treatment:'見つけたらすぐ捕殺（素手は臭いに注意）。粘着シートで捕獲。防虫ネットで侵入を防ぐ。殺虫剤（スミチオン等）が有効。',
-    prevention:'周囲の雑草を除去。防虫ネット設置。早朝は動きが鈍いので捕まえやすい。',
-    searchQuery:'カメムシ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=カメムシ+野菜+被害'}
-  ,{name:'ハダニ',type:'虫',e:'🕷',color:'#B84000',
-    symptoms:['葉が白っぽくかすれている','葉の裏に細かいクモの巣状のものがある','葉が黄化している','葉を光にかざすと小さな点が動く'],
-    desc:'0.5mm程度の極小の赤い虫。葉の裏に潜んで汁を吸い、葉が白くかすれる。乾燥高温で爆発的に増える。',
-    weather:{humid:false,hot:true},weatherNote:'高温乾燥時に急増。梅雨明け後に要注意。',
-    crops:['tomato','cucumber','eggplant','pumpkin','watermelon'],
-    treatment:'葉の裏に水スプレーで洗い流す。ダニ専用殺虫剤（マラソン乳剤は効果薄、アタブロン等）。木酢液も効果的。',
-    prevention:'葉の裏を定期的に確認。乾燥を防ぐため適切な水やり。',
-    searchQuery:'ハダニ 野菜 葉',imgUrl:'https://www.google.com/search?tbm=isch&q=ハダニ+野菜+被害'}
-  ,{name:'ナメクジ',type:'虫',e:'🐌',color:'#8B6914',
-    symptoms:['葉や実に不規則な穴が開いている','光沢のある粘液跡（ぬめり）がある','夜間や雨天後に被害が多い','地際の茎が食べられている'],
-    desc:'雨天や夜間に活動し、葉・茎・実をかじる。光沢のある粘液跡が目印。湿った場所を好む。',
-    weather:{humid:true,hot:false},weatherNote:'雨続きや多湿な環境で多発。',
-    crops:['lettuce','komatsuna','spinach','broccoli','cabbage'],
-    treatment:'手で捕殺（夜間・早朝が効果的）。ナメクジ専用薬（メタアルデヒド剤）を株元に散布。コーヒーかすや塩も効果的。',
-    prevention:'圃場の雑草除去。不要な落ち葉を取り除く。米ぬか・燻炭をまいて乾燥を促す。',
-    searchQuery:'ナメクジ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=ナメクジ+野菜+被害'}
+    prevention:'収穫後すぐに茎を処分（越冬防止）。絹糸が出たらすぐに農薬散布。'}
+  ,{name:'ウリハムシ',type:'虫',e:'🪲',color:'#B87316',
+    symptoms:['葉に穴が開いている','実に傷・穴がある'],
+    desc:'ウリ科の天敵。成虫が葉を円形に食べ、幼虫は根を食害。橙色の小型甲虫。カラカラと飛ぶ。',
+    weather:{humid:false,hot:true},weatherNote:'気温が高い晴れた日に活発に活動する。',
+    crops:['cucumber','pumpkin','watermelon'],
+    searchQuery:'ウリハムシ+葉+食害',imgUrl:'https://www.google.com/search?tbm=isch&q=ウリハムシ+葉+食害',
+    treatment:'見つけ次第捕殺（早朝が捕まえやすい）。シルバーマルチで飛来防止。薬剤：スミチオン。',
+    prevention:'防虫ネットで物理的防除が最も効果的。'}
   ,{name:'カイガラムシ',type:'虫',e:'🦗',color:'#6B5A3E',
     symptoms:['茎や葉に白・茶色の小さな固い塊がついている','葉が黄化・落葉する','茎がすすで黒くなっている','枝にびっしりと何かついている'],
     desc:'茎や葉に固着する。殻で覆われているため農薬が効きにくい。すす病も誘発する。',
@@ -2441,14 +2392,14 @@ const PEST_DB=[
     treatment:'歯ブラシや布でこすり落とす。アクテリック乳剤・マシン油乳剤が有効（孵化直後が効果的）。木酢液の散布。',
     prevention:'風通しをよくする。過密栽培を避ける。早期発見が大切。',
     searchQuery:'カイガラムシ 野菜',imgUrl:'https://www.google.com/search?tbm=isch&q=カイガラムシ+野菜+被害'}
-  ,{name:'ダンゴムシ',type:'虫',e:'🐛',color:'#5A5A5A',
-    symptoms:['地際の茎・根が食べられている','種まき後に発芽しない','根元に穴が開いている','土中の根が食害されている'],
-    desc:'丸まる習性が特徴。腐植を食べるが、柔らかい芽や根も食害する。播種後や定植直後に多い。',
-    weather:{humid:true,hot:false},weatherNote:'湿った環境を好む。梅雨時や雨後に活発。',
-    crops:['lettuce','komatsuna','spinach','daikon'],
-    treatment:'見つけ次第捕殺。誘殺材（ジョーカー等）を株元に設置。有機資材（米ぬか等）が誘引になるため量を減らす。',
-    prevention:'圃場の残渣・落ち葉を除去。乾燥気味の管理。木酢液の土壌散布。',
-    searchQuery:'ダンゴムシ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=ダンゴムシ+野菜+根+被害'}
+  ,{name:'カメムシ',type:'虫',e:'🐛',color:'#5A6B14',
+    symptoms:['実に傷・穴がある','実が変色している・凹んでいる','葉に刺し跡がある','独特の臭いがする'],
+    desc:'茶色や緑の甲虫状の害虫。実に口を刺して汁を吸い、変色・落果の原因になる。臭いを出して警戒させる。トマト・ピーマン・枝豆などに多い。',
+    weather:{humid:false,hot:true},weatherNote:'高温乾燥時に飛来しやすい。',
+    crops:['tomato','pepper','edamame','corn'],
+    treatment:'見つけたらすぐ捕殺（素手は臭いに注意）。粘着シートで捕獲。防虫ネットで侵入を防ぐ。殺虫剤（スミチオン等）が有効。',
+    prevention:'周囲の雑草を除去。防虫ネット設置。早朝は動きが鈍いので捕まえやすい。',
+    searchQuery:'カメムシ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=カメムシ+野菜+被害'}
   ,{name:'コナガ',type:'虫',e:'🦋',color:'#2A6B3E',
     symptoms:['アブラナ科の葉に小さな穴がある','葉の表面だけ残して裏から食べられている','小さな青緑の幼虫がいる','防虫ネット内でも被害がある'],
     desc:'アブラナ科専門の害虫。幼虫が葉の裏から食害し、表皮だけ残す「スケルトン状」の被害が特徴。農薬耐性が強い。',
@@ -2457,6 +2408,30 @@ const PEST_DB=[
     treatment:'アタブロン乳剤（効果的）。BT剤（バチルス・チューリンゲンシス）も有効。早期発見が重要。',
     prevention:'防虫ネット（目の細かいもの）。成虫の産卵を防ぐ。アブラナ科の連作を避ける。',
     searchQuery:'コナガ アブラナ科 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=コナガ+幼虫+葉'}
+  ,{name:'ダンゴムシ',type:'虫',e:'🐛',color:'#5A5A5A',
+    symptoms:['地際の茎・根が食べられている','種まき後に発芽しない','根元に穴が開いている','土中の根が食害されている'],
+    desc:'丸まる習性が特徴。腐植を食べるが、柔らかい芽や根も食害する。播種後や定植直後に多い。',
+    weather:{humid:true,hot:false},weatherNote:'湿った環境を好む。梅雨時や雨後に活発。',
+    crops:['lettuce','komatsuna','spinach','daikon'],
+    treatment:'見つけ次第捕殺。誘殺材（ジョーカー等）を株元に設置。有機資材（米ぬか等）が誘引になるため量を減らす。',
+    prevention:'圃場の残渣・落ち葉を除去。乾燥気味の管理。木酢液の土壌散布。',
+    searchQuery:'ダンゴムシ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=ダンゴムシ+野菜+根+被害'}
+  ,{name:'ナメクジ',type:'虫',e:'🐌',color:'#8B6914',
+    symptoms:['葉や実に不規則な穴が開いている','光沢のある粘液跡（ぬめり）がある','夜間や雨天後に被害が多い','地際の茎が食べられている'],
+    desc:'雨天や夜間に活動し、葉・茎・実をかじる。光沢のある粘液跡が目印。湿った場所を好む。',
+    weather:{humid:true,hot:false},weatherNote:'雨続きや多湿な環境で多発。',
+    crops:['lettuce','komatsuna','spinach','broccoli','cabbage'],
+    treatment:'手で捕殺（夜間・早朝が効果的）。ナメクジ専用薬（メタアルデヒド剤）を株元に散布。コーヒーかすや塩も効果的。',
+    prevention:'圃場の雑草除去。不要な落ち葉を取り除く。米ぬか・燻炭をまいて乾燥を促す。',
+    searchQuery:'ナメクジ 野菜 被害',imgUrl:'https://www.google.com/search?tbm=isch&q=ナメクジ+野菜+被害'}
+  ,{name:'ハダニ',type:'虫',e:'🕷',color:'#B84000',
+    symptoms:['葉が白っぽくかすれている','葉の裏に細かいクモの巣状のものがある','葉が黄化している','葉を光にかざすと小さな点が動く'],
+    desc:'0.5mm程度の極小の赤い虫。葉の裏に潜んで汁を吸い、葉が白くかすれる。乾燥高温で爆発的に増える。',
+    weather:{humid:false,hot:true},weatherNote:'高温乾燥時に急増。梅雨明け後に要注意。',
+    crops:['tomato','cucumber','eggplant','pumpkin','watermelon'],
+    treatment:'葉の裏に水スプレーで洗い流す。ダニ専用殺虫剤（マラソン乳剤は効果薄、アタブロン等）。木酢液も効果的。',
+    prevention:'葉の裏を定期的に確認。乾燥を防ぐため適切な水やり。',
+    searchQuery:'ハダニ 野菜 葉',imgUrl:'https://www.google.com/search?tbm=isch&q=ハダニ+野菜+被害'}
   ,{name:'ハマキガ',type:'虫',e:'🦋',color:'#8B4500',
     symptoms:['葉がくるくると巻かれている','巻いた葉の中に小さな幼虫がいる','新芽が食べられている','巻いた葉を開くと黄緑色の幼虫がいる'],
     desc:'幼虫が葉を巻いてその中に潜み食害する。糸で葉を綴り合わせる。新芽・若葉を好む。',
@@ -2465,14 +2440,48 @@ const PEST_DB=[
     treatment:'巻いた葉ごと除去して踏みつぶす。スミチオン乳剤・マラソン乳剤が有効。BT剤も使用可。',
     prevention:'成虫の産卵期に防虫ネット設置。早期発見・除去が最も効果的。',
     searchQuery:'ハマキガ 幼虫 野菜',imgUrl:'https://www.google.com/search?tbm=isch&q=ハマキガ+幼虫+野菜'}
-  ,{name:'アオバハゴロモ',type:'虫',e:'🐝',color:'#6AB04C',
-    symptoms:['茎や葉に白いフワフワした綿状のものがついている','幼虫が白い蝋物質で覆われている','汁を吸われて株が弱る'],
-    desc:'成虫は薄緑色で羽を持つ。幼虫は白い蝋状物質を分泌して身を守る。汁を吸い株を弱らせる。',
-    weather:{humid:true,hot:true},weatherNote:'梅雨〜夏に多発。',
-    crops:['tomato','pepper','eggplant','basil'],
-    treatment:'白い綿状のものを見たら幼虫ごと取り除く。スミチオン乳剤が有効。',
-    prevention:'雑草を除去（越冬場所になる）。防虫ネット設置。',
-    searchQuery:'アオバハゴロモ 幼虫 白い',imgUrl:'https://www.google.com/search?tbm=isch&q=アオバハゴロモ+幼虫+白い綿'}
+  ,{name:'ヨトウムシ',type:'虫',e:'🐛',color:'#5A3E0A',
+    symptoms:['葉に穴が開いている','葉脈だけ残して食べられている','実に傷・穴がある'],
+    desc:'夜行性。昼間は土中に潜み、夜に葉・茎・実を食害。幼虫は集団で、成長すると単独で大型化。',
+    weather:{humid:false,hot:false},weatherNote:'年2回発生（5〜6月、9〜10月）。気温変化の激しい時期に多い。',
+    crops:['tomato','eggplant','pepper','lettuce','komatsuna','spinach'],
+    searchQuery:'ヨトウムシ+幼虫+野菜',imgUrl:'https://www.google.com/search?tbm=isch&q=ヨトウムシ+幼虫+野菜',
+    treatment:'夜間にライトを当てて捕殺。薬剤：ダイアジノン・ヨトウムシ専用剤。ベイト剤も有効。',
+    prevention:'株元の土をこまめに確認（卵・幼虫を見つけ次第除去）。防虫ネット。'}
+  ,{name:'青枯病',type:'病気',e:'💀',color:'#2A6B3E',
+    symptoms:['株が突然青いまましおれる','朝は回復するが夕方にはしおれる','茎を切ると断面から乳白色の液体が出る','根が腐っている'],
+    desc:'土壌細菌による病気。維管束（水の通り道）を塞ぎ、突然全株がしおれる。一度かかると治療不可。土壌に何年も残る。',
+    weather:{humid:true,hot:true},weatherNote:'高温多湿の夏に多発。30℃以上で急増。',
+    crops:['tomato','eggplant','pepper','potato'],
+    treatment:'発症したら即抜き取り圃場外で処分（土ごと）。薬剤での治療は不可。',
+    prevention:'連作しない。接ぎ木苗を使用。排水改善。石灰でpHを上げる。',
+    searchQuery:'青枯病 トマト 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=青枯病+トマト+症状'}
+  ,{name:'うどんこ病',type:'病気',e:'🍄',color:'#EEEAFD',
+    symptoms:['葉が白い粉をふいたようになっている'],
+    desc:'糸状菌によるカビ病。葉の表面に白い粉状のカビが広がる。生育不良・光合成低下を引き起こす。',
+    weather:{humid:true,hot:false,tempRange:'昼夜の寒暖差が大きい時期'},
+    weatherNote:'乾燥ぎみで昼夜の温度差が大きい時期（5〜6月、9〜10月）に多発。',
+    crops:['cucumber','pumpkin','watermelon','tomato','basil'],
+    treatment:'発生初期にカリグリーン・重曹スプレー・木酢液。薬剤：トップジンM・ベンレート・ダコニール。',
+    prevention:'密植を避け風通しよく。窒素過多に注意。予防的に殺菌剤を散布。',
+    searchQuery:'うどんこ病+野菜+白い粉',imgUrl:'https://www.google.com/search?tbm=isch&q=うどんこ病+野菜+白い粉'}
+  ,{name:'疫病',type:'病気',e:'🍄',color:'#533AB7',
+    symptoms:['葉に黄色い斑点がある','実が腐っている・変色している','株が突然しおれた'],
+    desc:'卵菌による病害。葉に暗緑色の水浸状の斑点→黒褐色に拡大。高温多湿で急速に進行。ジャガイモ・トマトに致命的。',
+    weather:{humid:true,hot:true},weatherNote:'高温多湿（気温20〜25℃、湿度80%以上）で爆発的に広がる。梅雨時期に特に注意。',
+    crops:['potato','tomato','cucumber','watermelon'],
+    searchQuery:'疫病+トマト+症状',imgUrl:'https://www.google.com/search?tbm=isch&q=疫病+トマト+症状',
+    searchQuery:'うどんこ病+野菜+白い粉',imgUrl:'https://www.google.com/search?tbm=isch&q=うどんこ病+野菜+白い粉',
+    treatment:'発病部位を即除去・処分。薬剤：コサイド・ダコニール・リドミル。感染株はビニール袋で処分（堆肥不可）。',
+    prevention:'風通し良く。雨が当たらないよう。予防的にコサイドを散布（特に梅雨前）。'}
+  ,{name:'褐斑病',type:'病気',e:'🍁',color:'#8B4500',
+    symptoms:['葉に褐色の斑点がある','斑点の周囲が黄色くなる','斑点が融合して大きくなる','下葉から症状が出る'],
+    desc:'カビによる病気。葉に褐色の円形〜不整形の斑点が出る。きゅうり・ほうれん草・いんげんに多い。',
+    weather:{humid:true,hot:false},weatherNote:'多湿・曇天が続くと多発。',
+    crops:['cucumber','spinach','komatsuna','lettuce'],
+    treatment:'発病葉を除去。ダコニール・ベンレート等の殺菌剤。',
+    prevention:'密植を避け風通しよく。水はね防止のためマルチを使用。下葉を除去して通気確保。',
+    searchQuery:'褐斑病 野菜 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=褐斑病+野菜+葉+症状'}
   ,{name:'黒星病',type:'病気',e:'🍃',color:'#2A3A2A',
     symptoms:['葉に黒い星状の斑点がある','実に黒い凹んだ斑点がある','病斑の周囲が黄色くなる','葉が黄化して落ちる'],
     desc:'カビの一種による病気。葉・実・枝に黒い斑点が出る。ウリ科・バラ科に多い。梅雨時の多湿で急増。',
@@ -2489,6 +2498,22 @@ const PEST_DB=[
     treatment:'発病部位を除去。サプロール乳剤・アミスター等の殺菌剤。',
     prevention:'排水改善。密植を避け風通しをよくする。罹患した株の残渣を圃場外へ持ち出す。',
     searchQuery:'さび病 ネギ タマネギ 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=さび病+ネギ+オレンジ'}
+  ,{name:'根こぶ病',type:'病気',e:'🍄',color:'#993C1D',
+    symptoms:['株が突然しおれた','葉全体が黄色くなっている（下葉から）'],
+    desc:'アブラナ科に多い土壌病害。根にこぶができ、水・養分の吸収が妨げられる。抜いてみると根が変形している。',
+    weather:{humid:true,hot:false},weatherNote:'酸性土壌（pH5.5以下）で多発。排水不良の場所でも出やすい。',
+    crops:['broccoli','komatsuna'],
+    searchQuery:'根こぶ病+アブラナ科+根',imgUrl:'https://www.google.com/search?tbm=isch&q=根こぶ病+アブラナ科+根',
+    treatment:'発病株は根ごと丁寧に除去（土中に残さない）。石灰でpH矯正（6.5〜7.0を目標）。',
+    prevention:'連作を避ける。苦土石灰で酸性矯正。排水改善。'}
+  ,{name:'灰色かび病',type:'病気',e:'🍄',color:'#888',
+    symptoms:['実が腐っている・変色している','茎・葉に白い綿のようなものがついている'],
+    desc:'ボトリティス菌による病害。灰色のカビが花・果実・葉に発生。低温多湿条件で広がりやすい。',
+    weather:{humid:true,hot:false},weatherNote:'低温多湿（気温15〜20℃）で多発。雨が続いた後に急増。',
+    crops:['tomato','cucumber','eggplant','lettuce','strawberry'],
+    searchQuery:'灰色かび病+野菜+症状',imgUrl:'https://www.google.com/search?tbm=isch&q=灰色かび病+野菜+症状',
+    treatment:'発病部位を除去（袋に入れて廃棄）。薬剤：トップジンM・ベンレート・ネオボン。',
+    prevention:'花がらをこまめに除去。密植を避ける。換気・風通しを良く。'}
   ,{name:'べと病',type:'病気',e:'🌿',color:'#5A8B3E',
     symptoms:['葉の表面に黄色い多角形の斑点がある','葉の裏に灰紫色のカビが生える','斑点が広がって葉全体が黄化','雨の多い時期に急速に拡大'],
     desc:'カビ（卵菌類）による病気。葉の表に黄色い病斑、裏に灰色のカビが生える。ウリ科・ブドウに多い。多湿で急増。',
@@ -2497,14 +2522,6 @@ const PEST_DB=[
     treatment:'発病葉を除去。ダコニール・リドミル等の殺菌剤。銅剤も有効。',
     prevention:'水はけを改善。過湿を避ける。葉が濡れたままにしない。密植を避ける。',
     searchQuery:'べと病 きゅうり 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=べと病+野菜+症状'}
-  ,{name:'青枯病',type:'病気',e:'💀',color:'#2A6B3E',
-    symptoms:['株が突然青いまましおれる','朝は回復するが夕方にはしおれる','茎を切ると断面から乳白色の液体が出る','根が腐っている'],
-    desc:'土壌細菌による病気。維管束（水の通り道）を塞ぎ、突然全株がしおれる。一度かかると治療不可。土壌に何年も残る。',
-    weather:{humid:true,hot:true},weatherNote:'高温多湿の夏に多発。30℃以上で急増。',
-    crops:['tomato','eggplant','pepper','potato'],
-    treatment:'発症したら即抜き取り圃場外で処分（土ごと）。薬剤での治療は不可。',
-    prevention:'連作しない。接ぎ木苗を使用。排水改善。石灰でpHを上げる。',
-    searchQuery:'青枯病 トマト 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=青枯病+トマト+症状'}
   ,{name:'モザイク病',type:'病気',e:'🟡',color:'#BA7516',
     symptoms:['葉にモザイク状の黄緑の模様がある','葉がでこぼこに縮れている','実が変形する','新芽が特に縮れている'],
     desc:'ウイルス病。アブラムシが媒介する。葉にモザイク模様が出て株が弱る。一度感染すると治療不可。',
@@ -2513,14 +2530,6 @@ const PEST_DB=[
     treatment:'感染株は即抜き取り処分。媒介するアブラムシを防除することが最重要。',
     prevention:'アブラムシを早期防除。シルバーマルチでアブラムシを忌避。ウイルス耐性品種を選ぶ。',
     searchQuery:'モザイク病 野菜 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=モザイク病+野菜+葉'}
-  ,{name:'褐斑病',type:'病気',e:'🍁',color:'#8B4500',
-    symptoms:['葉に褐色の斑点がある','斑点の周囲が黄色くなる','斑点が融合して大きくなる','下葉から症状が出る'],
-    desc:'カビによる病気。葉に褐色の円形〜不整形の斑点が出る。きゅうり・ほうれん草・いんげんに多い。',
-    weather:{humid:true,hot:false},weatherNote:'多湿・曇天が続くと多発。',
-    crops:['cucumber','spinach','komatsuna','lettuce'],
-    treatment:'発病葉を除去。ダコニール・ベンレート等の殺菌剤。',
-    prevention:'密植を避け風通しよく。水はね防止のためマルチを使用。下葉を除去して通気確保。',
-    searchQuery:'褐斑病 野菜 症状',imgUrl:'https://www.google.com/search?tbm=isch&q=褐斑病+野菜+葉+症状'}
 ];
 
 let pestSymptomSel=new Set();
@@ -2577,7 +2586,9 @@ function renderPestWeatherRisk(){
 
 function renderPestLibrary(){
   const el=document.getElementById('pestLibrary');if(!el)return;
-  el.innerHTML=PEST_DB.map(p=>`
+  const insects=PEST_DB.filter(p=>p&&p.type==='虫');
+  const diseases=PEST_DB.filter(p=>p&&p.type==='病気');
+  const cardTpl=p=>`
     <div class="card" style="margin-bottom:8px;cursor:pointer" onclick="showPestDetail('${p.name}')">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="width:38px;height:38px;border-radius:9px;background:${p.type==='虫'?'#FAEEDA':'#EEEAFD'};display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0">${p.e}</div>
@@ -2588,8 +2599,13 @@ function renderPestLibrary(){
         </div>
         <i class="ti ti-chevron-right" style="color:var(--tx3)"></i>
       </div>
-    </div>`).join('');
+    </div>`;
+  const grp=(label,emoji,list)=>list.length===0?'':
+    `<div style="font-size:11px;font-weight:700;color:var(--tx3);padding:8px 2px 2px;letter-spacing:.05em">${emoji} ${label}（${list.length}種）</div>`+
+    list.map(cardTpl).join('');
+  el.innerHTML=grp('害虫','🐛',insects)+grp('病気','🍃',diseases);
 }
+
 
 function showPestDetail(name){
   const p=PEST_DB.find(x=>x.name===name);if(!p)return;
