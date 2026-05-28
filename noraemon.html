@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1324</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1357</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -1206,7 +1206,7 @@ async function fetchPlantWx(crop){
 
 function renderWbar(){
   if(!wdata)return;
-  const c=wdata.current,t=Math.round(c.temperature_2m),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m);
+  const c=wdata.current,t=Math.round(c.temperature_2m),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m/3.6*10)/10;
   const ico=wico(c.weather_code);
   const rain=isRaining(),hot=t>=32,humid=h>=80;
   const tip=rain?'🌧 雨天：追肥・農薬散布はお休みを':hot?'🥵 高温：朝夕の作業がおすすめ':humid?'💧 高湿：病害虫チェックを':'🌱 作業日和です！';
@@ -1217,7 +1217,7 @@ function renderWbar(){
 function renderWdetail(){
   if(!wdata){document.getElementById('wDetail').innerHTML='<div class="loading">🌤 取得中…</div>';return}
   const c=wdata.current,d=wdata.daily;
-  const t=Math.round(c.temperature_2m),f=Math.round(c.apparent_temperature||t),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m),r=c.precipitation;
+  const t=Math.round(c.temperature_2m),f=Math.round(c.apparent_temperature||t),h=c.relative_humidity_2m,w=Math.round(c.wind_speed_10m/3.6*10)/10,r=d.precipitation_sum?.[0]??0;
   const ico=wico(c.weather_code),lab=wlab(c.weather_code);
   const rain=isRaining(),hot=t>=32,humid=h>=80,windy=w>=10;
   let adv=[];
@@ -1227,7 +1227,7 @@ function renderWdetail(){
   if(humid&&!rain)adv.push({cls:'warn',ic:'💧',tt:`高湿度（${h}%）：病害虫に注意`,bd:'うどんこ病・疫病が出やすい条件です。風通しを良くしましょう。'});
   if(windy)adv.push({cls:'warn',ic:'💨',tt:`強風（${w}m/s）`,bd:'支柱の固定確認と、背の高い作物の誘引を増やしましょう。'});
   const fcst=(d.time||[]).slice(0,7).map((t2,i)=>{const dd=new Date(t2),fw=wico(d.weather_code[i]),hi=Math.round(d.temperature_2m_max[i]),lo=Math.round(d.temperature_2m_min[i]),rn=Math.round(d.precipitation_sum[i]);return`<div style="flex-shrink:0;width:48px;text-align:center;background:${i===0?'var(--gl)':'var(--bg2)'};border-radius:var(--r);padding:6px 3px;${i===0?'border:1px solid #C0DD97':''}"><div style="font-size:10px;color:var(--tx3);margin-bottom:3px">${i===0?'今日':DOWS[dd.getDay()]}</div><div style="font-size:18px;margin-bottom:3px">${fw}</div><div style="font-size:12px;font-weight:700">${hi}°</div><div style="font-size:10px;color:var(--tx3)">${lo}°</div><div style="font-size:9px;color:${rn>0?'var(--blue)':'var(--tx3)'};margin-top:2px">${rn>0?rn+'mm':'—'}</div></div>`;}).join('');
-  document.getElementById('wDetail').innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:44px">${ico}</div><div><div style="font-size:28px;font-weight:700">${t}<span style="font-size:14px;color:var(--tx2)">°C</span></div><div style="font-size:11px;color:var(--tx2);font-family:'M PLUS Rounded 1c',Arial,sans-serif">${lab}　体感${f}°C</div><div style="font-size:10px;color:var(--tx3)">📍${region.name}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px"><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💧 湿度</div><div style="font-size:14px;font-weight:700;color:${h>=80?'var(--amber)':'var(--blue)'}">${h}%</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💨 風速</div><div style="font-size:14px;font-weight:700;color:${w>=10?'var(--red)':'var(--green)'}">${w} m/s</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌧 降水量</div><div style="font-size:14px;font-weight:700;color:${r>0?'var(--blue)':'var(--green)'}">${r} mm</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌡 最高/最低</div><div style="font-size:13px;font-weight:700">${Math.round(d.temperature_2m_max[0])}° / ${Math.round(d.temperature_2m_min[0])}°</div></div></div><button class="btn btn-sm btn-bl" onclick="loadWeather()"><i class="ti ti-refresh"></i> 更新</button></div><div class="sec">今日の農作業アドバイス</div>${adv.map(a=>`<div class="banner ${a.cls}"><div class="banner-ico">${a.ic}</div><div><div class="banner-title">${a.tt}</div><div class="banner-body">${a.bd}</div></div></div>`).join('')}<div class="sec">週間予報</div><div class="card" style="padding:10px 12px"><div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:3px">${fcst}</div></div><div style="font-size:10px;color:var(--tx3);text-align:center;margin:4px 0 8px">データ提供: Open-Meteo（無料・オープンデータ）</div>`;
+  document.getElementById('wDetail').innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:44px">${ico}</div><div><div style="font-size:28px;font-weight:700">${t}<span style="font-size:14px;color:var(--tx2)">°C</span></div><div style="font-size:11px;color:var(--tx2);font-family:'M PLUS Rounded 1c',Arial,sans-serif">${lab}　体感${f}°C</div><div style="font-size:10px;color:var(--tx3)">📍${region.name}</div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px"><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💧 湿度</div><div style="font-size:14px;font-weight:700;color:${h>=80?'var(--amber)':'var(--blue)'}">${h}%</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">💨 風速</div><div style="font-size:14px;font-weight:700;color:${w>=10?'var(--red)':'var(--green)'}">${w} m/s</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌧 降水量</div><div style="font-size:14px;font-weight:700;color:${r>0?'var(--blue)':'var(--green)'}">${r>0?r+'mm':'0mm'}</div></div><div style="background:var(--bg2);border-radius:var(--r);padding:8px"><div style="font-size:10px;color:var(--tx3);margin-bottom:2px">🌡 最高/最低</div><div style="font-size:13px;font-weight:700">${Math.round(d.temperature_2m_max[0])}° / ${Math.round(d.temperature_2m_min[0])}°</div></div></div><button class="btn btn-sm btn-bl" onclick="loadWeather()"><i class="ti ti-refresh"></i> 更新</button></div><div class="sec">今日の農作業アドバイス</div>${adv.map(a=>`<div class="banner ${a.cls}"><div class="banner-ico">${a.ic}</div><div><div class="banner-title">${a.tt}</div><div class="banner-body">${a.bd}</div></div></div>`).join('')}<div class="sec">週間予報</div><div class="card" style="padding:10px 12px"><div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:3px">${fcst}</div></div><div style="font-size:10px;color:var(--tx3);text-align:center;margin:4px 0 8px">データ提供: Open-Meteo（無料・オープンデータ）</div>`;
 }
 
 // Todo
