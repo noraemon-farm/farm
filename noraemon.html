@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1227</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1233</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2783,10 +2783,15 @@ async function diagnosePestByPhoto(){
       {inline_data:{mime_type:mimeType,data:b64}},
       {text:prompt}
     ],1500);
-    const html=text.split('\n').map(l=>{
-      if(l.startsWith('## '))return '<div style="font-size:12px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
-      return l||'<br>';
-    }).join('');
+    const html=text
+      .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+      .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--bd);margin:8px 0">')
+      .split('\n').map(l=>{
+        if(l.startsWith('## '))return '<div style="font-size:13px;font-weight:700;margin:12px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
+        if(l.startsWith('# '))return '<div style="font-size:14px;font-weight:700;margin:8px 0 4px;color:var(--tx)">'+l.slice(2)+'</div>';
+        if(l.match(/^\d+\. /))return '<div style="padding:2px 0">'+l+'</div>';
+        return l||'<br>';
+      }).join('');
     // パネルで全文表示（padding-bottomを小さくして表示領域を確保）
     openPanel('<div style="padding:4px 0 20px">'+
       '<div style="font-size:15px;font-weight:700;margin-bottom:12px">🔍 AI病害虫診断結果</div>'+
@@ -2937,7 +2942,8 @@ function closePanel(){
   const panel=document.getElementById('panel');
   let startY=0,dragging=false;
   panel.addEventListener('touchstart',e=>{
-    if(e.target.closest('.panel-handle')||panel.scrollTop===0){
+    // panel-handle のみドラッグ対象（コンテンツ部分はスクロールに任せる）
+    if(e.target.closest('.panel-handle')){
       startY=e.touches[0].clientY;dragging=true;
     }
   },{passive:true});
