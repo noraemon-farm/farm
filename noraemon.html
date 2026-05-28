@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-0655</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-0752</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2417,7 +2417,7 @@ function getGeminiKey(){
 async function callGemini(parts,maxTokens=800){
   const key=getGeminiKey();
   if(!key)throw new Error('APIキーが必要です');
-  const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key;
+  const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key;
   const resp=await fetch(url,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
