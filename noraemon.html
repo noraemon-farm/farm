@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1206</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1212</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2782,14 +2782,17 @@ async function diagnosePestByPhoto(){
     const text=await callGemini([
       {inline_data:{mime_type:mimeType,data:b64}},
       {text:prompt}
-    ],800);
+    ],1500);
     const html=text.split('\n').map(l=>{
       if(l.startsWith('## '))return '<div style="font-size:12px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
       return l||'<br>';
-    }).join('\n');
-    res.innerHTML='<div style="margin-top:10px;padding:12px;background:var(--bg2);border-radius:8px;font-size:13px;line-height:1.8;color:var(--tx2)">'+html+'</div><div style="font-size:10px;color:var(--tx3);margin-top:4px;text-align:right">Powered by Google Gemini</div>';
-    // 結果エリアまでスクロール
-    setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
+    }).join('');
+    // パネルで全文表示
+    openPanel('<div style="padding:4px 0"><div style="font-size:15px;font-weight:700;margin-bottom:12px">🔍 AI病害虫診断結果</div>'+
+      '<div style="font-size:13px;line-height:1.9;color:var(--tx2)">'+html+'</div>'+
+      '<div style="font-size:10px;color:var(--tx3);margin-top:12px;text-align:right">Powered by Google Gemini</div>'+
+      '<button class="btn btn-bl" style="margin-top:12px" onclick="closePanel()"><i class="ti ti-x"></i> 閉じる</button></div>');
+    res.innerHTML='<div style="font-size:12px;color:var(--teal);padding:6px 0;cursor:pointer" onclick="diagnosePestByPhoto()">↑ 診断完了（もう一度診断する場合はボタンを押してください）</div>';
   }catch(e){
     res.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
   }finally{
