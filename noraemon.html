@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1255</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1307</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2951,23 +2951,21 @@ function closePanel(){
 // パネルをスワイプダウンで閉じる
 (function setupPanelSwipe(){
   const panel=document.getElementById('panel');
+  const handle=panel.querySelector('.panel-handle');
   let startY=0,dragging=false;
-  panel.addEventListener('touchstart',e=>{
-    e.stopPropagation();
-    if(e.target.closest('.panel-handle')){
+  // panel-handle のみドラッグ対象（passiveで登録してスクロールをブロックしない）
+  if(handle){
+    handle.addEventListener('touchstart',e=>{
       startY=e.touches[0].clientY;dragging=true;
-    }
-  },{passive:true});
+    },{passive:true});
+  }
+  // コンテンツ全体のtouchmove: passiveで登録してブラウザのスクロールを妨げない
   panel.addEventListener('touchmove',e=>{
     if(dragging){
-      // handle ドラッグ中は背景スクロールを止める
-      e.preventDefault();
       const dy=e.touches[0].clientY-startY;
-      if(dy>0){panel.style.transform=`translateY(${dy}px)`;}
+      if(dy>0){panel.style.transform='translateY('+dy+'px)';}
     }
-    // dragging でない = コンテンツのスクロール → 背景には伝えない
-    e.stopPropagation();
-  },{passive:false});
+  },{passive:true});
   panel.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     const dy=e.changedTouches[0].clientY-startY;
