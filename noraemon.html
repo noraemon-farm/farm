@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1233</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1243</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -80,7 +80,7 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 .banner-title{font-size:12px;font-weight:700;margin-bottom:2px}
 .banner-body{font-size:11px;color:var(--tx2);line-height:1.5}
 /* パネル */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:198;display:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:198;display:none;touch-action:none}
 .overlay.on{display:block}
 .panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px 16px 32px;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(110%);transition:transform .35s cubic-bezier(.32,0,.18,1);z-index:199;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 32px rgba(40,40,20,.18);visibility:hidden}
 .panel.on{transform:translateY(0);visibility:visible}
@@ -2931,8 +2931,13 @@ function openPanel(c){
   p.scrollTop=0;
   p.classList.add('on');
   document.getElementById('overlay').classList.add('on');
+  // bodyのスクロールをロック
+  document.body.style.overflow='hidden';
+  document.body.style.touchAction='none';
 }
 function closePanel(){
+  document.body.style.overflow='';
+  document.body.style.touchAction='';
   document.getElementById('panel').classList.remove('on');
   document.getElementById('overlay').classList.remove('on');
 }
@@ -2942,16 +2947,17 @@ function closePanel(){
   const panel=document.getElementById('panel');
   let startY=0,dragging=false;
   panel.addEventListener('touchstart',e=>{
-    // panel-handle のみドラッグ対象（コンテンツ部分はスクロールに任せる）
+    e.stopPropagation();
     if(e.target.closest('.panel-handle')){
       startY=e.touches[0].clientY;dragging=true;
     }
   },{passive:true});
   panel.addEventListener('touchmove',e=>{
+    e.stopPropagation();
     if(!dragging)return;
     const dy=e.touches[0].clientY-startY;
     if(dy>0){panel.style.transform=`translateY(${dy}px)`;}
-  },{passive:true});
+  },{passive:false});
   panel.addEventListener('touchend',e=>{
     if(!dragging)return;dragging=false;
     const dy=e.changedTouches[0].clientY-startY;
