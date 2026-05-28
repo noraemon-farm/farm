@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-1212</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-1227</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -82,7 +82,7 @@ select.finp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmln
 /* パネル */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:198;display:none}
 .overlay.on{display:block}
-.panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px 16px calc(80px + env(safe-area-inset-bottom));position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(110%);transition:transform .35s cubic-bezier(.32,0,.18,1);z-index:199;max-height:92vh;overflow-y:auto;box-shadow:0 -4px 32px rgba(40,40,20,.18);visibility:hidden}
+.panel{background:var(--bg);border-top:1px solid var(--bd);padding:16px 16px 32px;position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;border-radius:var(--rl2) var(--rl2) 0 0;transform:translateY(110%);transition:transform .35s cubic-bezier(.32,0,.18,1);z-index:199;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 -4px 32px rgba(40,40,20,.18);visibility:hidden}
 .panel.on{transform:translateY(0);visibility:visible}
 .panel-handle{width:42px;height:5px;background:var(--bd2);border-radius:3px;margin:0 auto 14px;cursor:pointer}
 /* 作物 */
@@ -327,13 +327,13 @@ canvas{display:block;touch-action:none}
       <!-- 写真で診断（Gemini） -->
       <div class="card" style="margin-bottom:10px">
         <div style="font-size:12px;font-weight:700;margin-bottom:6px">📷 写真を送って診断する</div>
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">葉・実・虫の写真をGemini AIに送ると原因を判定します（Google AIキー必要）</div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">葉・実・虫の写真をGemini AIに送ると原因を判定します（カメラ撮影またはファイル選択可）</div>
         <label style="display:block;cursor:pointer">
           <div id="photoPreviewArea" style="width:100%;min-height:80px;border:2px dashed var(--bd2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--tx3);overflow:hidden;position:relative">
-            <span id="photoPreviewLabel">📷 タップして写真を選択</span>
+            <span id="photoPreviewLabel">📷 カメラで撮影 / 写真を選択</span>
             <img id="photoPreviewImg" style="display:none;width:100%;height:140px;object-fit:cover;border-radius:6px">
           </div>
-          <input type="file" id="pestPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="onPestPhotoSelected(this)">
+          <input type="file" id="pestPhotoInput" accept="image/*" style="display:none" onchange="onPestPhotoSelected(this)">
         </label>
         <textarea id="photoDesc" rows="2" placeholder="補足（任意）: 例「きゅうりの葉の裏が白い」" style="width:100%;margin-top:8px;padding:8px;border:1px solid var(--bd2);border-radius:6px;font-size:12px;box-sizing:border-box;resize:none"></textarea>
         <div style="display:flex;gap:6px;margin-top:8px">
@@ -2787,12 +2787,13 @@ async function diagnosePestByPhoto(){
       if(l.startsWith('## '))return '<div style="font-size:12px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
       return l||'<br>';
     }).join('');
-    // パネルで全文表示
-    openPanel('<div style="padding:4px 0"><div style="font-size:15px;font-weight:700;margin-bottom:12px">🔍 AI病害虫診断結果</div>'+
+    // パネルで全文表示（padding-bottomを小さくして表示領域を確保）
+    openPanel('<div style="padding:4px 0 20px">'+
+      '<div style="font-size:15px;font-weight:700;margin-bottom:12px">🔍 AI病害虫診断結果</div>'+
       '<div style="font-size:13px;line-height:1.9;color:var(--tx2)">'+html+'</div>'+
       '<div style="font-size:10px;color:var(--tx3);margin-top:12px;text-align:right">Powered by Google Gemini</div>'+
-      '<button class="btn btn-bl" style="margin-top:12px" onclick="closePanel()"><i class="ti ti-x"></i> 閉じる</button></div>');
-    res.innerHTML='<div style="font-size:12px;color:var(--teal);padding:6px 0;cursor:pointer" onclick="diagnosePestByPhoto()">↑ 診断完了（もう一度診断する場合はボタンを押してください）</div>';
+      '</div>');
+    res.innerHTML='<div style="font-size:12px;color:var(--teal);padding:6px 0">✅ 診断完了（結果はパネルに表示されています）</div>';
   }catch(e){
     res.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
   }finally{
