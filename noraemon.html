@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0528-0633</title>
+<title>のらエモン｜家庭菜園お助けAI v0528-0655</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -324,16 +324,25 @@ canvas{display:block;touch-action:none}
       <!-- 天気連動リスク -->
       <div id="pestWeatherRisk" class="card" style="margin-bottom:10px"></div>
 
-      <!-- 写真で調べる -->
+      <!-- 写真で診断（Gemini） -->
       <div class="card" style="margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;margin-bottom:6px">📷 写真で調べる</div>
-        <div style="font-size:11px;color:var(--tx3);margin-bottom:10px">スマホのカメラで症状を撮影して、Google Lensで病害虫を特定できます</div>
-        <a href="https://lens.google.com" target="_blank" rel="noopener"
-           style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;background:#4285F4;color:white;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;margin-bottom:6px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-          Google Lens で写真診断
-        </a>
-        <div style="font-size:10px;color:var(--tx3);text-align:center">カメラアイコン→「植物を検索」で病害虫を特定</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:6px">📷 写真を送って診断する</div>
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">葉・実・虫の写真をGemini AIに送ると原因を判定します（Google AIキー必要）</div>
+        <label style="display:block;cursor:pointer">
+          <div id="photoPreviewArea" style="width:100%;min-height:80px;border:2px dashed var(--bd2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--tx3);overflow:hidden;position:relative">
+            <span id="photoPreviewLabel">📷 タップして写真を選択</span>
+            <img id="photoPreviewImg" style="display:none;width:100%;height:140px;object-fit:cover;border-radius:6px">
+          </div>
+          <input type="file" id="pestPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="onPestPhotoSelected(this)">
+        </label>
+        <textarea id="photoDesc" rows="2" placeholder="補足（任意）: 例「きゅうりの葉の裏が白い」" style="width:100%;margin-top:8px;padding:8px;border:1px solid var(--bd2);border-radius:6px;font-size:12px;box-sizing:border-box;resize:none"></textarea>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-p" style="flex:1" onclick="diagnosePestByPhoto()" id="photoDiagBtn">
+            <i class="ti ti-robot"></i> Geminiに診断してもらう
+          </button>
+          <button class="btn" style="padding:0 10px" onclick="store.removeItem('noraemon_gemini_key');alert('APIキーをリセットしました')" title="APIキーをリセット">🔑</button>
+        </div>
+        <div id="photoDiagResult"></div>
       </div>
 
             <!-- 症状チェック -->
@@ -2394,6 +2403,41 @@ const PEST_SYMPTOMS=[
   '葉全体が黄色くなっている（下葉から）','葉脈だけ残して食べられている',
 ];
 
+// ━━━━ Gemini API 共通 ━━━━
+function getGeminiKey(){
+  let k=store.getItem('noraemon_gemini_key')||'';
+  if(!k){
+    k=prompt('Google Gemini APIキーを入力してください\n（AIzaSy...の形式）\nhttps://aistudio.google.com/app/apikey で無料取得できます');
+    if(k&&k.length>10)store.setItem('noraemon_gemini_key',k);
+    else return null;
+  }
+  return k;
+}
+
+async function callGemini(parts,maxTokens=800){
+  const key=getGeminiKey();
+  if(!key)throw new Error('APIキーが必要です');
+  const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+key;
+  const resp=await fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      contents:[{parts}],
+      generationConfig:{maxOutputTokens:maxTokens,temperature:0.4}
+    })
+  });
+  if(!resp.ok){
+    const err=await resp.json().catch(()=>({}));
+    if(resp.status===400&&err.error?.message?.includes('API_KEY')){
+      store.removeItem('noraemon_gemini_key');
+      throw new Error('APIキーが無効です。再入力してください。');
+    }
+    throw new Error(err.error?.message||'APIエラー '+resp.status);
+  }
+  const data=await resp.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||'回答を取得できませんでした';
+}
+
 const PEST_DB=[
   {name:'アオバハゴロモ',type:'虫',e:'🐝',color:'#6AB04C',
     symptoms:['茎や葉に白いフワフワした綿状のものがついている','幼虫が白い蝋物質で覆われている','汁を吸われて株が弱る'],
@@ -2704,27 +2748,86 @@ async function diagnosePest(){
 
 
 // 病害虫写真診断
+function onPestPhotoSelected(input){
+  if(!input.files||!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('photoPreviewImg');
+    const lbl=document.getElementById('photoPreviewLabel');
+    if(img){img.src=e.target.result;img.style.display='block';}
+    if(lbl)lbl.style.display='none';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function diagnosePestByPhoto(){
+  const input=document.getElementById('pestPhotoInput');
+  const desc=document.getElementById('photoDesc')?.value||'';
+  const btn=document.getElementById('photoDiagBtn');
+  const res=document.getElementById('photoDiagResult');
+  if(!input?.files||!input.files[0]){alert('まず写真を選択してください');return;}
+  const file=input.files[0];
+  const b64=await new Promise((ok,ng)=>{
+    const r=new FileReader();
+    r.onload=e=>ok(e.target.result.split(',')[1]);
+    r.onerror=ng;r.readAsDataURL(file);
+  });
+  const mimeType=file.type||'image/jpeg';
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader"></i> 診断中…';
+  res.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:8px 0">🔍 写真を分析中…</div>';
+  try{
+    const cropCtx=myCrops.length>0?'育てている作物: '+myCrops.map(c=>DB[c.key]?.n||c.key).join('、'):'';
+    const prompt=`あなたは家庭菜園の病害虫診断の専門家です。写真を見て診断してください。\n${cropCtx}\n${desc?'補足: '+desc:''}\n\n## 考えられる原因\n## 症状の説明\n## 対処法\n## 予防策`;
+    const text=await callGemini([
+      {inline_data:{mime_type:mimeType,data:b64}},
+      {text:prompt}
+    ],800);
+    const html=text.split('\n').map(l=>{
+      if(l.startsWith('## '))return '<div style="font-size:12px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
+      return l||'<br>';
+    }).join('\n');
+    res.innerHTML='<div style="margin-top:10px;padding:10px;background:var(--bg2);border-radius:8px;font-size:12px;line-height:1.7;color:var(--tx2)">'+html+'</div><div style="font-size:10px;color:var(--tx3);margin-top:4px;text-align:right">Powered by Google Gemini</div>';
+  }catch(e){
+    res.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-robot"></i> Geminiに診断してもらう';
+  }
+}
+
 async function askPestAI(cropKey){
   const syms=[...pestSymptomSel];
   const desc=(document.getElementById('pestDesc')?.value||'').trim();
   const cropName=cropKey?`${DB[cropKey]?.e||''}${DB[cropKey]?.n||''}`:'（作物未指定）';
-  const weatherInfo=wdata?`気温${Math.round(wdata.current.temperature_2m)}℃・湿度${wdata.current.relative_humidity_2m}%・${isRaining()?'雨天':'晴れ'}`:' 天気情報なし';
+  const weatherInfo=wdata?`気温${Math.round(wdata.current.temperature_2m)}℃・湿度${wdata.current.relative_humidity_2m}%・${isRaining()?'雨天':'晴れ'}`:'天気情報なし';
   const resEl=document.getElementById('pestAIResult');if(!resEl)return;
   resEl.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:10px 0">🔍 のらエモンが診断中…</div>';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:1000,
-        system:'あなたは家庭菜園のAI「のらエモン」です。病害虫・病気の診断と対策を、日本語で200〜300字程度で具体的にアドバイスしてください。',
-        messages:[{role:'user',content:`作物：${cropName}\n今日の天気：${weatherInfo}\n症状：${syms.join('、')||'なし'}\n詳しい状況：${desc||'なし'}\n\n考えられる病害虫・病気と、今すぐできる対策を教えてください。`}]
-      })
-    });
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'取得できませんでした';
-    resEl.innerHTML=`<div style="background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:12px;margin-top:8px"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">🌱 のらエモンの診断</div><div style="font-size:12px;line-height:1.7">${text.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){resEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:6px">⚠️ 通信エラーが発生しました</div>';}
+    const prompt=`あなたは家庭菜園の病害虫診断の専門家です。以下の情報をもとに、最も可能性が高い病害虫・病気を診断してください。
+
+作物: ${cropName}
+症状: ${syms.length?syms.join('、'):'（未選択）'}
+補足: ${desc||'なし'}
+天気: ${weatherInfo}
+地域: ${region?.name||'不明'}
+
+以下の形式で日本語で回答してください：
+## 最も考えられる原因
+## 対処法
+## 予防策
+## 受診の目安`;
+
+    const text=await callGemini([{text:prompt}],800);
+    const html=text.split('\n').map(l=>{
+      if(l.startsWith('## '))return '<div style="font-size:12px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
+      return l||'<br>';
+    }).join('\n');
+    resEl.innerHTML=`<div style="margin-top:10px;padding:10px;background:var(--bg2);border-radius:8px;font-size:12px;line-height:1.7;color:var(--tx2)">${html}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:6px;text-align:right">Powered by Google Gemini</div>`;
+  }catch(e){
+    resEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -2775,17 +2878,7 @@ async function suggestSuccession(id){
   `);
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:1000,
-        system:'あなたは家庭菜園のAI「のらエモン」です。収穫後の後作を、連作障害・季節・コンパニオンプランツの相性を考慮して具体的に提案してください。200〜300字程度で。',
-        messages:[{role:'user',content:`収穫した作物：${db.n}\n科：${myGroups.join('・')||'不明'}\n連作障害で避けるべき作物：${avoidKeys.map(k=>DB[k]?.n).join('・')||'なし'}\n今の時期（${nowMonth}月）から植えられる候補：${candidates.map(c=>c.n).join('・')||'なし'}\n${mapInfo}\n土の状態：${db.end}\n\nこの場所に次に植えるのに最適な作物と、必要な土作り・準備を教えてください。`}]
-      })
-    });
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'取得できませんでした';
+    const text=await callGemini([{text:'あなたは家庭菜園のAI「のらエモン」です。収穫後の後作を、連作障害・季節・コンパニオンプランツの相性を考慮して具体的に提案してください。200〜300字程度で。\n\n'+`収穫した作物：${db.n}\n科：${myGroups.join('・')||'不明'}\n連作障害で避けるべき作物：${avoidKeys.map(k=>DB[k]?.n).join('・')||'なし'}\n今の時期（${nowMonth}月）から植えられる候補：${candidates.map(c=>c.n).join('・')||'なし'}\n${mapInfo}\n土の状態：${db.end}\n\nこの場所に次に植えるのに最適な作物と、必要な土作り・準備を教えてください。`}],1000);
     const sEl=document.getElementById('successionResult');if(!sEl)return;
     sEl.innerHTML=`
       <div style="background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:12px;margin-bottom:10px">
@@ -3260,9 +3353,7 @@ ${db.caution?'注意事項：'+db.caution:''}
 メモ：${crop.memo||'なし'}
 質問：${q||'今の状態と次にすべきことを教えてください'}`;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt,messages:[{role:'user',content:userContext}]})});
-    const data=await res.json();
-    const text=data.content?.[0]?.text||'返答を取得できませんでした';
+    const text=await callGemini([{text:systemPrompt+'\n\n'+userContext+'\n\n質問: '+q}],1000);
     respEl.innerHTML=`<div style="background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:12px 13px;margin-top:4px"><div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">🌱 のらエモンより</div><div style="font-size:13px;line-height:1.7;color:var(--tx)">${text.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){respEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ 通信エラーが発生しました。</div>';}
 }
