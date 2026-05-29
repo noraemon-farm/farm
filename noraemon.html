@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0824</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0902</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -502,7 +502,7 @@ canvas{display:block;touch-action:none}
     <!-- 農薬登録 -->
     <div class="scr" id="scr-agro-register">
       <button class="btn btn-sm" style="margin-bottom:10px" onclick="showTab('agrochem')"><i class="ti ti-arrow-left"></i> 一覧に戻る</button>
-      <div class="sec">新しい農薬・肥料を登録</div>
+      <div class="sec" id="agroFormTitle">新しい農薬・肥料を登録</div>
       <div class="card">
         <div class="fgrp"><label class="flbl">製品名 <span style="color:var(--red)">*</span></label><input class="finp" id="f-name" placeholder="例：スミチオン乳剤"></div>
         <div class="fgrp"><label class="flbl">カテゴリー</label>
@@ -518,6 +518,7 @@ canvas{display:block;touch-action:none}
         <div class="fgrp"><label class="flbl">使用できる主な作物</label><input class="finp" id="f-crops" placeholder="例：トマト、キュウリ、ナス（カンマ区切り）"><div class="finp-hint">空欄の場合は「幅広い野菜に適用」と表示されます</div></div>
         <div class="fgrp"><label class="flbl">希釈濃度・使用方法</label><input class="finp" id="f-dilution" placeholder="例：1000〜1500倍希釈 / 7〜10日間隔で散布"></div>
         <div class="fgrp"><label class="flbl">収穫前日数</label><input class="finp" id="f-preharvest" placeholder="例：14日前まで / 前日まで"></div>
+        <div class="fgrp"><label class="flbl">散布のタイミング</label><textarea class="finp" id="f-timing" rows="2" placeholder="例：アブラムシが発生し始めた頃（新芽に群がり始めたら）に散布"></textarea></div>
         <div class="fgrp"><label class="flbl">注意事項</label><textarea class="finp" id="f-caution" rows="2" placeholder="例：ミツバチへの影響あり。蚕に対して毒性が高い。"></textarea></div>
         <div class="fgrp"><label class="flbl">在庫量（任意）</label>
           <div style="display:flex;gap:8px">
@@ -2000,17 +2001,59 @@ function showAgroDetail(id){
         <input type="number" id="stockInput_${a.id||a.name}" value="${a.stock}" min="0" max="${a.stockMax}" step="${a.unit==='本'?1:a.unit==='ml'?10:a.unit==='g'?50:1}" style="width:80px;padding:4px 8px;border:1px solid var(--bd2);border-radius:6px;font-size:13px">
         <span style="font-size:12px;color:var(--tx3)">${a.unit} / ${a.stockMax}${a.unit}</span>
         <button class="btn btn-sm btn-p" onclick="updateAgroStock('${a.id||a.name}',parseFloat(document.getElementById('stockInput_${a.id||a.name}').value)||0)">保存</button>
-      </div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${linkPest(a.effect||"")}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<button class="btn btn-d btn-bl" style="margin-top:12px" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>`:''}`);
+      </div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${linkPest(a.effect||"")}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-bl" style="flex:1" onclick="editAgro('${a.id||a.name}')"><i class="ti ti-edit"></i> 編集</button>
+      <button class="btn btn-d" style="flex:1" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>
+    </div>`:''}`);
 }
 function adjStock(id,dir){const a=allAgro().find(x=>x.id===id||x.name===id);if(!a)return;const step=Math.ceil((a.stockMax||100)*0.05)||1;a.stock=Math.max(0,Math.min(a.stockMax||9999,a.stock+dir*step));saveData();showAgroDetail(id);renderAgro()}
+
+function editAgro(id){
+  const a=allAgro().find(x=>x.id===id||x.name===id);
+  if(!a||!a.own)return;
+  // フォームに値を入れる
+  const setVal=(eid,v)=>{const el=document.getElementById(eid);if(el)el.value=v||'';};
+  setVal('f-name',a.name);
+  setVal('f-ingredient',a.ingredient);
+  setVal('f-effect',a.effect);
+  setVal('f-crops',(a.crops||[]).join('、'));
+  setVal('f-dilution',a.dilution);
+  setVal('f-timing',a.timing);
+  setVal('f-preharvest',a.preHarvest);
+  setVal('f-caution',a.caution);
+  setVal('f-stock',a.stock||0);
+  setVal('f-unit',a.unit||'ml');
+  const catEl=document.getElementById('f-cat');
+  if(catEl)catEl.value=a.cat||'insecticide';
+  // 編集中のIDを記憶
+  _editingAgroId=id;
+  closePanel();
+  showTab('agro-register');
+}
+
+let _editingAgroId=null;
+
 function delAgro(id){if(!confirm('この農薬を削除しますか？'))return;userAgro=userAgro.filter(a=>(a.id||a.name)!==id);saveData();closePanel();renderAgro()}
 function registerAgro(){
   const name=document.getElementById('f-name').value.trim();if(!name){alert('製品名を入力してください');return}
   const cropsRaw=document.getElementById('f-crops').value;const crops=cropsRaw?cropsRaw.split(/[,、，]/).map(s=>s.trim()).filter(Boolean):[];
   const stock=parseFloat(document.getElementById('f-stock').value)||0,unit=document.getElementById('f-unit').value.trim();
-  userAgro.push({id:'user_'+Date.now(),name,brand:'自己登録',cat:document.getElementById('f-cat').value,ingredient:document.getElementById('f-ingredient').value.trim(),effect:document.getElementById('f-effect').value.trim(),crops,dilution:document.getElementById('f-dilution').value.trim(),preHarvest:document.getElementById('f-preharvest').value.trim(),caution:document.getElementById('f-caution').value.trim(),stock,unit,stockMax:stock*2||0,timing:'',registered:new Date().toISOString().slice(0,10),own:true});
+  // 編集モードの場合は既存データを更新
+  if(_editingAgroId){
+    const idx=userAgro.findIndex(x=>x.id===_editingAgroId||x.name===_editingAgroId);
+    if(idx>=0){
+      userAgro[idx]={...userAgro[idx],name,cat:document.getElementById('f-cat').value,ingredient:document.getElementById('f-ingredient').value.trim(),effect:document.getElementById('f-effect').value.trim(),crops,dilution:document.getElementById('f-dilution').value.trim(),timing:document.getElementById('f-timing')?.value.trim()||'',preHarvest:document.getElementById('f-preharvest').value.trim(),caution:document.getElementById('f-caution').value.trim(),stock,unit,stockMax:Math.max(userAgro[idx].stockMax||0,stock*2||0)};
+      _editingAgroId=null;
+      saveData();
+      ['f-name','f-ingredient','f-effect','f-crops','f-dilution','f-timing','f-preharvest','f-caution','f-stock','f-unit'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+      showTab('agrochem');
+      return;
+    }
+    _editingAgroId=null;
+  }
+  userAgro.push({id:'user_'+Date.now(),name,brand:'自己登録',cat:document.getElementById('f-cat').value,ingredient:document.getElementById('f-ingredient').value.trim(),effect:document.getElementById('f-effect').value.trim(),crops,dilution:document.getElementById('f-dilution').value.trim(),preHarvest:document.getElementById('f-preharvest').value.trim(),timing:document.getElementById('f-timing')?.value.trim()||'',caution:document.getElementById('f-caution').value.trim(),stock,unit,stockMax:stock*2||0,timing:'',registered:new Date().toISOString().slice(0,10),own:true});
   saveData();
-  ['f-name','f-ingredient','f-effect','f-crops','f-dilution','f-preharvest','f-caution','f-stock','f-unit'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['f-name','f-ingredient','f-effect','f-crops','f-dilution','f-timing','f-preharvest','f-caution','f-stock','f-unit'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   showTab('agrochem');setTimeout(()=>{const el=document.querySelector('[data-cat="own"]');if(el)setAgroCat('own',el)},100);
 }
 
@@ -2026,7 +2069,12 @@ function showTab(tab){
   const hdrBtn=document.getElementById('hdrBtn');
   if(tab==='map')hdrBtn.innerHTML='<button class="btn btn-sm btn-p" onclick="analyzeMap()"><i class="ti ti-search"></i> 解析</button>';
   else if(tab==='mapcheck')hdrBtn.innerHTML='<button class="btn btn-sm" onclick="showTab(\'map\')"><i class="ti ti-arrow-left"></i> マップへ</button>';
-  else if(tab==='agro-register')hdrBtn.innerHTML='<button class="btn btn-sm" onclick="showTab(\'agrochem\')"><i class="ti ti-arrow-left"></i> 一覧へ</button>';
+  else if(tab==='agro-register'){hdrBtn.innerHTML='<button class="btn btn-sm" onclick="_editingAgroId=null;showTab(\'agrochem\')"><i class="ti ti-arrow-left"></i> 一覧へ</button>';
+    const ft=document.getElementById('agroFormTitle');
+    if(ft)ft.textContent=_editingAgroId?'農薬・肥料を編集':'新しい農薬・肥料を登録';
+    const rb=document.querySelector('#scr-agro-register .btn.btn-p');
+    if(rb)rb.innerHTML=_editingAgroId?'<i class="ti ti-check"></i> 更新する':'<i class="ti ti-check"></i> 登録する';
+  }
   else if(tab==='home'||tab==='todo')hdrBtn.innerHTML='<button class="btn btn-sm btn-p" onclick="showAddCrop()"><i class="ti ti-plus"></i> 追加</button>';
   else hdrBtn.innerHTML='';
   if(tab==='home')renderHome();
