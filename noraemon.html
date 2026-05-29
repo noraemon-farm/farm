@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0600</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0613</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -1993,7 +1993,7 @@ function showAgroDetail(id){
         <input type="number" id="stockInput_${a.id||a.name}" value="${a.stock}" min="0" max="${a.stockMax}" step="${a.unit==='本'?1:a.unit==='ml'?10:a.unit==='g'?50:1}" style="width:80px;padding:4px 8px;border:1px solid var(--bd2);border-radius:6px;font-size:13px">
         <span style="font-size:12px;color:var(--tx3)">${a.unit} / ${a.stockMax}${a.unit}</span>
         <button class="btn btn-sm btn-p" onclick="updateAgroStock('${a.id||a.name}',parseFloat(document.getElementById('stockInput_${a.id||a.name}').value)||0)">保存</button>
-      </div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${a.effect}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<button class="btn btn-d btn-bl" style="margin-top:12px" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>`:''}`);
+      </div><div style="display:flex;justify-content:space-between;margin-top:7px"><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',-1)"><i class="ti ti-minus"></i> 使用</button><button class="btn btn-sm" onclick="adjStock('${a.id||a.name}',1)"><i class="ti ti-plus"></i> 補充</button></div></div>`:a.unit?`<div style="font-size:12px;color:var(--tx2);margin-bottom:12px">在庫: ${a.stock}${a.unit}</div>`:''}<div class="sec" style="margin-top:0">有効成分</div><div style="font-size:13px;background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6">${a.ingredient}</div><div class="sec">効能・用途</div><div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${linkPest(a.effect||"")}</div><div class="sec">使用できる主な作物</div><div style="margin-bottom:10px">${(a.crops||[]).map(c=>`<span class="crop-chip">${c}</span>`).join('')||'<span style="font-size:12px;color:var(--tx3)">登録なし</span>'}</div><div class="sec">希釈濃度・使用方法</div><div style="font-size:13px;background:var(--bl);border:1px solid #B5D4F4;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:#042C53">${a.dilution||'—'}</div><div class="ir"><span class="ik">収穫前使用期限</span><span class="iv" style="color:var(--red)">${a.preHarvest||'—'}</span></div><div class="sec">散布のタイミング</div><div style="font-size:13px;background:var(--gl);border:1px solid #C0DD97;border-radius:var(--r);padding:10px 12px;margin-bottom:10px;line-height:1.6;color:var(--gd)">${a.timing||'—'}</div><div class="sec">注意事項</div><div class="caution-box">${isBee?'<div style="font-weight:700;margin-bottom:4px">🐝 ミツバチへの毒性あり ／ 開花期の使用禁止</div>':''}${isFish?'<div style="font-weight:700;margin-bottom:4px">🐟 魚毒性あり ／ 河川・水路への流出厳禁</div>':''}${isStrong?'<div style="font-weight:700;margin-bottom:4px">⚠️ 特に重要な注意事項あり</div>':''}${a.caution||'特記事項なし'}</div>${a.own?`<button class="btn btn-d btn-bl" style="margin-top:12px" onclick="delAgro('${a.id||a.name}')"><i class="ti ti-trash"></i> 削除</button>`:''}`);
 }
 function adjStock(id,dir){const a=allAgro().find(x=>(x.id||x.name)===id);if(!a)return;const step=Math.ceil((a.stockMax||100)*0.05)||1;a.stock=Math.max(0,Math.min(a.stockMax||9999,a.stock+dir*step));saveData();showAgroDetail(id);renderAgro()}
 function delAgro(id){if(!confirm('この農薬を削除しますか？'))return;userAgro=userAgro.filter(a=>(a.id||a.name)!==id);saveData();closePanel();renderAgro()}
@@ -2711,6 +2711,25 @@ function renderPestLibrary(){
 }
 
 
+
+// テキスト内の農薬名・病害虫名をリンクに変換
+function linkAgro(text){
+  const names=['アタブロン乳剤', 'オルトラン粒剤', 'コサイド3000', 'スミチオン乳剤', 'ダコニール1000', 'トップジンM水和剤', 'ネオボン殺虫殺菌スプレー', 'ベニカXファインスプレー', 'ベンレート水和剤', 'マラソン乳剤', '木酢液', '苦土石灰', '燻炭（くん炭）', '米ぬか', 'ハイポネックス原液', '発酵鶏糞', 'マグアンプK'];
+  let t=text;
+  names.forEach(n=>{
+    t=t.split(n).join('<a href="#" onclick="showAgroDetail(\''+n+'\');event.stopPropagation();return false" style="color:var(--teal);text-decoration:underline;text-decoration-style:dotted">'+n+'</a>');
+  });
+  return t;
+}
+function linkPest(text){
+  const names=['アオバハゴロモ', 'アブラムシ', 'アワノメイガ', 'ウリハムシ', 'カイガラムシ', 'カメムシ', 'コナガ', 'ダンゴムシ', 'ナメクジ', 'ハダニ', 'ハマキガ', 'ヨトウムシ', '青枯病', 'うどんこ病', '疫病', '褐斑病', '黒星病', 'さび病', '根こぶ病', '灰色かび病', 'べと病', 'モザイク病'];
+  let t=text;
+  names.forEach(n=>{
+    t=t.split(n).join('<a href="#" onclick="showPestDetail(\''+n+'\');event.stopPropagation();return false" style="color:var(--amber);text-decoration:underline;text-decoration-style:dotted">'+n+'</a>');
+  });
+  return t;
+}
+
 function showPestDetail(name){
   const p=PEST_DB.find(x=>x.name===name);if(!p)return;
   const cropNames=p.crops.map(k=>DB[k]?.e+DB[k]?.n).filter(Boolean).join('・');
@@ -2720,15 +2739,15 @@ function showPestDetail(name){
       <div><div style="font-size:16px;font-weight:700">${p.name}</div><div style="font-size:11px;color:var(--tx3)">${p.type}</div></div>
     </div>
     <div class="sec" style="margin-top:0">特徴・症状</div>
-    <div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${p.desc}</div>
+    <div style="font-size:13px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${linkAgro(p.desc||"")}</div>
     <div class="sec">⚠️ 発生しやすい天気</div>
     <div style="font-size:12px;background:var(--al);border-radius:var(--r);padding:9px 11px;margin-bottom:10px;color:#633806">${p.weatherNote}</div>
     <div class="sec">被害を受けやすい作物</div>
     <div style="font-size:12px;margin-bottom:10px">${cropNames||'多種'}</div>
     <div class="sec">🌿 対処法</div>
-    <div style="font-size:12px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${p.treatment}</div>
+    <div style="font-size:12px;line-height:1.7;color:var(--tx2);margin-bottom:10px">${linkAgro(p.treatment||"")}</div>
     <div class="sec">🛡 予防</div>
-    <div style="font-size:12px;line-height:1.7;color:var(--tx2)">${p.prevention}</div>
+    <div style="font-size:12px;line-height:1.7;color:var(--tx2)">${linkAgro(p.prevention||"")}</div>
     ${p.imgUrl?`<a href="${p.imgUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;padding:10px;background:var(--tl);border-radius:8px;color:var(--teal);text-decoration:none;font-size:13px;font-weight:600">🔍 症状の写真を検索する</a>`:''}
   `);
 }
