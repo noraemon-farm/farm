@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0654</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0701</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2717,7 +2717,8 @@ function linkAgro(text){
   const names=['アタブロン乳剤', 'オルトラン粒剤', 'コサイド3000', 'スミチオン乳剤', 'ダコニール1000', 'トップジンM水和剤', 'ネオボン殺虫殺菌スプレー', 'ベニカXファインスプレー', 'ベンレート水和剤', 'マラソン乳剤', '木酢液', '苦土石灰', '燻炭（くん炭）', '米ぬか', 'ハイポネックス原液', '発酵鶏糞', 'マグアンプK'];
   let t=text;
   names.forEach(n=>{
-    t=t.split(n).join('<a href="javascript:void(0)" onclick="showAgroDetail(\''+n+'\');event.stopPropagation();return false" style="color:var(--teal);text-decoration:underline;text-decoration-style:dotted">'+n+'</a>');
+    const safe=n.replace(/'/g,"\\'");
+    t=t.split(n).join('<span onclick="showAgroDetail(\''+safe+'\');event.stopPropagation()" style="color:var(--teal);text-decoration:underline;text-decoration-style:dotted;cursor:pointer">'+n+'</span>');
   });
   return t;
 }
@@ -2725,7 +2726,8 @@ function linkPest(text){
   const names=['アオバハゴロモ', 'アブラムシ', 'アワノメイガ', 'ウリハムシ', 'カイガラムシ', 'カメムシ', 'コナガ', 'ダンゴムシ', 'ナメクジ', 'ハダニ', 'ハマキガ', 'ヨトウムシ', '青枯病', 'うどんこ病', '疫病', '褐斑病', '黒星病', 'さび病', '根こぶ病', '灰色かび病', 'べと病', 'モザイク病'];
   let t=text;
   names.forEach(n=>{
-    t=t.split(n).join('<a href="javascript:void(0)" onclick="showPestDetail(\''+n+'\');event.stopPropagation();return false" style="color:var(--amber);text-decoration:underline;text-decoration-style:dotted">'+n+'</a>');
+    const safe=n.replace(/'/g,"\\'");
+    t=t.split(n).join('<span onclick="showPestDetail(\''+safe+'\');event.stopPropagation()" style="color:var(--amber);text-decoration:underline;text-decoration-style:dotted;cursor:pointer">'+n+'</span>');
   });
   return t;
 }
@@ -2828,13 +2830,14 @@ async function diagnosePestByPhoto(){
         if(l.match(/^\d+\. /))return '<div style="padding:2px 0">'+l+'</div>';
         return l||'<br>';
       }).join('');
-    // パネルで全文表示（padding-bottomを小さくして表示領域を確保）
-    openPanel('<div style="padding:4px 0 20px">'+
-      '<div style="font-size:15px;font-weight:700;margin-bottom:12px">🔍 AI病害虫診断結果</div>'+
+    // インラインで直接表示（パネル不要）
+    res.innerHTML=
+      '<div class="card" style="margin-top:8px">'+
+      '<div style="font-size:14px;font-weight:700;margin-bottom:10px">🔍 AI病害虫診断結果</div>'+
       '<div style="font-size:13px;line-height:1.9;color:var(--tx2)">'+html+'</div>'+
-      '<div style="font-size:10px;color:var(--tx3);margin-top:12px;text-align:right">Powered by Google Gemini</div>'+
-      '</div>');
-    res.innerHTML='<div style="font-size:12px;color:var(--teal);padding:6px 0">✅ 診断完了（結果はパネルに表示されています）</div>';
+      '<div style="font-size:10px;color:var(--tx3);margin-top:10px;text-align:right">Powered by Google Gemini</div>'+
+      '</div>';
+    setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
   }catch(e){
     res.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
   }finally{
