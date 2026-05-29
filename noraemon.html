@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0717</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0731</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2719,22 +2719,14 @@ function linkAgro(text){
   let t=text;
   names.forEach(n=>{
     if(!t.includes(n))return;
-    const safe=n.replace(/'/g,"\\'");
-    t=t.split(n).join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe+'\');return false" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+n+'</span>');
+    t=t.split(n).join('<span class="lnk-agro" data-name="'+n+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+n+'</span>');
   });
-
-  // 略称も検索
-  if(t.includes('アタブロン')&&!t.includes('showAgroDetail')){const n2='アタブロン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('アタブロン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">アタブロン</span>');}
-  if(t.includes('オルトラン')&&!t.includes('showAgroDetail')){const n2='オルトラン粒剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('オルトラン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">オルトラン</span>');}
-  if(t.includes('コサイド')&&!t.includes('showAgroDetail')){const n2='コサイド3000';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('コサイド').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">コサイド</span>');}
-  if(t.includes('スミチオン')&&!t.includes('showAgroDetail')){const n2='スミチオン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('スミチオン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">スミチオン</span>');}
-  if(t.includes('ダコニール')&&!t.includes('showAgroDetail')){const n2='ダコニール1000';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ダコニール').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ダコニール</span>');}
-  if(t.includes('トップジンM')&&!t.includes('showAgroDetail')){const n2='トップジンM水和剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('トップジンM').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">トップジンM</span>');}
-  if(t.includes('ネオボン殺虫殺菌')&&!t.includes('showAgroDetail')){const n2='ネオボン殺虫殺菌スプレー';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ネオボン殺虫殺菌').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ネオボン殺虫殺菌</span>');}
-  if(t.includes('ベニカXファイン')&&!t.includes('showAgroDetail')){const n2='ベニカXファインスプレー';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ベニカXファイン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ベニカXファイン</span>');}
-  if(t.includes('ベンレート')&&!t.includes('showAgroDetail')){const n2='ベンレート水和剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ベンレート').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ベンレート</span>');}
-  if(t.includes('マラソン')&&!t.includes('showAgroDetail')){const n2='マラソン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('マラソン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">マラソン</span>');}
-  if(t.includes('ハイポネックス')&&!t.includes('showAgroDetail')){const n2='ハイポネックス原液';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ハイポネックス').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ハイポネックス</span>');}
+  // 略称
+  const shorts={'スミチオン':'スミチオン乳剤','ダコニール':'ダコニール1000','マラソン':'マラソン乳剤','ベンレート':'ベンレート水和剤','オルトラン':'オルトラン粒剤','アタブロン':'アタブロン乳剤','ベニカ':'ベニカXファインスプレー','ハイポネックス':'ハイポネックス原液'};
+  Object.entries(shorts).forEach(([s,f])=>{
+    if(t.includes(s)&&!t.includes('lnk-agro'))
+      t=t.split(s).join('<span class="lnk-agro" data-name="'+f+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+s+'</span>');
+  });
   return t;
 }
 function linkPest(text){
@@ -2743,8 +2735,7 @@ function linkPest(text){
   let t=text;
   names.forEach(n=>{
     if(!t.includes(n))return;
-    const safe=n.replace(/'/g,"\\'");
-    t=t.split(n).join('<span onclick="event.stopPropagation();showPestDetail(\''+safe+'\');return false" style="color:var(--amber);border-bottom:1px dotted var(--amber);cursor:pointer">'+n+'</span>');
+    t=t.split(n).join('<span class="lnk-pest" data-name="'+n+'" style="color:var(--amber);border-bottom:1px dotted var(--amber);cursor:pointer">'+n+'</span>');
   });
   return t;
 }
@@ -2837,7 +2828,7 @@ async function diagnosePestByPhoto(){
     const text=await callGemini([
       {inline_data:{mime_type:mimeType,data:b64}},
       {text:prompt}
-    ],2000);
+    ],3000);
     const html=text
       .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
       .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--bd);margin:8px 0">')
@@ -2851,7 +2842,7 @@ async function diagnosePestByPhoto(){
     res.innerHTML=
       '<div class="card" style="margin-top:8px">'+
       '<div style="font-size:14px;font-weight:700;margin-bottom:10px">🔍 AI病害虫診断結果</div>'+
-      '<div style="font-size:13px;line-height:1.9;color:var(--tx2)">'+html+'</div>'+
+      '<div style="font-size:13px;line-height:1.9;color:var(--tx2);max-height:60vh;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding-right:4px">'+html+'</div>'+
       '<div style="font-size:10px;color:var(--tx3);margin-top:10px;text-align:right">Powered by Google Gemini</div>'+
       '</div>';
     setTimeout(()=>res.scrollIntoView({behavior:'smooth',block:'start'}),100);
@@ -3434,6 +3425,14 @@ function delPV(){
   const crop=myCrops.find(c=>c.id===pvCropId);if(!crop)return;
   crop.photos.splice(pvIdx,1);saveData();closePV();showDetail(pvCropId);
 }
+
+// パネル内リンク: data-name属性によるイベントデリゲーション
+document.getElementById('panelContent').addEventListener('click',function(e){
+  const agro=e.target.closest('.lnk-agro');
+  const pest=e.target.closest('.lnk-pest');
+  if(agro){e.stopPropagation();showAgroDetail(agro.dataset.name);}
+  else if(pest){e.stopPropagation();showPestDetail(pest.dataset.name);}
+});
 
 </script>
 </body>
