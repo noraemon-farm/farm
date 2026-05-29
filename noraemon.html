@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0746</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0751</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2715,22 +2715,23 @@ function renderPestLibrary(){
 // テキスト内の農薬名・病害虫名をリンクに変換
 function linkAgro(text){
   if(!text)return '';
-  const names=['ネオボン殺虫殺菌スプレー', 'ベニカXファインスプレー', 'ダコニール1000', 'トップジンM水和剤', 'ハイポネックス原液', 'コサイド3000', 'ベンレート水和剤', 'アタブロン乳剤', 'オルトラン粒剤', 'スミチオン乳剤', '燻炭（くん炭）', 'マラソン乳剤', 'マグアンプK', '苦土石灰', '発酵鶏糞', '木酢液', '米ぬか'];
+  // allAgro()から動的取得（userAgroで追加した農薬も対象）
+  const names=allAgro().map(a=>a.name).sort((a,b)=>b.length-a.length);
   let t=text;
   names.forEach(n=>{
     if(!t.includes(n))return;
     t=t.split(n).join('<span class="lnk-agro" data-name="'+n+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+n+'</span>');
   });
-  // 略称
-  const shorts={'スミチオン':'スミチオン乳剤','ダコニール':'ダコニール1000','マラソン':'マラソン乳剤','ベンレート':'ベンレート水和剤','オルトラン':'オルトラン粒剤','アタブロン':'アタブロン乳剤','ベニカ':'ベニカXファインスプレー','ハイポネックス':'ハイポネックス原液'};
+  // 略称（PRESET_AGROの正式名に紐付け）
+  const shorts={'スミチオン':'スミチオン乳剤','ダコニール':'ダコニール1000','マラソン':'マラソン乳剤','ベンレート':'ベンレート水和剤','オルトラン':'オルトラン粒剤','アタブロン':'アタブロン乳剤','ベニカ':'ベニカXファインスプレー','ハイポネックス':'ハイポネックス原液','木酢':'木酢液'};
   Object.entries(shorts).forEach(([s,f])=>{
-    // すでに正式名でリンク済みの場合はスキップ（data-name=fが含まれていれば）
     if(!t.includes(s))return;
     if(t.includes('data-name="'+f+'"'))return;
     t=t.split(s).join('<span class="lnk-agro" data-name="'+f+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+s+'</span>');
   });
   return t;
 }
+
 function linkPest(text){
   if(!text)return '';
   const names=['アオバハゴロモ', 'アワノメイガ', 'カイガラムシ', 'アブラムシ', 'ウリハムシ', 'ダンゴムシ', 'ヨトウムシ', 'うどんこ病', '灰色かび病', 'モザイク病', 'カメムシ', 'ナメクジ', 'ハマキガ', '根こぶ病', 'コナガ', 'ハダニ', '青枯病', '褐斑病', '黒星病', 'さび病', 'べと病', '疫病'];
