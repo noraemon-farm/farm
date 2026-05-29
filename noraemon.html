@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0701</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0717</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2714,20 +2714,37 @@ function renderPestLibrary(){
 
 // テキスト内の農薬名・病害虫名をリンクに変換
 function linkAgro(text){
-  const names=['アタブロン乳剤', 'オルトラン粒剤', 'コサイド3000', 'スミチオン乳剤', 'ダコニール1000', 'トップジンM水和剤', 'ネオボン殺虫殺菌スプレー', 'ベニカXファインスプレー', 'ベンレート水和剤', 'マラソン乳剤', '木酢液', '苦土石灰', '燻炭（くん炭）', '米ぬか', 'ハイポネックス原液', '発酵鶏糞', 'マグアンプK'];
+  if(!text)return '';
+  const names=['ネオボン殺虫殺菌スプレー', 'ベニカXファインスプレー', 'ダコニール1000', 'トップジンM水和剤', 'ハイポネックス原液', 'コサイド3000', 'ベンレート水和剤', 'アタブロン乳剤', 'オルトラン粒剤', 'スミチオン乳剤', '燻炭（くん炭）', 'マラソン乳剤', 'マグアンプK', '苦土石灰', '発酵鶏糞', '木酢液', '米ぬか'];
   let t=text;
   names.forEach(n=>{
+    if(!t.includes(n))return;
     const safe=n.replace(/'/g,"\\'");
-    t=t.split(n).join('<span onclick="showAgroDetail(\''+safe+'\');event.stopPropagation()" style="color:var(--teal);text-decoration:underline;text-decoration-style:dotted;cursor:pointer">'+n+'</span>');
+    t=t.split(n).join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe+'\');return false" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+n+'</span>');
   });
+
+  // 略称も検索
+  if(t.includes('アタブロン')&&!t.includes('showAgroDetail')){const n2='アタブロン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('アタブロン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">アタブロン</span>');}
+  if(t.includes('オルトラン')&&!t.includes('showAgroDetail')){const n2='オルトラン粒剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('オルトラン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">オルトラン</span>');}
+  if(t.includes('コサイド')&&!t.includes('showAgroDetail')){const n2='コサイド3000';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('コサイド').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">コサイド</span>');}
+  if(t.includes('スミチオン')&&!t.includes('showAgroDetail')){const n2='スミチオン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('スミチオン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">スミチオン</span>');}
+  if(t.includes('ダコニール')&&!t.includes('showAgroDetail')){const n2='ダコニール1000';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ダコニール').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ダコニール</span>');}
+  if(t.includes('トップジンM')&&!t.includes('showAgroDetail')){const n2='トップジンM水和剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('トップジンM').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">トップジンM</span>');}
+  if(t.includes('ネオボン殺虫殺菌')&&!t.includes('showAgroDetail')){const n2='ネオボン殺虫殺菌スプレー';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ネオボン殺虫殺菌').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ネオボン殺虫殺菌</span>');}
+  if(t.includes('ベニカXファイン')&&!t.includes('showAgroDetail')){const n2='ベニカXファインスプレー';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ベニカXファイン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ベニカXファイン</span>');}
+  if(t.includes('ベンレート')&&!t.includes('showAgroDetail')){const n2='ベンレート水和剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ベンレート').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ベンレート</span>');}
+  if(t.includes('マラソン')&&!t.includes('showAgroDetail')){const n2='マラソン乳剤';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('マラソン').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">マラソン</span>');}
+  if(t.includes('ハイポネックス')&&!t.includes('showAgroDetail')){const n2='ハイポネックス原液';const safe2=n2.replace(/'/g,"\\\\'");t=t.split('ハイポネックス').join('<span onclick="event.stopPropagation();showAgroDetail(\''+safe2+'\')" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">ハイポネックス</span>');}
   return t;
 }
 function linkPest(text){
-  const names=['アオバハゴロモ', 'アブラムシ', 'アワノメイガ', 'ウリハムシ', 'カイガラムシ', 'カメムシ', 'コナガ', 'ダンゴムシ', 'ナメクジ', 'ハダニ', 'ハマキガ', 'ヨトウムシ', '青枯病', 'うどんこ病', '疫病', '褐斑病', '黒星病', 'さび病', '根こぶ病', '灰色かび病', 'べと病', 'モザイク病'];
+  if(!text)return '';
+  const names=['アオバハゴロモ', 'アワノメイガ', 'カイガラムシ', 'アブラムシ', 'ウリハムシ', 'ダンゴムシ', 'ヨトウムシ', 'うどんこ病', '灰色かび病', 'モザイク病', 'カメムシ', 'ナメクジ', 'ハマキガ', '根こぶ病', 'コナガ', 'ハダニ', '青枯病', '褐斑病', '黒星病', 'さび病', 'べと病', '疫病'];
   let t=text;
   names.forEach(n=>{
+    if(!t.includes(n))return;
     const safe=n.replace(/'/g,"\\'");
-    t=t.split(n).join('<span onclick="showPestDetail(\''+safe+'\');event.stopPropagation()" style="color:var(--amber);text-decoration:underline;text-decoration-style:dotted;cursor:pointer">'+n+'</span>');
+    t=t.split(n).join('<span onclick="event.stopPropagation();showPestDetail(\''+safe+'\');return false" style="color:var(--amber);border-bottom:1px dotted var(--amber);cursor:pointer">'+n+'</span>');
   });
   return t;
 }
@@ -2820,7 +2837,7 @@ async function diagnosePestByPhoto(){
     const text=await callGemini([
       {inline_data:{mime_type:mimeType,data:b64}},
       {text:prompt}
-    ],1500);
+    ],2000);
     const html=text
       .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
       .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--bd);margin:8px 0">')
