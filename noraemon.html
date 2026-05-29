@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0731</title>
+<title>のらエモン｜家庭菜園お助けAI v0529-0741</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2470,7 +2470,7 @@ const PEST_DB=[
     weather:{humid:true,hot:false},weatherNote:'アブラムシは乾燥した天候で爆発的に増えやすい。',
     crops:['tomato','cucumber','eggplant','pepper','broccoli','komatsuna','basil'],
     searchQuery:'アブラムシ+野菜+被害',imgUrl:'https://www.google.com/search?tbm=isch&q=アブラムシ+野菜+被害',
-    treatment:'牛乳スプレー・水で洗い流す・木酢液・ニームオイル。薬剤：アドマイヤー・オルトランなど。天敵（テントウムシ）を活用。',
+    treatment:'牛乳スプレー・水で洗い流す・木酢液・ニームオイル。薬剤はオルトラン粒剤・スミチオン乳剤が有効。天敵（テントウムシ）を活用。',
     prevention:'反射マルチで飛来防止。密植を避けて風通しよく。'}
   ,{name:'アワノメイガ',type:'虫',e:'🦋',color:'#639922',
     symptoms:['実に傷・穴がある','茎・葉に白い綿のようなものがついている'],
@@ -2724,8 +2724,10 @@ function linkAgro(text){
   // 略称
   const shorts={'スミチオン':'スミチオン乳剤','ダコニール':'ダコニール1000','マラソン':'マラソン乳剤','ベンレート':'ベンレート水和剤','オルトラン':'オルトラン粒剤','アタブロン':'アタブロン乳剤','ベニカ':'ベニカXファインスプレー','ハイポネックス':'ハイポネックス原液'};
   Object.entries(shorts).forEach(([s,f])=>{
-    if(t.includes(s)&&!t.includes('lnk-agro'))
-      t=t.split(s).join('<span class="lnk-agro" data-name="'+f+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+s+'</span>');
+    // すでに正式名でリンク済みの場合はスキップ（data-name=fが含まれていれば）
+    if(!t.includes(s))return;
+    if(t.includes('data-name="'+f+'"'))return;
+    t=t.split(s).join('<span class="lnk-agro" data-name="'+f+'" style="color:var(--teal);border-bottom:1px dotted var(--teal);cursor:pointer">'+s+'</span>');
   });
   return t;
 }
@@ -3428,8 +3430,10 @@ function delPV(){
 
 // パネル内リンク: data-name属性によるイベントデリゲーション
 document.getElementById('panelContent').addEventListener('click',function(e){
+  console.log('panel click:', e.target.className, e.target.dataset?.name);
   const agro=e.target.closest('.lnk-agro');
   const pest=e.target.closest('.lnk-pest');
+  console.log('agro:', agro?.dataset?.name, 'pest:', pest?.dataset?.name);
   if(agro){e.stopPropagation();showAgroDetail(agro.dataset.name);}
   else if(pest){e.stopPropagation();showPestDetail(pest.dataset.name);}
 });
