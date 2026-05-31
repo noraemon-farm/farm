@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0531-0001</title>
+<title>のらエモン｜家庭菜園お助けAI v0531-0026</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2478,7 +2478,7 @@ function getGeminiKey(){
   return k;
 }
 
-async function callGemini(parts,maxTokens=800,retryCount=0){
+async function callGemini(parts,maxTokens=1500,retryCount=0){
   const key=getGeminiKey();
   if(!key)throw new Error('APIキーが必要です');
   const url='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+key;
@@ -2884,11 +2884,11 @@ async function diagnosePestByPhoto(){
   res.innerHTML='<div style="font-size:12px;color:var(--tx3);padding:8px 0">🔍 写真を分析中…</div>';
   try{
     const cropCtx=myCrops.length>0?'育てている作物: '+myCrops.map(c=>DB[c.key]?.n||c.key).join('、'):'';
-    const prompt=`あなたは家庭菜園の病害虫診断の専門家です。写真を見て診断してください。\n${cropCtx}\n${desc?'補足: '+desc:''}\n\n## 考えられる原因\n## 症状の説明\n## 対処法\n## 予防策`;
+    const prompt=`あなたは家庭菜園の病害虫診断の専門家です。写真を見て日本語で簡潔に診断してください。${cropCtx?'\n'+cropCtx:''}${desc?'\n補足: '+desc:''}\n\n以下の順で回答してください：\n## 考えられる原因（最も可能性が高いものから）\n## 症状の説明\n## 対処法\n## 予防策\n\n各項目は簡潔に、合計1500文字以内でまとめてください。`;
     const text=await callGemini([
       {inline_data:{mime_type:mimeType,data:b64}},
       {text:prompt}
-    ],3000);
+    ],8000);
     const html=text
       .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
       .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--bd);margin:8px 0">')
