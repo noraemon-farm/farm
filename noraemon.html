@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0529-0902</title>
+<title>のらエモン｜家庭菜園お助けAI v0531-0001</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2852,8 +2852,11 @@ async function diagnosePest(){
 
 
 // 病害虫写真診断
+let _selectedPhotoFile=null; // カメラ・ファイル選択どちらでも保存
+
 function onPestPhotoSelected(input){
   if(!input.files||!input.files[0])return;
+  _selectedPhotoFile=input.files[0]; // グローバルに保存
   const reader=new FileReader();
   reader.onload=e=>{
     const img=document.getElementById('photoPreviewImg');
@@ -2865,12 +2868,11 @@ function onPestPhotoSelected(input){
 }
 
 async function diagnosePestByPhoto(){
-  const input=document.getElementById('pestPhotoInput');
   const desc=document.getElementById('photoDesc')?.value||'';
   const btn=document.getElementById('photoDiagBtn');
   const res=document.getElementById('photoDiagResult');
-  if(!input?.files||!input.files[0]){alert('まず写真を選択してください');return;}
-  const file=input.files[0];
+  if(!_selectedPhotoFile){alert('まず写真を選択してください');return;}
+  const file=_selectedPhotoFile;
   const b64=await new Promise((ok,ng)=>{
     const r=new FileReader();
     r.onload=e=>ok(e.target.result.split(',')[1]);
