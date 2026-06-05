@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0605-0308</title>
+<title>のらエモン｜家庭菜園お助けAI v0605-0312</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2093,7 +2093,7 @@ function registerAgro(){
 
 // ══ タブ切り替え ══
 function showTab(tab){
-  const tabs=['home','todo','weather','menu','map','mapcheck','agrochem','agro-register','suggest','catalog','plan','pest'];
+  const tabs=['home','todo','weather','menu','map','mapcheck','agrochem','agro-register','suggest','catalog','plan','pest','acctemp'];
   tabs.forEach(t=>document.getElementById('scr-'+t)?.classList.toggle('on',t===tab));
   ['home','todo','weather','menu'].forEach(t=>document.getElementById('nav-'+t)?.classList.toggle('on',t===tab));
   const titles={home:'家庭菜園お助けAI「のらエモン」',todo:'📋 今週のTo-Do',weather:'🌤 天気詳細',menu:'メニュー',map:'🗺 畑マップエディタ',mapcheck:'🔍 解析結果',agrochem:'🧪 農薬・肥料ライブラリ','agro-register':'📝 農薬・肥料を登録',suggest:'🌟 植え付け提案',catalog:'📋 作物一覧',plan:'📅 今年の栽培計画',pest:'🔍 病害虫・病気診断'};
