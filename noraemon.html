@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0605-0312</title>
+<title>のらエモン｜家庭菜園お助けAI v0615-0200</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -1383,7 +1383,38 @@ function renderHome(){
   buildGantt(document.getElementById('homeGantt'),_activeForGantt);
   // 要注意バナーは廃止
   document.getElementById('alerts').innerHTML='';
-  document.getElementById('archiveSec').innerHTML='';
+  // アーカイブ（終了した作物）セクション
+  const archEl=document.getElementById('archiveSec');
+  if(archEl){
+    const archived=myCrops.filter(c=>c.status==='archived');
+    if(archived.length===0){
+      archEl.innerHTML='';
+    } else {
+      archEl.innerHTML=`
+        <div style="margin-top:4px">
+          <div class="sec" style="font-size:12px;color:var(--tx3);display:flex;justify-content:space-between;align-items:center">
+            <span>📦 終了した作物（${archived.length}件）</span>
+          </div>
+          <div class="card" style="padding:8px 12px">
+            ${archived.map(c=>{
+              const db=DB[c.key];if(!db)return '';
+              const endDate=c.endDate?new Date(c.endDate):null;
+              const endStr=endDate?`${endDate.getMonth()+1}/${endDate.getDate()}終了`:'終了';
+              const plantDate=c.plantDate?new Date(c.plantDate):null;
+              const plantStr=plantDate?`${plantDate.getMonth()+1}/${plantDate.getDate()}植付`:'';
+              return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd);cursor:pointer" onclick="showDetail(${c.id})">
+                <span style="font-size:20px">${db.e}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600">${db.n}${c.variety?` (${c.variety})`:''}</div>
+                  <div style="font-size:11px;color:var(--tx3)">${plantStr}${plantStr&&endStr?' · ':''}${endStr}</div>
+                </div>
+                <i class="ti ti-chevron-right" style="color:var(--tx3);font-size:14px"></i>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+  }
   // ★デバッグ: localStorageのキーと myCrops件数を表示
 
   // 天気＋病害虫注意報
