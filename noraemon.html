@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-0936</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-0944</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -3427,6 +3427,7 @@ function showEditCrop(id){
     <div class="fgrp"><label class="flbl">品種・メモ</label><input type="text" class="finp" id="ev" value="${crop.variety||''}" maxlength="30"></div>
     <div class="fgrp"><label class="flbl">植え付け日 / 種まき日</label><input type="date" class="finp" id="ed" value="${fdi(crop.plantDate)}"></div>
     <div class="fgrp"><label class="flbl">メモ</label><textarea class="finp" id="ememo" rows="2" style="font-size:12px">${crop.memo||''}</textarea></div>
+    <div class="fgrp"><label class="flbl">植えた場所 <span style="font-size:10px;color:var(--tx3)">（任意・連作チェックに使用）</span></label><input type="text" class="finp" id="elocation" value="${crop.location||''}" placeholder="例：北側の畝、プランターA" maxlength="30" list="elocation-list"><datalist id="elocation-list">${[...new Set(myCrops.map(c=>c.location).filter(Boolean))].map(l=>`<option value="${l}">`).join('')}</datalist></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn" style="flex:1" onclick="showDetail(${id})">キャンセル</button>
       <button class="btn btn-p" style="flex:1" onclick="doEditCrop(${id})"><i class="ti ti-check"></i> 保存</button>
@@ -3442,6 +3443,7 @@ function doEditCrop(id){
   crop.key=k;crop.variety=v;crop.plantDate=new Date(y,m-1,d);
   crop.plantType=ptEl?ptEl.value:'seedling';
   crop.memo=(document.getElementById('ememo')?.value||'').trim();
+  crop.location=(document.getElementById('elocation')?.value||'').trim();
   crop.plantWeather=null;
   saveData();closePanel();renderHome();
 }
