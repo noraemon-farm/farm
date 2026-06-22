@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-2024</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-2115</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -3677,13 +3677,16 @@ async function askRotationAI(loc){
     .map(([k,v])=>v.n)
     .slice(0,15).join('・');
 
-  const prompt=`畑「${loc}」の栽培履歴:${history}
+  // 直前の栽培の科を取得
+  const usedFamilies=[...new Set(myCrops.filter(c=>c.location===loc).map(c=>DB[c.key]?.family).filter(Boolean))];
+
+  const prompt=`畑「${loc}」使用済みの科:${usedFamilies.join('・')}
 植付候補(${month+1}月):${candidates}
 
 箇条書きのみで回答(前置き不要):
-【今年OK】・作物名:理由
-【今年NG】・作物名:理由
-【アドバイス】・ポイント`;
+【今年OK】・作物名（科名）
+【今年NG】・作物名（科名・連作障害N年）
+【アドバイス】・ポイント1行`;
 
   try{
     const text=await callGemini([{text:prompt}],8000);
