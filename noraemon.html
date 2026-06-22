@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-2120</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-2132</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -390,6 +390,7 @@ canvas{display:block;touch-action:none}
         <div class="tool-btn"        id="tool-crop"     onclick="setTool('crop')">     <i class="ti ti-plant"></i>作物</div>
         <div class="tool-btn"        id="tool-obstacle" onclick="setTool('obstacle')"> <i class="ti ti-building"></i>障害物</div>
         <div class="tool-btn"        id="tool-sunpaint" onclick="setTool('sunpaint')"> <i class="ti ti-sun"></i>日当たり</div>
+        <div class="tool-btn"        id="tool-label"    onclick="setTool('label')" title="ゾーン名を設定">      <i class="ti ti-tag"></i><span>名前</span>    </div>
         <div class="tool-btn"        id="tool-erase"    onclick="setTool('erase')">    <i class="ti ti-eraser"></i>消す</div>
         <div class="tool-btn"        onclick="undoMap()"><i class="ti ti-arrow-back-up"></i>戻す</div>
       </div>
@@ -1755,8 +1756,22 @@ function drawMap(){
   }}
   // 右上コンパス：mapOrientDegに合わせて方位ラベルを回転して描画
   drawMapCompass(ctx, cv.width-28, 28, 20);
-}
 
+  // ゾーン名ラベルを描画
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const cell=mapGrid[r]?.[c];
+    if(!cell?.label)continue;
+    const px=cpx(),x=c*px+px/2,y=r*px+px*0.72;
+    ctx.save();
+    ctx.font=`bold ${Math.max(8,Math.min(11,px/3))}px sans-serif`;
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillRect(x-ctx.measureText(cell.label).width/2-2,y-9,ctx.measureText(cell.label).width+4,12);
+    ctx.fillStyle='#1a5c2a';
+    ctx.fillText(cell.label,x,y);
+    ctx.restore();
+  }
+}
 function drawMapCompass(ctx,cx,cy,r){
   ctx.save();
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
@@ -1840,7 +1855,7 @@ function updateCompassUI(){
 function clearMap(){if(!confirm('マップをリセットしますか？'))return;initMapGrid();mapUndo=[];drawMap()}
 
 function mapCellFrom(e,cv){const rect=cv.getBoundingClientRect();const px=cpx();const sx=cv.width/rect.width,sy=cv.height/rect.height;const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;const col=Math.floor((cx-rect.left)*sx/px),row=Math.floor((cy-rect.top)*sy/px);if(col<0||col>=COLS||row<0||row>=ROWS)return null;return{row,col}}
-function applyMapTool(r,c){const cell=mapGrid[r][c];if(mapTool==='field'){cell.type='field';cell.obs=null}else if(mapTool==='bed'){cell.type=`bed_${bedOrient}`;cell.obs=null}else if(mapTool==='path'){cell.type='path';cell.obs=null;cell.crop=null}else if(mapTool==='crop'){if(cell.type&&!cell.obs)cell.crop=selCropKey}else if(mapTool==='obstacle'){cell.obs=selObs;cell.crop=null}else if(mapTool==='sunpaint'){if(cell.type&&!cell.obs)cell.sun=sunPaint}else if(mapTool==='erase'){cell.type=null;cell.crop=null;cell.sun=null;cell.obs=null;cell._shadow=false}}
+function applyMapTool(r,c){const cell=mapGrid[r][c];if(mapTool==='label'){const name=prompt('このゾーンの名前を入力してください（空白で削除）:',cell.label||'');if(name!==null)cell.label=name.trim()||undefined;drawMap();return;}if(mapTool==='field'){cell.type='field';cell.obs=null}else if(mapTool==='bed'){cell.type=`bed_${bedOrient}`;cell.obs=null}else if(mapTool==='path'){cell.type='path';cell.obs=null;cell.crop=null}else if(mapTool==='crop'){if(cell.type&&!cell.obs)cell.crop=selCropKey}else if(mapTool==='obstacle'){cell.obs=selObs;cell.crop=null}else if(mapTool==='sunpaint'){if(cell.type&&!cell.obs)cell.sun=sunPaint}else if(mapTool==='erase'){cell.type=null;cell.crop=null;cell.sun=null;cell.obs=null;cell._shadow=false}}
 function saveMapUndo(){mapUndo.push(JSON.stringify(mapGrid));if(mapUndo.length>40)mapUndo.shift()}
 function undoMap(){if(!mapUndo.length)return;mapGrid=JSON.parse(mapUndo.pop());drawMap()}
 
@@ -1852,7 +1867,7 @@ mc.addEventListener('touchstart',e=>{e.preventDefault();saveMapUndo();mapDraggin
 mc.addEventListener('touchmove',e=>{e.preventDefault();if(!mapDragging)return;const p=mapCellFrom(e,mc);if(p){applyMapTool(p.row,p.col);drawMap()}},{passive:false});
 mc.addEventListener('touchend',()=>mapDragging=false);
 
-function setTool(t){mapTool=t;['field','bed','path','crop','obstacle','sunpaint','erase'].forEach(id=>document.getElementById('tool-'+id)?.classList.toggle('active',id===t));renderMapSubOpts()}
+function setTool(t){mapTool=t;['field','bed','path','crop','obstacle','sunpaint','erase','label'].forEach(id=>document.getElementById('tool-'+id)?.classList.toggle('active',id===t));renderMapSubOpts()}
 function renderMapSubOpts(){
   const el=document.getElementById('mapSubOpts');if(!el)return;
   if(mapTool==='bed')el.innerHTML=`<div class="card"><div style="font-size:11px;font-weight:700;margin-bottom:7px">畝の向き</div><div style="display:flex;gap:4px"><div class="orient-btn ${bedOrient==='ns'?'active':''}" onclick="setBedOrient('ns')">↕ 南北畝</div><div class="orient-btn ${bedOrient==='ew'?'active':''}" onclick="setBedOrient('ew')">↔ 東西畝</div></div></div>`;
@@ -3387,11 +3402,11 @@ function showAddCrop(key='tomato'){
   const db=DB[key];const cb=document.getElementById('cb');
   if(cb&&db?.caution)cb.innerHTML='<div class="caution-box" style="margin-bottom:10px">'+db.caution+'</div>';
   // 既存の場所名をオートコンプリートに設定
-  const locations=[...new Set(myCrops.map(c=>c.location).filter(Boolean))];
+  const locations=[...new Set([...myCrops.map(c=>c.location).filter(Boolean),...getMapZoneNames()])];
   const dl=document.getElementById('location-list');
   if(dl)dl.innerHTML=locations.map(l=>`<option value="${l}">`).join('');
   const hint=document.getElementById('nlocation-hint');
-  if(hint&&locations.length>0)hint.textContent='過去の場所: '+locations.join('・');
+  if(hint&&locations.length>0)hint.textContent='候補: '+locations.join('・');
 }
 function startAdd(k){
   if(document.getElementById('panel')?.classList.contains('on'))closePanel();
@@ -3433,7 +3448,7 @@ function showEditCrop(id){
     <div class="fgrp"><label class="flbl">品種・メモ</label><input type="text" class="finp" id="ev" value="${crop.variety||''}" maxlength="30"></div>
     <div class="fgrp"><label class="flbl">植え付け日 / 種まき日</label><input type="date" class="finp" id="ed" value="${fdi(crop.plantDate)}"></div>
     <div class="fgrp"><label class="flbl">メモ</label><textarea class="finp" id="ememo" rows="2" style="font-size:12px">${crop.memo||''}</textarea></div>
-    <div class="fgrp"><label class="flbl">植えた場所 <span style="font-size:10px;color:var(--tx3)">（任意・連作チェックに使用）</span></label><input type="text" class="finp" id="elocation" value="${crop.location||''}" placeholder="例：北側の畝、プランターA" maxlength="30" list="elocation-list"><datalist id="elocation-list">${[...new Set(myCrops.map(c=>c.location).filter(Boolean))].map(l=>`<option value="${l}">`).join('')}</datalist></div>
+    <div class="fgrp"><label class="flbl">植えた場所 <span style="font-size:10px;color:var(--tx3)">（任意・連作チェックに使用）</span></label><input type="text" class="finp" id="elocation" value="${crop.location||''}" placeholder="例：北側の畝、プランターA" maxlength="30" list="elocation-list"><datalist id="elocation-list">${[...new Set([...myCrops.map(c=>c.location).filter(Boolean),...getMapZoneNames()])].map(l=>`<option value="${l}">`).join('')}</datalist></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn" style="flex:1" onclick="showDetail(${id})">キャンセル</button>
       <button class="btn btn-p" style="flex:1" onclick="doEditCrop(${id})"><i class="ti ti-check"></i> 保存</button>
@@ -3591,6 +3606,13 @@ function delPV(){
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 連作チェック
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+function getMapZoneNames(){
+  const zones=new Set();
+  (mapGrid||[]).forEach(row=>(row||[]).forEach(cell=>{if(cell?.label)zones.add(cell.label);}));
+  return [...zones];
+}
+
 function renderRotation(){
   const el=document.getElementById('rotationContent');
   if(!el)return;
