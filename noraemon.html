@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-0951</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-0959</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -893,10 +893,10 @@ const DB={
     ],
     end:'連作は2〜3年あけること。ネギ科全体（タマネギ・ニラ等）を含む。',
     plant:'8〜9月に種まき→苗育て→翌春3〜4月に本圃へ移植。この2段階が基本。'},
-,
-  moroheiya:{n:'モロヘイヤ',e:'🌿',c:'#1A7A3E',cl:'#E2F5EA',family:'アオイ科',rotationYears:1,germDays:7,germTempMin:20,germTempMax:35,growTempMin:22,growTempMax:32,heatLimit:40,season:[4,5,6],days:60,space:'30cm',light:'full',height_cm:100,ph:'6.0-7.0',tmp:'25-32℃',ht:'平畝',sh:'強',wi:'中',varieties:['一般品種'],tasks:[{d:14,t:'間引き',n:'株間30cmに間引く',h:'本葉2〜3枚になったら'},
-  kuushinsai:{n:'空芯菜',e:'🌱',c:'#1A6B5A',cl:'#E0F5F0',family:'ヒルガオ科',rotationYears:2,germDays:7,germTempMin:20,germTempMax:35,growTempMin:22,growTempMax:32,heatLimit:40,season:[5,6,7],days:45,space:'20cm',light:'full',height_cm:40,ph:'6.0-7.0',tmp:'25-32℃',ht:'平畝',sh:'中',wi:'中',varieties:['一般品種'],tasks:[{d:14,t:'間引き',n:'株間20cmに間引く',h:'本葉2〜3枚になったら'},
-  swiss_chard:{n:'スイスチャード',e:'🌈',c:'#C0392B',cl:'#FDECEA',family:'ヒユ科',rotationYears:1,germDays:7,germTempMin:10,germTempMax:25,growTempMin:15,growTempMax:25,heatLimit:35,season:[3,4,8,9],days:60,space:'25cm',light:'full',height_cm:60,ph:'6.0-7.0',tmp:'15-25℃',ht:'平畝',sh:'中',wi:'中',varieties:['カラフルチャード','レインボーチャード','ルビーレッド'],tasks:[{d:14,t:'間引き',n:'株間25cmに間引く',h:'本葉2〜3枚になったら'}};
+  moroheiya:{n:'モロヘイヤ',e:'🌿',c:'#1A7A3E',cl:'#E2F5EA',family:'アオイ科',rotationYears:1,germDays:7,germTempMin:20,germTempMax:35,growTempMin:22,growTempMax:32,heatLimit:40,season:[4,5,6],days:60,space:'30cm',light:'full',height_cm:100,ph:'6.0-7.0',tmp:'25-32℃',ht:'平畝',sh:'強',wi:'中',varieties:['一般品種'],tasks:[{d:14,t:'間引き',n:'株間30cmに間引く',h:'本葉2〜3枚になったら'},{d:30,t:'摘心',n:'草丈30〜40cmで頂点を摘む',h:'草丈30〜40cmになったら'},{d:45,t:'追肥',n:'化成肥料を株元に',h:'葉色が薄くなってきたら'},{d:50,t:'収穫',n:'先端15〜20cmを摘み取る',h:'草丈50cm以上になったら'}],end:'高温を好む夏野菜。種は毒性あり必ず加熱調理。花前に収穫を。'},
+  kuushinsai:{n:'空芯菜',e:'🌱',c:'#1A6B5A',cl:'#E0F5F0',family:'ヒルガオ科',rotationYears:2,germDays:7,germTempMin:20,germTempMax:35,growTempMin:22,growTempMax:32,heatLimit:40,season:[5,6,7],days:45,space:'20cm',light:'full',height_cm:40,ph:'6.0-7.0',tmp:'25-32℃',ht:'平畝',sh:'中',wi:'中',varieties:['一般品種'],tasks:[{d:14,t:'間引き',n:'株間20cmに間引く',h:'本葉2〜3枚になったら'},{d:30,t:'追肥',n:'液肥を週1回施す',h:'草丈20cm以上になったら'},{d:35,t:'収穫',n:'草丈20〜25cmで先端を摘み取る',h:'草丈20cm以上になったら'}],end:'夏の高温多湿を好む葉菜。水やりしっかり。病害虫に強く栽培しやすい。'},
+  swiss_chard:{n:'スイスチャード',e:'🌈',c:'#C0392B',cl:'#FDECEA',family:'ヒユ科',rotationYears:1,germDays:7,germTempMin:10,germTempMax:25,growTempMin:15,growTempMax:25,heatLimit:35,season:[3,4,8,9],days:60,space:'25cm',light:'full',height_cm:60,ph:'6.0-7.0',tmp:'15-25℃',ht:'平畝',sh:'中',wi:'中',varieties:['カラフルチャード','レインボーチャード','ルビーレッド'],tasks:[{d:14,t:'間引き',n:'株間25cmに間引く',h:'本葉2〜3枚になったら'},{d:35,t:'追肥',n:'化成肥料を株元に施す',h:'葉色が薄くなってきたら'},{d:45,t:'収穫',n:'外葉から順に収穫する',h:'草丈30cm以上になったら'}],end:'カラフルな茎が特徴。春・秋まきが適期。ビーツの仲間。'}
+};
 
 const SEASON_ALL={0:['negi','negi_autumn'],1:['lettuce','spinach','negi','negi_autumn'],2:['lettuce','carrot','spinach','potato','taro','negi','daikon','daikon_spring','cabbage'],3:['tomato','lettuce','carrot','potato','komatsuna','taro','daikon_spring','cabbage'],4:['tomato','cucumber','eggplant','pepper','corn','sweetpotato','pumpkin','watermelon','edamame','ginger','negi','asparagus'],5:['tomato','cucumber','basil','pepper','corn','sweetpotato','pumpkin','watermelon','edamame','ginger'],6:['cucumber','carrot','corn','edamame','shungiku'],7:['carrot','spinach','negi','shungiku'],8:['lettuce','carrot','spinach','broccoli','komatsuna','daikon','cabbage','hakusai','shungiku','negi'],9:['spinach','lettuce','broccoli','komatsuna','onion','daikon','hakusai','shungiku','negi','negi_autumn','potato_autumn'],10:['spinach','komatsuna','onion','shungiku','negi'],11:['komatsuna','negi']};
 
@@ -1076,7 +1076,7 @@ const store={
     try{return localStorage.key(i);}catch(e){}
     try{return sessionStorage.key(i);}catch(e){}
     return Object.keys(_memStore)[i]??null;
-  },{d:30,t:'摘心',n:'草丈30〜40cmで頂点を摘む',h:'草丈30〜40cmになったら'},{d:45,t:'追肥',n:'化成肥料を株元に',h:'葉色が薄くなってきたら'},{d:50,t:'収穫',n:'先端15〜20cmを摘み取る',h:'草丈50cm以上になったら'}],end:'高温を好む夏野菜。種は毒性あり必ず加熱調理。花前に収穫を。'},{d:30,t:'追肥',n:'液肥を週1回施す',h:'草丈20cm以上になったら'},{d:35,t:'収穫',n:'草丈20〜25cmで先端を摘み取る',h:'草丈20cm以上になったら'}],end:'夏の高温多湿を好む葉菜。水やりしっかり。病害虫に強く栽培しやすい。'},{d:35,t:'追肥',n:'化成肥料を株元に施す',h:'葉色が薄くなってきたら'},{d:45,t:'収穫',n:'外葉から順に収穫する',h:'草丈30cm以上になったら'}],end:'カラフルな茎が特徴。春・秋まきが適期。ビーツの仲間。'}
+  }
 }; // v3: 発芽日数対応・germDays追加
 
 function saveData(){
