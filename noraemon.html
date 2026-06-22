@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-1428</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-1437</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -3644,7 +3644,7 @@ function renderRotation(){
       <button class="btn btn-p" style="width:100%" onclick="askRotationAI('${loc.replace(/'/g,'\'')}')">
         <i class="ti ti-robot"></i> Geminiに今年植えられる作物を提案してもらう
       </button>
-      <div id="rotation-result-${loc.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
+      <div id="rotation-result-${loc.replace(/[^a-zA-Z0-9]/g,'_')}" style="margin-top:4px"></div>
     </div>`;
   }).join('');
 }
@@ -3687,14 +3687,17 @@ ${history}
 ・具体的な輪作のポイント1〜2行`;
 
   try{
-    const text=await callGemini([{text:prompt}],1500);
+    const text=await callGemini([{text:prompt}],2000);
     const html=text
       .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
       .split('\n').map(l=>{
+        if(l.startsWith('【')&&l.includes('】'))return '<div style="font-size:13px;font-weight:700;margin:12px 0 6px;color:var(--tx);border-left:3px solid var(--green);padding-left:8px">'+l+'</div>';
+        if(l.startsWith('・'))return '<div style="padding:3px 0 3px 8px;color:var(--tx2)">'+l+'</div>';
         if(l.startsWith('## '))return '<div style="font-size:13px;font-weight:700;margin:10px 0 4px;color:var(--tx)">'+l.slice(3)+'</div>';
-        return l||'<br>';
+        return l?'<div style="padding:1px 0">'+l+'</div>':'<div style="height:6px"></div>';
       }).join('');
-    resEl.innerHTML='<div style="margin-top:8px;padding:10px;background:var(--bg2);border-radius:8px;font-size:12px;line-height:1.8;color:var(--tx2)">'+html+'</div><div style="font-size:10px;color:var(--tx3);text-align:right;margin-top:4px">Powered by Google Gemini</div>';
+    resEl.innerHTML='<div style="margin-top:8px;padding:12px;background:var(--bg2);border-radius:8px;font-size:13px;line-height:1.9;color:var(--tx2)">'+html+'</div><div style="font-size:10px;color:var(--tx3);text-align:right;margin-top:4px">Powered by Google Gemini</div>';
+    setTimeout(()=>resEl.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
   }catch(e){
     resEl.innerHTML='<div style="color:var(--red);font-size:12px;padding:8px 0">⚠️ '+e.message+'</div>';
   }
