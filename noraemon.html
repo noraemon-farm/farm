@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-0959</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-1428</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -1476,7 +1476,7 @@ function renderSuggest(){
 }
 function togExc(k){const i=excluded.indexOf(k);if(i>=0)excluded.splice(i,1);else excluded.push(k);if(favorites.includes(k))favorites.splice(favorites.indexOf(k),1);saveData();renderSuggest()}
 function togFav(k){const i=favorites.indexOf(k);if(i>=0)favorites.splice(i,1);else favorites.push(k);if(excluded.includes(k))excluded.splice(excluded.indexOf(k),1);saveData();renderSuggest()}
-const CATALOG_ORDER=['asparagus','edamame','pumpkin','cabbage','cucumber','komatsuna','sweetpotato','taro','shungiku','ginger','potato','potato_autumn','watermelon','onion','daikon_spring','daikon','corn','tomato','negi','negi_autumn','eggplant','carrot','carrot_autumn','hakusai','basil','pepper','broccoli','spinach','lettuce','moroheiya','kuushinsai','swiss_chard'];
+const CATALOG_ORDER=['asparagus','edamame','pumpkin','cabbage','cucumber','kuushinsai','komatsuna','sweetpotato','taro','shungiku','ginger','potato','potato_autumn','watermelon','swiss_chard','onion','daikon','daikon_spring','corn','tomato','eggplant','carrot','carrot_autumn','negi','negi_autumn','hakusai','basil','pepper','broccoli','spinach','moroheiya','lettuce'];
 const CROP_ICONS={
 daikon:`<svg viewBox="0 0 32 32" width="32" height="32"><ellipse cx="16" cy="20" rx="7" ry="10" fill="#F5F5EC" stroke="#C8C8A0" stroke-width="1.4"/><ellipse cx="16" cy="29" rx="2.5" ry="3" fill="#E8E8D8" stroke="#B8B898" stroke-width="1"/><path d="M16 10 Q12 4 10 2" fill="none" stroke="#5A9020" stroke-width="2" stroke-linecap="round"/><path d="M16 10 Q16 3 16 1" fill="none" stroke="#4A8010" stroke-width="2" stroke-linecap="round"/><path d="M16 10 Q20 4 22 2" fill="none" stroke="#5A9020" stroke-width="2" stroke-linecap="round"/></svg>`,
 daikon_spring:`<svg viewBox="0 0 32 32" width="32" height="32"><ellipse cx="16" cy="20" rx="7" ry="10" fill="#F5F5EC" stroke="#C8C8A0" stroke-width="1.4"/><ellipse cx="16" cy="29" rx="2.5" ry="3" fill="#E8E8D8" stroke="#B8B898" stroke-width="1"/><path d="M16 10 Q12 4 10 2" fill="none" stroke="#5A9020" stroke-width="2" stroke-linecap="round"/><path d="M16 10 Q16 3 16 1" fill="none" stroke="#4A8010" stroke-width="2" stroke-linecap="round"/><path d="M16 10 Q20 4 22 2" fill="none" stroke="#5A9020" stroke-width="2" stroke-linecap="round"/><text x="16" y="8" text-anchor="middle" font-size="6" fill="#3A7010">春</text></svg>`,
@@ -3670,27 +3670,21 @@ async function askRotationAI(loc){
     .map(([k,v])=>`${v.n}（${v.family||''}、${v.season?.map(m=>m+1+'月').join('・')}植付）`)
     .slice(0,20).join('、');
 
-  const prompt=`あなたは家庭菜園の連作障害の専門家です。
-以下の畑の場所「${loc}」の栽培履歴をもとに、今年（${new Date().getFullYear()}年）植えるのに適した作物を提案してください。
-
-【栽培履歴】
+  const prompt=`場所「${loc}」の栽培履歴：
 ${history}
 
-【今の時期（${month+1}月）に植えられる候補】
-${candidates}
+今月（${month+1}月）に植えられる候補：${candidates}
 
-連作障害に注意しながら、以下の形式で回答してください：
+以下の形式のみで回答（前置き不要）：
 
-## おすすめ作物（3〜5種）
-各作物について：作物名、選んだ理由、注意点
+【今年植えてOKな作物】
+・作物名（理由1行）
 
-## 避けるべき作物
-連作障害リスクの高い作物と理由
+【今年避けるべき作物】
+・作物名（連作障害の年数と理由1行）
 
-## 来年以降のアドバイス
-輪作計画のヒント
-
-簡潔に、合計600文字以内でお願いします。`;
+【改善アドバイス】
+・具体的な輪作のポイント1〜2行`;
 
   try{
     const text=await callGemini([{text:prompt}],1500);
