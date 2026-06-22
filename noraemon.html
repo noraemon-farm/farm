@@ -7,7 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>のらエモン｜家庭菜園お助けAI v0622-2115</title>
+<title>のらエモン｜家庭菜園お助けAI v0622-2120</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -2574,7 +2574,7 @@ async function callGemini(parts,maxTokens=1500,retryCount=0){
     headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify({
       contents:[{parts}],
-      generationConfig:{maxOutputTokens:maxTokens,temperature:0.4},thinkingConfig:{thinkingBudget:0}
+      generationConfig:{maxOutputTokens:maxTokens,temperature:0.4}
     })
   });
   if(!resp.ok){
